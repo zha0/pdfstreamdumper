@@ -10,6 +10,24 @@ Begin VB.Form Form1
    ScaleHeight     =   8550
    ScaleWidth      =   9480
    StartUpPosition =   3  'Windows Default
+   Begin VB.TextBox Org 
+      BeginProperty Font 
+         Name            =   "Terminal"
+         Size            =   6
+         Charset         =   255
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   1140
+      Left            =   0
+      MultiLine       =   -1  'True
+      ScrollBars      =   3  'Both
+      TabIndex        =   14
+      Top             =   3240
+      Width           =   9435
+   End
    Begin VB.CommandButton cmdView 
       Caption         =   "View"
       Height          =   255
@@ -58,6 +76,7 @@ Begin VB.Form Form1
       _ExtentX        =   16642
       _ExtentY        =   3942
       View            =   3
+      LabelEdit       =   1
       MultiSelect     =   -1  'True
       LabelWrap       =   -1  'True
       HideSelection   =   -1  'True
@@ -113,12 +132,12 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   2535
+      Height          =   1095
       Left            =   0
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Both
       TabIndex        =   1
-      Top             =   5940
+      Top             =   7380
       Width           =   9435
    End
    Begin VB.TextBox Text1 
@@ -131,12 +150,12 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   2535
+      Height          =   2850
       Left            =   0
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Both
       TabIndex        =   0
-      Top             =   3360
+      Top             =   4500
       Width           =   9435
    End
    Begin VB.Label Label3 
@@ -221,6 +240,7 @@ Private Sub cmdLoad_Click()
     Dim setArg As Boolean
     Dim argI As Integer
     Dim li As ListItem
+    Dim orgHeader As String
     
     For i = 0 To UBound(x)
         If x(i) = txtMarker1 Then
@@ -228,6 +248,8 @@ Private Sub cmdLoad_Click()
             push ret, ""
         ElseIf active Then
         
+            orgHeader = orgHeader & x(i)
+             
             If x(i) = "LONG" Then x(i) = "int"
             
             If x(i) = txtMarker2 Then
@@ -264,9 +286,11 @@ Private Sub cmdLoad_Click()
                 Set li = lv.ListItems.Add(, , argI - 1)
                 li.SubItems(1) = Trim(ret(UBound(ret)))
                 li.SubItems(1) = Mid(li.SubItems(1), 1, Len(li.SubItems(1)) - 1)
+                li.Tag = orgHeader
                 active = False
                 inArgs = False
                 argI = False
+                orgHeader = Empty
             End If
 
             
@@ -301,9 +325,13 @@ Private Sub Command1_Click()
     Dim li As ListItem
     Dim x() As String
     Dim y() As String
+        
+    Org = Empty
     
     For Each li In lv.ListItems
         If li.Selected Then
+            
+            Org.Text = Org.Text & Replace(Replace(Replace(li.Tag, vbTab, Empty), "  ", " "), "  ", " ") & vbCrLf
             
             arglist = ""
             fxname = ""

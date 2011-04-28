@@ -34,5 +34,5 @@ License: hooker.c Copyright (C) 2005 David Zimmer <david@idefense.com, dzzie@yah
 #define unique
 #endif
 
-unique int InstallHook(void *real, void* hook, void* thunkJMP);
+unique int InstallHook(void *real, void* hook, void* thunkJMP, int traditional_hook);
 unique char* lastError;

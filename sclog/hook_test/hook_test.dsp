@@ -86,12 +86,32 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=..\hooker\asmserv.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\hooker\assembl.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\hooker\disasm.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\hook_test.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\hooker\hooker.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=..\hooker\disasm.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\..\hooker.h

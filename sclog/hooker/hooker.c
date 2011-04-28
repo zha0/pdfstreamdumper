@@ -55,11 +55,15 @@ int RestorePerm(char* offset, int size, int oldPerm){
 	return VirtualProtect(offset, size, oldPerm, &oldPerm) ;
 }
 
-int _InstallHook(char* real, char* hook, char* thunk){
+int _InstallHook(char* real, char* hook, char* thunk, int traditional_hook){
 
 	t_disasm disasm;
 	t_asmmodel am;
 
+	/* 68 aa bb cc dd  push xxxxxxxx (push ret hook = 6 bytes) (non-traditional)
+	   c3              ret
+	   cc              int3 */
+	char hook_code[6] = {0x68,0xAA,0xBB,0xCC,0xDD,0xC3};
 	char myAsm[TEXTLEN] , errtext[TEXTLEN];
 	char *pointer = real;
 	
@@ -68,9 +72,9 @@ int _InstallHook(char* real, char* hook, char* thunk){
 	if(!EnableWrite(thunk,20)){
 		sprintf(lastError,"Could not set writable memory perm on thunk?");
 		return 0;
-	}
+	}	
 
-	while(length<5){ //copy min space of first instructions of real fx to our thunk
+	while(length<6){ //copy min space of first instructions of real fx to our thunk
 		l = Disasm(pointer,10, (unsigned long)pointer, &disasm, DISASM_CODE);
 		if(l<1){ 
 			sprintf(lastError,"Disasm Error?");
@@ -125,12 +129,16 @@ int _InstallHook(char* real, char* hook, char* thunk){
 	
 	//now we replace the first bytes of the real function with a 
 	//rdirection to our hook replacement	
-	sprintf(myAsm,"jmp 0%X", (int)hook);                //jmp hook
-	asmLen = Assemble(myAsm,(int)real,&am,0,0,errtext); //asm to embed at real fx start
-	
-	if(asmLen<1){
-		sprintf(lastError,"Asm Length failed? %d %s", asmLen,errtext);
-		return 0;
+	if(traditional_hook){
+		sprintf(myAsm,"jmp 0%X", (int)hook);                //jmp hook
+		asmLen = Assemble(myAsm,(int)real,&am,0,0,errtext); //asm to embed at real fx start
+		
+		if(asmLen<1){
+			sprintf(lastError,"Asm Length failed? %d %s", asmLen,errtext);
+			return 0;
+		}
+	}else{
+		memcpy( &hook_code[1], (int)&hook, 4); //embed our address in tmp buf
 	}
 
 	oldPerm = EnableWrite(real,asmLen);
@@ -140,8 +148,13 @@ int _InstallHook(char* real, char* hook, char* thunk){
 		return 0 ;
 	}
 
-	while(length--) real[length] = 0xCC; //be tidy for debugging sake
-	memcpy(real, am.code, asmLen);       //embed our patch at beginning of real function
+	while(length--) real[length] = 0xCC; //be tidy for debugging sake (CC full stolen buffer from real function)
+	
+	if(traditional_hook){
+		memcpy(real, am.code, asmLen);       //embed our patch at beginning of real function
+	}else{
+		memcpy(real, hook_code, 6);
+	}
 	
 	RestorePerm(real,asmLen,oldPerm);
 
@@ -150,7 +163,7 @@ int _InstallHook(char* real, char* hook, char* thunk){
 }
 
 
-int InstallHook(void *real, void* hook, void* thunkJMP){
+int InstallHook(void *real, void* hook, void* thunkJMP, int traditional_hook){
 
 	t_disasm disasm;
 	int l=0;
@@ -169,9 +182,9 @@ int InstallHook(void *real, void* hook, void* thunkJMP){
 	switch(disasm.cmdtype){
 		case C_JMP: 
 			realAllocation = disasm.jmpconst;
-			return _InstallHook( (char*) real, (char*) hook, realAllocation);
+			return _InstallHook( (char*) real, (char*) hook, realAllocation, traditional_hook);
 		default:
-			return _InstallHook( (char*) real, (char*) hook, (char*)thunkJMP);
+			return _InstallHook( (char*) real, (char*) hook, (char*)thunkJMP, traditional_hook);
 	}
 	
 }

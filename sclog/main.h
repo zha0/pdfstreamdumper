@@ -1,32 +1,4 @@
 /*
-Purpose: sclog.exe
-
-		This research application was designed to allow malcode analysts to
-		quickly get an overview of an unknown shellcodes functionality by
-		actually executing it within the framework of a minimal sandbox
-		implemented through the use of API hooking. 
-
-		It is not recommended to run unknown payloads outside of VMWare type
-		enviroments. 
-
-		By using this tool, you take responsibility for any results the use 
-		of this tool may cause. It is NOT guaranteed to be safe.
-
-		sclog supports the following command line arguments:
-
-			Usage: sclog <sc_file> [/addbpx /redir /nonet /nofilt /dump /step]
-
-			sc_file     shellcode file to execute and log
-			/addbpx     Adds a breakpoint to beginning of shellcode buffer
-			/redir      Changes IP specified in Connect() to localhost
-			/nonet      no safety net - if set we dont block any dangerous apis
-			/nofilt     no api filtering - show all hook messages
-			/dump       dumps shellcode buffer to disk at first api call (self decoded)
-			/step       asks the user to permit each hooked API call before executing
-
-		Several sample shellcode payloads are provided (*.sc) 
-		See the readme file for example output.
-
 License: sclog.exe Copyright (C) 2005 David Zimmer <david@idefense.com, dzzie@yahoo.com>
 
 		 Assembler and Disassembler engines are Copyright (C) 2001 Oleh Yuschuk
@@ -116,6 +88,8 @@ ALLOC_THUNK( HGLOBAL  __stdcall Real_GlobalFree( HGLOBAL a0 ) );
 ALLOC_THUNK( LPVOID   __stdcall Real_VirtualAlloc( LPVOID a0, DWORD a1, DWORD a2, DWORD a3 ) );
 ALLOC_THUNK( BOOL     __stdcall Real_VirtualFree( LPVOID a0, DWORD a1, DWORD a2 ) );
 ALLOC_THUNK( DWORD    __stdcall Real_GetTempPathA( DWORD a0, LPSTR a1 ) );
+
+ALLOC_THUNK( LPVOID __stdcall Real_VirtualAllocEx( HANDLE a0, LPVOID a1, DWORD a2, DWORD a3, DWORD a4 ) );
 
 //my header and lib files are old! and i dont want to link to msvc90.dll with vs08..so fuck it
 //ALLOC_THUNK( DWORD    __stdcall Real_GetFileSizeEx( HANDLE a0, PLARGE_INTEGER  a1 ) );
@@ -242,7 +216,7 @@ void hexdump(unsigned char* str, int len){
 	char *nl="\r\n";
 	char *tmp = (char*)malloc(50);
 	
-	if(nohex) return;
+	if(showhex==0) return;
 
 	msg(nl);
 

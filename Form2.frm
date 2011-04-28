@@ -516,6 +516,9 @@ Private Declare Function SetCapture Lib "user32" (ByVal hwnd As Long) As Long
 Private Declare Function ReleaseCapture Lib "user32" () As Long
 Private objsAdded As Boolean
 Dim USING_MYMAIN As Boolean
+Private Declare Function SetFilePointer Lib "kernel32" (ByVal hFile As Long, ByVal lDistanceToMove As Long, lpDistanceToMoveHigh As Long, ByVal dwMoveMethod As Long) As Long
+
+
 
 Public Function StandardizeLineBreaks(ByVal x)
     x = Replace(x, vbCrLf, Chr(5))
@@ -581,13 +584,13 @@ End Sub
 Private Sub mnuCopyToJs_Click()
     On Error Resume Next
     If lv.SelectedItem Is Nothing Then Exit Sub
-    txtJS.Text = lv.SelectedItem.Tag
+    txtJS.Text = lv.SelectedItem.tag
 End Sub
 
 Private Sub mnuCopyToLower_Click()
     On Error Resume Next
     If lv.SelectedItem Is Nothing Then Exit Sub
-    txtOut.Text = lv.SelectedItem.Tag
+    txtOut.Text = lv.SelectedItem.tag
 End Sub
 
 Private Sub mnuGotoLine_Click()
@@ -943,12 +946,12 @@ Private Sub lblClipboard_Click(Index As Integer)
     Select Case Index
         Case 0
             Set li = lv.ListItems.Add(, , (lv.ListItems.Count + 1) & " len - " & Len(txtJS.Text))
-            li.Tag = txtJS.Text
-            li.ToolTipText = li.Tag
+            li.tag = txtJS.Text
+            li.ToolTipText = li.tag
         Case 1
             Set li = lv.ListItems.Add(, , (lv.ListItems.Count + 1) & " len - " & Len(txtOut.Text))
-            li.Tag = txtOut.Text
-            li.ToolTipText = li.Tag
+            li.tag = txtOut.Text
+            li.ToolTipText = li.tag
         Case 2
             txtJS.Text = txtOut.Text
             txtOut.Text = Empty
@@ -958,7 +961,7 @@ End Sub
 
 Private Sub lv_DblClick()
     If lv.SelectedItem Is Nothing Then Exit Sub
-    txtJS.Text = lv.SelectedItem.Tag
+    txtJS.Text = lv.SelectedItem.tag
 End Sub
 
 
@@ -1293,7 +1296,7 @@ Private Sub mnuSaveAll_Click()
     If Len(f) = 0 Then Exit Sub
     
     For Each li In lv.ListItems
-        fso.writeFile f & "\script_" & li.Index & ".js", li.Tag
+        fso.writeFile f & "\script_" & li.Index & ".js", li.tag
     Next
     
     Exit Sub
@@ -1356,7 +1359,7 @@ Private Sub mnuSaveToFile_Click()
     f = dlg.SaveDialog(AllFiles, "", "Save file", , Me.hwnd, "script_" & lv.SelectedItem.Index & ".js")
     If Len(f) = 0 Then Exit Sub
     
-    fso.writeFile f, lv.SelectedItem.Tag
+    fso.writeFile f, lv.SelectedItem.tag
     
     Exit Sub
 hell:     MsgBox Err.Description
@@ -1432,10 +1435,20 @@ Private Sub mnuShellcode2Exe_Click(Index As Integer)
     Select Case Index
         Case 0: offset = &H1000
         Case 1: offset = &H1020
-        Case 2: offset = &H7030
+        Case 2: offset = &H8030
     End Select
     
-    Put f, offset + 1, shellcode()
+    Dim b As Byte
+    If offset = &H8030 Then 'negative fuckers
+        Seek f, &H7030
+        For i = 0 To &H1000 'this is some stupid shit...
+            Get f, , b
+        Next
+        Put f, , shellcode()
+    Else
+        Put f, offset + 1, shellcode()
+    End If
+    
     Close
     
     If Err.Number = 0 Then

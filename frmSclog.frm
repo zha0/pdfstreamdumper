@@ -130,12 +130,12 @@ Begin VB.Form frmSclog
          Width           =   1455
       End
       Begin VB.CheckBox chkNoHex 
-         Caption         =   "Hide Data Hex Dumps"
+         Caption         =   "Show Data Hex Dumps"
          Height          =   255
          Left            =   5880
          TabIndex        =   7
          Top             =   240
-         Width           =   1935
+         Width           =   2025
       End
       Begin VB.CheckBox chkDll 
          Caption         =   "Allow Any DLL 2 Load"
@@ -475,7 +475,7 @@ Private Sub Command1_Click()
     If chkBreak.Value = 1 Then cmdline = cmdline & " /addbpx"
     If chkDll.Value = 1 Then cmdline = cmdline & " /anydll"
     If chkDump.Value = 1 Then cmdline = cmdline & " /dump"
-    If chkNoHex.Value = 1 Then cmdline = cmdline & " /nohex"
+    If chkNoHex.Value = 1 Then cmdline = cmdline & " /hex"
     If chkNoNet.Value = 1 Then cmdline = cmdline & " /nonet"
     If chkRedir.Value = 1 Then cmdline = cmdline & " /redir"
     If chkStep.Value = 1 Then cmdline = cmdline & " /step"
@@ -500,7 +500,7 @@ Private Sub Command1_Click()
             MsgBox "The file to open a handle to does not exist.", vbCritical
             Exit Sub
         End If
-        cmdline = cmdline & " /fhand " & GetShortName(txtFhand.Text)
+        cmdline = cmdline & " /fopen " & GetShortName(txtFhand.Text)
     End If
     
     'If scfile = GetShortName(txtLogFile.Text) Then

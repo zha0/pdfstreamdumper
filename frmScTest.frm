@@ -38,7 +38,7 @@ Begin VB.Form frmScTest
          Caption         =   "..."
          Height          =   285
          Left            =   6840
-         TabIndex        =   22
+         TabIndex        =   21
          Top             =   675
          Width           =   465
       End
@@ -46,31 +46,31 @@ Begin VB.Form frmScTest
          Height          =   285
          Left            =   1035
          OLEDropMode     =   1  'Manual
-         TabIndex        =   21
+         TabIndex        =   20
          Top             =   675
          Width           =   5685
       End
       Begin VB.CheckBox chkfopen 
          Caption         =   "fopen"
          Height          =   240
-         Left            =   270
-         TabIndex        =   20
+         Left            =   225
+         TabIndex        =   19
          Top             =   720
          Width           =   1230
       End
       Begin VB.CheckBox ChkMemMon 
-         Caption         =   "MemMonitor"
+         Caption         =   "Monitor DLL Read/Write"
          Height          =   195
          Left            =   5640
-         TabIndex        =   19
+         TabIndex        =   18
          Top             =   480
-         Width           =   1215
+         Width           =   2295
       End
       Begin VB.CheckBox chkFindSc 
          Caption         =   "FindSc"
          Height          =   255
          Left            =   5640
-         TabIndex        =   18
+         TabIndex        =   17
          Top             =   180
          Width           =   1095
       End
@@ -78,7 +78,7 @@ Begin VB.Form frmScTest
          Caption         =   "Debug Shell"
          Height          =   195
          Left            =   4080
-         TabIndex        =   17
+         TabIndex        =   16
          Top             =   480
          Width           =   1455
       End
@@ -86,7 +86,7 @@ Begin VB.Form frmScTest
          Caption         =   "Unlimited steps"
          Height          =   255
          Left            =   4080
-         TabIndex        =   16
+         TabIndex        =   15
          Top             =   180
          Width           =   1635
       End
@@ -122,8 +122,8 @@ Begin VB.Form frmScTest
          Top             =   990
          Width           =   1575
       End
-      Begin VB.CheckBox chkGraph 
-         Caption         =   "Generate Graph"
+      Begin VB.CheckBox chkReport 
+         Caption         =   "Report Mode"
          Height          =   255
          Left            =   240
          TabIndex        =   1
@@ -145,7 +145,7 @@ Begin VB.Form frmScTest
          Height          =   255
          Index           =   8
          Left            =   3480
-         TabIndex        =   15
+         TabIndex        =   14
          Top             =   1125
          Width           =   1335
       End
@@ -164,28 +164,9 @@ Begin VB.Form frmScTest
          Height          =   255
          Index           =   7
          Left            =   4860
-         TabIndex        =   14
+         TabIndex        =   13
          Top             =   1125
          Width           =   675
-      End
-      Begin VB.Label Label6 
-         Caption         =   "Save graph"
-         BeginProperty Font 
-            Name            =   "MS Sans Serif"
-            Size            =   8.25
-            Charset         =   0
-            Weight          =   400
-            Underline       =   -1  'True
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         ForeColor       =   &H00FF0000&
-         Height          =   255
-         Index           =   1
-         Left            =   7965
-         TabIndex        =   13
-         Top             =   180
-         Width           =   915
       End
       Begin VB.Label Label6 
          Caption         =   "Save dump"
@@ -201,7 +182,7 @@ Begin VB.Form frmScTest
          ForeColor       =   &H00FF0000&
          Height          =   255
          Index           =   0
-         Left            =   9000
+         Left            =   8010
          TabIndex        =   12
          Top             =   180
          Width           =   855
@@ -471,11 +452,11 @@ Private Sub Command1_Click()
     If chkAdjustOffsets.Value = 1 Then cmdline = cmdline & " -a"
     If chkInteractiveHooks.Value = 1 Then cmdline = cmdline & " -i"
     If chkCreateDump.Value = 1 Then cmdline = cmdline & " -d"
-    If chkGraph.Value = 1 Then cmdline = cmdline & " -G graph.dot"
+    If chkReport.Value = 1 Then cmdline = cmdline & " -r"
     If chkUnlimitedSteps.Value = 1 Then cmdline = cmdline & " -s -1"
     If chkDebugShell.Value = 1 Then cmdline = cmdline & " -vvv"
-    If chkFindSc.Value = 1 Then cmdline = cmdline & " -getpc" 'this runs it through both if need be..
-    If ChkMemMon.Value = 1 Then cmdline = cmdline & " -mm"
+    If chkFindSc.Value = 1 Then cmdline = cmdline & " -findsc"
+    If ChkMemMon.Value = 1 Then cmdline = cmdline & " -mdll"
     If chkfopen.Value = 1 Then
         If Not fso.FileExists(txtFopen.Text) Then
             MsgBox "You must specify a valid file to open", vbInformation

@@ -4,6 +4,7 @@
 
 #pragma warning (disable:4047)
 #pragma warning (disable:4024)
+#pragma warning (disable:4305)
 
 unsigned int __declspec(naked) CalledFrom(void){
 	_asm{
@@ -27,8 +28,11 @@ void test(void){ printf("Inside Test\n");}
 void hook(void){ printf("In Hook\n");}
 
 HANDLE __stdcall My_LoadLibrary(char* dllName){	
-	printf("Inside hooked LoadLibrary! %s Called From: %X\n", dllName, CalledFrom() );
-	return Real_LoadLibrary(dllName);
+	HANDLE h = 0;
+	printf("Inside hooked LoadLibrary! *dllname= %x  ret_addr= %x\n", (int)dllName, CalledFrom() );
+	h = Real_LoadLibrary(dllName);
+	printf("\tDll=%s retval=%x\n", dllName, h);
+	return h;
 }
 
 
@@ -66,38 +70,24 @@ void main(void){
 	
 	HMODULE h=0;
 	FARPROC f=0;
-
-	if ( !InstallHook( test, hook, Test_thunk) ){
-		printf("Install hook failed :(");
-		return;
-	}
-
 	
-	printf("Calling test!\n");
-	test();
-	
-	printf("Trying to call the real api now!\n");
-
-	RealTest();
-
-	printf("And back where i belong at end\n");
-
-	if (!InstallHook( LoadLibrary, My_LoadLibrary, LoadLibrary_thunk) ){
+	if (!InstallHook( LoadLibrary, My_LoadLibrary, LoadLibrary_thunk,1) ){
 		printf("Install hook failed :(");
 		return;
 	}
 	
-	printf("Loadlibrary hook installed\n");
+	printf("Loadlibrary traditional hook installed\n");
 	
+//	_asm int 3
 	h = LoadLibrary("ws2_32");
 	printf("Ws2_32 handle=%X\n", h );
 
-	if(!InstallHook( GetProcAddress, My_GetProcAddress, Real_GetProcAddress) ){
+	if(!InstallHook( GetProcAddress, My_GetProcAddress, Real_GetProcAddress,0) ){
 		printf("Install hook failed :(");
 		return;
 	}
 
-	printf("GetProc Hook installed\n");
+	printf("GetProc non traditional hook installed\n");
 	f = GetProcAddress(h,"listen");
 	printf("GetProcAddress(listen)=%X\n\n", f);
 

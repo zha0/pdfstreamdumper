@@ -13,12 +13,15 @@ int buf[6000] = {0xC3CCCCC3};
 
 
 void usage(){
-	printf("HUSK.EXE - Wrapper that allows shellcode to be embedded and executed\n");
+	system("cls");
+	printf("\n\nHUSK.EXE - Wrapper that allows shellcode to be embedded and executed\n\n");
 	printf("Supports the following command line options:\n\n");
-	printf("    /break\t   Inserts breakpoint before shellcode buffer is called.\n");
-	printf("    /fhand <file>\t Opens a handle to <file> for shellcode to search for.\n");
-	printf("    /dll <dllfile> \tLoads <dllfile> (add to memory map or use api_log.dll)\n"); 
-	printf("    /foff hexnum \tStarts execution at file offset\n\n"); 
+	printf("    /break             Inserts breakpoint before shellcode buffer is called.\n");
+	printf("    /fopen <file>      Opens a handle to <file> for shellcode to search for.\n");
+	printf("    /dll <dllfile>     Loads <dllfile> (add to memory map or use api_log.dll)\n"); 
+	printf("    /foff hexnum       Starts execution at file offset\n"); 
+	printf("    /va 0xBase-0xSize  VirtualAlloc memory at 0xBase of 0xSize\n\n"); 
+	printf("Shellcode buffer VirtualAddress: 0x%x \n\n", &buf);
 	exit(0);
 }
 
@@ -44,7 +47,7 @@ int main(int argc, char* argv[])
 
 		if(strstr(argv[i],"/break") > 0 )  break_mode=1;
 
-		if(strstr(argv[i],"/fhand") > 0 ){ 
+		if(strstr(argv[i],"/fopen") > 0 ){ 
 			if(i+1 >= argc){
 				printf("/fhand no argument found\n");
 				exit(0);
@@ -52,13 +55,39 @@ int main(int argc, char* argv[])
 				char* target = argv[i+1];
 				fHand = OpenFile(target, &o , OF_READ);
 				if(fHand==HFILE_ERROR){
-					printf("Option /fhand Could not open file %s\r\n", target);
+					printf("Option /fopen Could not open file %s\r\n", target);
 					printf("Press any key to continue...\r\n");
 					getch();
 
 				}else{
 					printf("Successfully opened a handle (0x%X) to %s\r\n", fHand, target);
 				}
+			}
+		}
+
+		if(strstr(argv[i],"/va") > 0 ){
+			if(i+1 >= argc){
+				printf("Invalid option /va must specify 0xBase-0xSize as next arg\n");
+				exit(0);
+			}
+		    char *ag = strdup(argv[i+1]);
+			char *sz;
+			unsigned int size=0;
+			unsigned int base=0;
+			if (( sz = strstr(ag, "-")) != NULL)
+			{
+				*sz = '\0';
+				sz++;
+				size = strtol(sz, NULL, 16);
+				base = strtol(ag, NULL, 16);
+				int r = (int)VirtualAlloc((void*)base, size, MEM_RESERVE | MEM_COMMIT, 0x40 );
+				printf("VirtualAlloc(base=%x, size=%x) = %x - %x\n", base, size, r, r+size);
+				if(r==0){ printf("ErrorCode: %x\nAborting...\n", GetLastError()); exit(0);}
+				//0x57 = ERROR_INVALID_PARAMETER 
+
+			}else{
+				printf("Invalid option /va must specify 0xBase-0xSize as next arg\n");
+				exit(0);
 			}
 		}
 
