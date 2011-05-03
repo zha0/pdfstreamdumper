@@ -93,6 +93,9 @@ ChangeLog:
 #include <stdarg.h>
 #include <conio.h>
 
+#pragma warning(disable:4996)
+#pragma warning(disable:4018)
+
 HANDLE STDOUT;
 HANDLE STDIN;
 
@@ -1150,6 +1153,7 @@ void main(int argc, char **argv){
 	WSADATA WsaDat;	
 	int addbpx=0;
 	int foff=0;
+	int i=0;
 
     VAlloc.offset = 0;
 	GAlloc.offset = 0;
@@ -1168,8 +1172,11 @@ void main(int argc, char **argv){
 	if(strstr(argv[1],"-h") > 0 ) usage();
 
 	//first scan the args to set the basic options which require no output
-	for(int i=2; i<argc; i++){
+	for( i=1; i<argc; i++){
+		if(argv[i][0] == '-') argv[i][0] = '/';
+
 		if(strstr(argv[i],"/addbpx") > 0 )  addbpx=1;
+		if(strstr(argv[i],"/break") > 0 )  addbpx=1;
 		if(strstr(argv[i],"/redir") > 0 )   redirect=1;
 		if(strstr(argv[i],"/nonet") > 0 )   nonet=1;
 		if(strstr(argv[i],"/nofilt") > 0 )  nofilt=1;
@@ -1178,7 +1185,7 @@ void main(int argc, char **argv){
 		if(strstr(argv[i],"/anydll") > 0 )  anyDll=1;
 		if(strstr(argv[i],"/hex") > 0 )     showhex=1;
 		if(strstr(argv[i],"/showadr") > 0 ) showadr=1;
-		if(strstr(argv[i],"/hooks") > 0 )   showHooks=1;
+		if(strstr(argv[i],"/hooks") > 0 ){  showHooks=1; break;}
 		if(strstr(argv[i],"/alloc") > 0 )	allocLogging = 1; //used in InstalllHooks()
 
 		if(strstr(argv[i],"/foff") > 0 ){
@@ -1227,16 +1234,16 @@ void main(int argc, char **argv){
 
 	}
 	
-	printf("Loading urlmon... 0x%x\r\n", LoadLibrary("urlmon.dll")   );
-	printf("Loading wininet... 0x%x\r\n", LoadLibrary("wininet.dll") );
-	
-	printf("Installing Hooks\r\n" ) ;
-	InstallHooks();
+	LoadLibrary("urlmon.dll");
+    LoadLibrary("wininet.dll");
 
-	if(showHooks==1) exit(0);
+	if(showHooks==1){
+		InstallHooks();
+		exit(0);
+	}
 
 	//now we scan for the options which can require messages and processing. (after hooks so log file shows
-	for( i=2; i<argc; i++){
+	for(i=2; i<argc; i++){
 
 		if(strstr(argv[i],"/log") > 0 ){ 
 			SetConsoleTextAttribute(STDOUT,  0x0E); //yellow
@@ -1244,8 +1251,8 @@ void main(int argc, char **argv){
 				char* target = argv[i+1];
 				logFile = (HANDLE)OpenFile(target, &o , OF_CREATE);
 				if(logFile==NULL){
-					infomsg("Option /log Could not create file %s\r\n", target);
-					infomsg("Press any key to continue...\r\n");
+					printf("Option /log Could not create file %s\r\n", target);
+					printf("Press any key to continue...\r\n");
 					getch();
 
 				}
@@ -1259,17 +1266,17 @@ void main(int argc, char **argv){
 				char* target = argv[i+1];
 				HANDLE fHand =  (HANDLE)OpenFile(target, &o , OF_READ);
 				if(fHand == INVALID_HANDLE_VALUE ){
-					infomsg("Option /fopen Could not open file %s\r\n", target);
-					infomsg("Press any key to continue...\r\n");
+					printf("Option /fopen Could not open file %s\r\n", target);
+					printf("Press any key to continue...\r\n");
 					getch();
 
 				}else{
 					DWORD bs;
-					infomsg("Opened %s successfully handle=0x%x  size=0x%x\r\n", target ,fHand, GetFileSize(fHand, &bs) );
+					printf("Opened %s successfully handle=0x%x  size=0x%x\r\n", target ,fHand, GetFileSize(fHand, &bs) );
 				}
 			}else{
-				infomsg("/fHand File arg does not exist!\r\n");
-				infomsg("Press any key to continue...\r\n");
+				printf("/fHand File arg does not exist!\r\n");
+				printf("Press any key to continue...\r\n");
 				getch();
 			}
 			SetConsoleTextAttribute(STDOUT,  0x07); //default gray
@@ -1281,7 +1288,7 @@ void main(int argc, char **argv){
 	HANDLE h =  (HANDLE)OpenFile(filename, &o , OF_READ);
 	
 	if(h == INVALID_HANDLE_VALUE ){
-		infomsg("Could not open file %s\r\n\r\n", filename);
+		printf("Could not open file %s\r\n\r\n", filename);
 		return;
 	}
 
@@ -1289,13 +1296,13 @@ void main(int argc, char **argv){
 	bufsz = GetFileSize(h,NULL);
 	
 	if( bufsz == INVALID_FILE_SIZE){
-		infomsg("Could not get filesize\r\n\r\n");
+		printf("Could not get filesize\r\n\r\n");
 		CloseHandle(h);
 		return;
 	}
 
 	if(addbpx){
-		infomsg("Adding Breakpoint to beginning of shellcode buffer\r\n");
+		printf("Adding Breakpoint to beginning of shellcode buffer\r\n");
 		bufsz++;
 	}
 	else{
@@ -1304,8 +1311,14 @@ void main(int argc, char **argv){
 
 	atexit(myAtExit); //for GAlloc and VAlloc mem dumping if we have to.
 
-	buf = (char*)malloc(bufsz);
-	infomsg("Loading Shellcode into memory\r\n");
+	//buf = (char*)malloc(bufsz);
+	buf = (char*)VirtualAlloc((void*)0x11110000 , bufsz, MEM_RESERVE | MEM_COMMIT , 0x40);
+	if(buf == 0){
+		printf("VirtualAlloc failed..aborting run\n");
+		exit(0);
+	};
+
+	printf("Loading Shellcode into memory\r\n");
 
 	if(addbpx){
 		buf[0]= (unsigned char)0xCC;
@@ -1322,12 +1335,15 @@ void main(int argc, char **argv){
 
 	if(stepMode) SetConsoleMode(STDIN, !ENABLE_LINE_INPUT ); //turn off line input (bug: this breaks ctrl-c)
 
-	infomsg("Starting up winsock\r\n");
+	printf("Starting up winsock\r\n");
 	
 	if ( WSAStartup(MAKEWORD(1,1), &WsaDat) !=0  ){  
-		infomsg("Sorry WSAStartup failed exiting.."); 
+		printf("Sorry WSAStartup failed exiting.."); 
 		return;
 	}
+
+	printf("Installing Hooks\r\n" ) ;
+	InstallHooks();
 
 	msg("Executing Buffer...\r\n\r\n"); //we are hooked now only use safe display fx
 	msg("_ret_____API_________________\r\n",0x02);
