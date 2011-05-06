@@ -4,10 +4,10 @@ Begin VB.Form frmSclog
    ClientHeight    =   6825
    ClientLeft      =   60
    ClientTop       =   345
-   ClientWidth     =   11100
+   ClientWidth     =   10680
    LinkTopic       =   "Form3"
    ScaleHeight     =   6825
-   ScaleWidth      =   11100
+   ScaleWidth      =   10680
    StartUpPosition =   2  'CenterScreen
    Begin VB.TextBox Text1 
       BeginProperty Font 
@@ -482,7 +482,7 @@ Private Sub Command1_Click()
     If chkAlloc.Value = 1 Then cmdline = cmdline & " /alloc"
     If chkShowAddr.Value = 1 Then cmdline = cmdline & " /showadr"
     If chkOffset.Value = 1 Then
-        If Not isHex(txtStartOffset) Then
+        If Not isHexNum(txtStartOffset) Then
             MsgBox "Start offset is not a valid hex number: " & txtStartOffset, vbInformation
             Exit Sub
         End If
@@ -626,3 +626,4 @@ Private Sub Label5_Click()
     Clipboard.SetText last_cmdline
     MsgBox "Last command line copied to clipboard: " & vbCrLf & vbCrLf & last_cmdline, vbInformation
 End Sub
+

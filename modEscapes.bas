@@ -337,6 +337,13 @@ Public Function isHex(v) As Boolean
     Err.Clear
 End Function
 
+Public Function isHexNum(v) As Boolean
+    On Error Resume Next
+    x = CLng("&h" & v)
+    If Err.Number = 0 Then isHexNum = True
+    Err.Clear
+End Function
+
 Function ExtractFromParanthesisPageEncapsulation(Data)
     
     On Error Resume Next

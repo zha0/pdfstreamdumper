@@ -96,6 +96,33 @@ ALLOC_THUNK( LPVOID __stdcall Real_VirtualAllocEx( HANDLE a0, LPVOID a1, DWORD a
 //ALLOC_THUNK( HANDLE   __stdcall Real_FindFirstFileExA( LPCSTR a0, FINDEX_INFO_LEVELS a1, LPVOID a2, FINDEX_SEARCH_OPS a3, LPVOID a4, DWORD a5 ) );
 //ALLOC_THUNK( BOOL     __stdcall Real_IsDebuggerPresent( VOID ) );
 
+enum AntiSpamFx{
+	asAll		= 0,
+	asWriteFile = 1,
+};
+
+bool AntiSpamSupress[50]; 
+
+void SetSupress(AntiSpamFx api){
+	AntiSpamSupress[api] = true;
+}
+
+void ReleaseSupress(AntiSpamFx api){
+	AntiSpamSupress[api] = false;
+}
+
+void ReleaseSupressExcept(AntiSpamFx api){
+	for(int i=0;i<50;i++){
+		if(i!=api) AntiSpamSupress[i] = false;
+	}
+}
+
+
+bool IsSupressed(AntiSpamFx api){
+	return AntiSpamSupress[api];
+}
+
+
 
 char* ProcessFromPID(DWORD pid){ //must free() results
 

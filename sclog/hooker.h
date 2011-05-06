@@ -28,6 +28,8 @@ License: hooker.c Copyright (C) 2005 David Zimmer <david@idefense.com, dzzie@yah
 
 */
 
+#pragma warning(disable: 4996)
+
 #ifdef __cplusplus 
 #define unique extern "C"
 #else

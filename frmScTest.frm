@@ -1,12 +1,12 @@
 VERSION 5.00
 Begin VB.Form frmScTest 
    Caption         =   "scDbg - libemu Shellcode Logger Launch Interface"
-   ClientHeight    =   6900
+   ClientHeight    =   7170
    ClientLeft      =   60
    ClientTop       =   345
    ClientWidth     =   10140
    LinkTopic       =   "Form3"
-   ScaleHeight     =   6900
+   ScaleHeight     =   7170
    ScaleWidth      =   10140
    StartUpPosition =   2  'CenterScreen
    Begin VB.TextBox Text1 
@@ -24,20 +24,43 @@ Begin VB.Form frmScTest
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   3
-      Top             =   1530
+      Top             =   1845
       Width           =   9960
    End
    Begin VB.Frame Frame1 
       Caption         =   "Options"
-      Height          =   1455
+      Height          =   1815
       Left            =   60
       TabIndex        =   0
       Top             =   0
       Width           =   10005
+      Begin VB.TextBox txtManualArgs 
+         Height          =   285
+         Left            =   1800
+         TabIndex        =   25
+         Top             =   1080
+         Width           =   5955
+      End
+      Begin VB.TextBox txtStartOffset 
+         Height          =   285
+         Left            =   8055
+         TabIndex        =   22
+         Text            =   "0"
+         Top             =   180
+         Width           =   675
+      End
+      Begin VB.CheckBox chkOffset 
+         Caption         =   "Start Offset  0x"
+         Height          =   255
+         Left            =   6660
+         TabIndex        =   23
+         Top             =   195
+         Width           =   1515
+      End
       Begin VB.CommandButton cmdrowse 
          Caption         =   "..."
          Height          =   285
-         Left            =   6840
+         Left            =   7830
          TabIndex        =   21
          Top             =   675
          Width           =   465
@@ -48,7 +71,7 @@ Begin VB.Form frmScTest
          OLEDropMode     =   1  'Manual
          TabIndex        =   20
          Top             =   675
-         Width           =   5685
+         Width           =   6720
       End
       Begin VB.CheckBox chkfopen 
          Caption         =   "fopen"
@@ -117,9 +140,9 @@ Begin VB.Form frmScTest
       Begin VB.CommandButton Command1 
          Caption         =   "Launch"
          Height          =   375
-         Left            =   8325
+         Left            =   8370
          TabIndex        =   2
-         Top             =   990
+         Top             =   1035
          Width           =   1575
       End
       Begin VB.CheckBox chkReport 
@@ -129,6 +152,14 @@ Begin VB.Form frmScTest
          TabIndex        =   1
          Top             =   180
          Width           =   1695
+      End
+      Begin VB.Label Label1 
+         Caption         =   "Manual  Arguments"
+         Height          =   285
+         Left            =   225
+         TabIndex        =   24
+         Top             =   1080
+         Width           =   1410
       End
       Begin VB.Label Label6 
          Caption         =   "scdbg homepage"
@@ -146,7 +177,7 @@ Begin VB.Form frmScTest
          Index           =   8
          Left            =   3480
          TabIndex        =   14
-         Top             =   1125
+         Top             =   1440
          Width           =   1335
       End
       Begin VB.Label Label6 
@@ -165,7 +196,7 @@ Begin VB.Form frmScTest
          Index           =   7
          Left            =   4860
          TabIndex        =   13
-         Top             =   1125
+         Top             =   1440
          Width           =   675
       End
       Begin VB.Label Label6 
@@ -182,9 +213,9 @@ Begin VB.Form frmScTest
          ForeColor       =   &H00FF0000&
          Height          =   255
          Index           =   0
-         Left            =   8010
+         Left            =   8190
          TabIndex        =   12
-         Top             =   180
+         Top             =   1440
          Width           =   855
       End
       Begin VB.Label Label6 
@@ -203,7 +234,7 @@ Begin VB.Form frmScTest
          Index           =   2
          Left            =   5580
          TabIndex        =   11
-         Top             =   1125
+         Top             =   1440
          Width           =   1035
       End
       Begin VB.Label Label6 
@@ -222,7 +253,7 @@ Begin VB.Form frmScTest
          Index           =   6
          Left            =   6660
          TabIndex        =   10
-         Top             =   1125
+         Top             =   1440
          Width           =   375
       End
       Begin VB.Label Label6 
@@ -241,7 +272,7 @@ Begin VB.Form frmScTest
          Index           =   4
          Left            =   1860
          TabIndex        =   6
-         Top             =   1125
+         Top             =   1440
          Width           =   1455
       End
       Begin VB.Label Label6 
@@ -260,7 +291,7 @@ Begin VB.Form frmScTest
          Index           =   3
          Left            =   240
          TabIndex        =   5
-         Top             =   1125
+         Top             =   1440
          Width           =   1335
       End
       Begin VB.Label Label6 
@@ -277,9 +308,9 @@ Begin VB.Form frmScTest
          ForeColor       =   &H00FF0000&
          Height          =   255
          Index           =   5
-         Left            =   7200
+         Left            =   7335
          TabIndex        =   4
-         Top             =   180
+         Top             =   1440
          Width           =   735
       End
    End
@@ -457,6 +488,15 @@ Private Sub Command1_Click()
     If chkDebugShell.Value = 1 Then cmdline = cmdline & " -vvv"
     If chkFindSc.Value = 1 Then cmdline = cmdline & " -findsc"
     If ChkMemMon.Value = 1 Then cmdline = cmdline & " -mdll"
+    
+    If chkOffset.Value = 1 Then
+        If Not isHexNum(txtStartOffset) Then
+            MsgBox "Start offset is not a valid hex number: " & txtStartOffset, vbInformation
+            Exit Sub
+        End If
+        cmdline = cmdline & " -foff " & txtStartOffset
+    End If
+    
     If chkfopen.Value = 1 Then
         If Not fso.FileExists(txtFopen.Text) Then
             MsgBox "You must specify a valid file to open", vbInformation
@@ -465,7 +505,7 @@ Private Sub Command1_Click()
         cmdline = cmdline & " -fopen " & GetShortName(txtFopen)
     End If
                                 
-    cmdline = cmdline & " -f sample.sc"
+    cmdline = cmdline & " -f sample.sc" & " " & txtManualArgs
     
     cmdline = "cmd /k chdir /d " & libemu & "\ && " & cmdline
     lastcmdline = cmdline
