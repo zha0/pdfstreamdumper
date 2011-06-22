@@ -1,12 +1,67 @@
 		Changelog for libemu
 
-4.23.11
+6.22.11 - repne support for movsb added, 5 new hooks: (not yet interactive)
+		- InternetConnectA, HttpOpenRequestA, HttpSendRequestA, InternetCloseHandle, GetCurrentThread
+		- /hooks now shows interactive hooks in yellow
+		
+6.8.11  - emu_memory_read_string now allows for partial string reads
+	    - new function emu_string_clear
+        - string dereferencing added to deref_regs, stack dump, and dword dump
+        	
+6.6.11  - made sure interrupts throw error (linux shellcode no longer supported)
+        - new hook: SHGetFolderPathA
+        - removed userhooks.h, ADDHOOK macro now builds prototypes
+5.21.11
+		- export_copy fix * 2, more hook conversions to popd(), /lookup mode
+		- removed emu_track (was used in graphing and shellcode detection code)
+		- added /api option to locate API table in memory (scans body/stack/allocs)
+5.19.11
+		- imlemented movsw/movsb with rep support
+		- new hooks: IsBadReadPtr, GetCommandLineA	
+		- updated: GetTempFileNameA, GetTempPathA
+		- new option: /cmd for use with GetCommandLineA
+		- hooks now receive emu_env_w32 instead of emu_env and emu_env.env removed
+5.18.11
+		- implemented rep for stosw/stosd
+		- implemented Antispam system using win.env->lastApiCalled/lastApiHitCount
+		- new hook fread (w/antispam & interactive mode support)
+5.17.11
+        - reimplemented repe/repne for scasb (thanks to markus for pointing out error)
+        - new hooks: EnumWindows, GetClassNameA
+5.16.11
+	exe - experimental changes to CreateFileMapping, MapViewOfFile
+	    - new options -cfo (CreateFileOverride) , -u (unlimited steps)
+	    - emu_string->data from void* to char* (avoid need for emu_string_char)
+	    - repne scasb implemented
+	    - new hooks: GetUrlCacheEntryInfoA,CopyFileA mods to GetFileSize
+
+5.14.11
+	dll - updated ws2_32, urlmon, and msvcrt dlls (and peb) all have saved binaries now
+	    - added ordinals for all dlls exports, added hook by ordinal function
+	    - GetProcAddress now support ordinal lookups.
+	    - updated memory monitor dll ranges for new and updated dlls
+	    - error handling tweaks for invalid memory disasm and step requests
+5.5.11
+	exe - FinFirstFileA, FindClose, DeleteUrlCacheEntryA, FindWindow
+	    - copying kernel32 from live memory so all opcodes are present for scanners
+	
+4.22.11
+    dll - switched over to using a static PEB, see ./support/pebBuilder project
+    
+4.14.11
+	exe - added /patch /b0 /ba /dir commands
+	    - fread in vc is different that in gcc.. had to switch fopen mode to use CreateFile
+	    - WriteFile, CreateFile etc now proxy to real api. (required because of above)
+	
+4.11.11
 	exe - /dump mode highlights possible start offsets (90,E8.E9)
 	    - kinda added: MultiByteToWideChar, URLDownloadToCacheFileW,CreateProcessInternalW, CreateFileW
-		- back port of the new PEB module lists and the /patch feature (see VS_LIBEMU ./support/patchgen.exe)
+	    - ported code base to Visual Studio 2008. some features stripped like graphing, linux hooks, getpc
+	    - new hooks CreateFileMappingA, WideCharToMultiByte, GetLogicalDriveStringsA
+	    - still some fixups required from port.
 
 3.31.11
-    exe - added logging stub for ZwQueryVirtualMemory (not really implemented though)
+    exe - added logging stub for ZwQueryVirtualMemory (only Section Name class implemented)
 	    - added bunch of signed to unsigned casts to make gcc 4.x happy
 		- dbgshell dump words now lets you walk mem negative with -1/-2 options
 		- added hooks GetEnvironmentVariableA,VirtualAllocEx,WriteProcessMemory,CreateRemoteThread,DialogBoxIndirectParamA
@@ -159,7 +214,7 @@
    the cmd prompts stdout and stderr is written to a socketpair, which is read by the spy process, and gets written to the connection
    the process id returned by CreateProcess(cmd) is the spy's process id, so WaitForSingleObject waits for the spy process to exit
    the spy process exists if the cmd prompt ends (the socketpair gets closed), the connection gets closed, or we hit a timeout
- - fix bug introduced by making profiles optional, env->env.win->loaded_dlls[i]->baseaddr is invalid if we found it, as the loop does not stop
+ - fix bug introduced by making profiles optional, env->win->loaded_dlls[i]->baseaddr is invalid if we found it, as the loop does not stop
  - hook URLDownloadToFile in sctest
  - allow hooking URLDwnloadToFile
  - sctest, use the optional profiling
@@ -267,7 +322,7 @@
  - fpu backwards traversal was dodgy, comparing fpu state with eflags does not make any sense
    look at the src/emu_track.c diff to see the mess
    when fixing, the size of the fpu state got shrinked to one bit, we don't need the others anyway
-   TRACK_FPU_LAST_INSTRUCTION had to be adjusted to comply with one bit vars
+   //TRACK_FPU_LAST_INSTRUCTION had to be adjusted to comply with one bit vars
  - sub reg32_a,reg32_b inits reg32_a if reg32_a == reg32_b
  - proper linux syscall hooking, removed the int_cd code and created a linux environment
    - lookup the syscalls name from a struct, in case of syscall groups like socketcall for accept,socket,connect,... provide a helper fn within the struct which returns the proper syscall name

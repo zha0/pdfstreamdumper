@@ -15,7 +15,7 @@ Attribute VB_Exposed = False
 'Site:     http://sandsprite.com
 
 Event NewStream(stream As CPDFStream)
-Event ParseError(msg As String)
+Event DebugMessage(msg As String)
 Event SetObjectCount(cnt As Long)
 Event Complete()
 
@@ -34,6 +34,7 @@ Function ParseFile(fpath As String) As String
     Dim objStart As Long
     Dim objEnd As Long
     Dim endObj As Long
+    Dim lastObjEnd As Long
     
     Dim decryptor As String
     Dim dFile As String
@@ -64,7 +65,7 @@ Function ParseFile(fpath As String) As String
         endObj = InStr(objStart, sStr, "objend", vbTextCompare) 'this works too (found in sample 1df9249930f1f26edf367aceb614c603.pdf)
         
         If objEnd < 1 And endObj < 1 Then
-            'MsgBox "Missing endstream marker file possible corrupted", vbInformation
+            RaiseEvent DebugMessage("Missing endstream marker objStart = 0x" & Hex(objStart))
             Exit Do
         End If
     
@@ -77,10 +78,12 @@ Function ParseFile(fpath As String) As String
         stream.ParseSelf
         
         RaiseEvent NewStream(stream)
+        If stream.ObjectEndOffset > lastObjEnd Then lastObjEnd = stream.ObjectEndOffset
         
         objStart = InStr(stream.ObjectEndOffset, sStr, "obj", vbTextCompare)
     Loop
     
+    RaiseEvent DebugMessage("Parsing complete 0x" & Hex(Len(sStr) - lastObjEnd) & " bytes after end of last object @ 0x" & Hex(lastObjEnd))
     RaiseEvent Complete
     
 End Function

@@ -115,6 +115,7 @@ Begin VB.Form frmScTest
       End
       Begin VB.CheckBox chkAdjustOffsets 
          Caption         =   "Show File based offsets"
+         Enabled         =   0   'False
          Height          =   195
          Left            =   1920
          TabIndex        =   9
@@ -571,7 +572,7 @@ Private Sub Label6_Click(Index As Integer)
     cap = Label6(Index).Caption
     
     If InStr(cap, "Help") > 0 Then
-        Shell "cmd /k """ & App.path & "\libemu\scdbg.exe"" -h", vbNormalFocus
+        Shell "cmd /k mode con lines=45 cols=100 && """ & App.path & "\libemu\scdbg.exe"" -h", vbNormalFocus
     End If
     
     If InStr(cap, "Home") > 0 Then

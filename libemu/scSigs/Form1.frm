@@ -372,11 +372,11 @@ Function DoScans(sc_hex, sc_byte)
     End If
     
     For Each h In hashs 'checks for hash as both little endian and big endian
-        m = InStr(sc_hex, h.hSwapped)
+        m = InStr(sc_hex, h.hSwapped) / 2
         If m > 0 Then
             List1.AddItem "0x" & Hex(m) & vbTab & h.hName & " (hash match)"
         End If
-        m = InStr(sc_hex, h.hRegular)
+        m = InStr(sc_hex, h.hRegular) / 2
         If m > 0 Then
             List1.AddItem "0x" & Hex(m) & vbTab & h.hName & " (hash match (Rev))"
         End If
