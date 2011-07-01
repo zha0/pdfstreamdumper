@@ -1,5 +1,11 @@
 		Changelog for libemu
 
+6.24.11 - new export emu_memory_read_wide_string, 9 new hooks (SCM)
+        - CloseServiceHandle, DeleteService, ControlService
+		- OpenServiceA/W, RegOpenKeyExA/W, OpenSCManagerA/W
+		- patch can now be run on its own, now supports embedded comments
+		- /sigs supports /disasm, /hooks interactive highlights
+
 6.22.11 - repne support for movsb added, 5 new hooks: (not yet interactive)
 		- InternetConnectA, HttpOpenRequestA, HttpSendRequestA, InternetCloseHandle, GetCurrentThread
 		- /hooks now shows interactive hooks in yellow

@@ -1,5 +1,5 @@
 VERSION 5.00
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Begin VB.Form Form1 
    Caption         =   "Xor Brute Forcer"
    ClientHeight    =   6435
@@ -10,6 +10,14 @@ Begin VB.Form Form1
    ScaleHeight     =   6435
    ScaleWidth      =   13125
    StartUpPosition =   3  'Windows Default
+   Begin VB.CheckBox chkShowAll 
+      Caption         =   "Show All"
+      Height          =   330
+      Left            =   10125
+      TabIndex        =   7
+      Top             =   90
+      Width           =   960
+   End
    Begin VB.TextBox Text4 
       BeginProperty Font 
          Name            =   "Courier"
@@ -117,7 +125,7 @@ Begin VB.Form Form1
       OLEDropMode     =   1  'Manual
       TabIndex        =   0
       Top             =   90
-      Width           =   10815
+      Width           =   9825
    End
 End
 Attribute VB_Name = "Form1"
@@ -252,7 +260,7 @@ Private Sub Command1_Click()
     For i = 1 To 254
         tmp = d(X(), i)
         sc_hex = UCase(HexDump(tmp, 1))
-        If FindMatches(tmp, sc_hex, found) Then
+        If FindMatches(tmp, sc_hex, found) Or chkShowAll.value = 1 Then
             Set li = ListView1.ListItems.Add(, , "Key: 0x" & Hex(i))
             li.SubItems(1) = found
             li.Tag = tmp

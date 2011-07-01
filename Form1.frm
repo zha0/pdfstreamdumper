@@ -566,11 +566,26 @@ Begin VB.Form Form1
       Begin VB.Menu mnuCompress 
          Caption         =   "Zlib Compress_File"
       End
+      Begin VB.Menu mnuSpacer22 
+         Caption         =   "-"
+      End
       Begin VB.Menu mnub64decode 
          Caption         =   "Base64 Decode File"
       End
+      Begin VB.Menu mnub64Encode 
+         Caption         =   "Base64 Encode File"
+      End
+      Begin VB.Menu mnuSpacer44 
+         Caption         =   "-"
+      End
+      Begin VB.Menu mnuDecompressSWC 
+         Caption         =   "Decompress SWF  (CWS Header)"
+      End
       Begin VB.Menu mnuDecrypt 
          Caption         =   "Force_Decrypt"
+      End
+      Begin VB.Menu mnuSpacer77 
+         Caption         =   "-"
       End
       Begin VB.Menu mnuFilters 
          Caption         =   "Manual_Filters"
@@ -578,7 +593,7 @@ Begin VB.Form Form1
       Begin VB.Menu mnuHexEditor 
          Caption         =   "View PDF in Hexeditor"
       End
-      Begin VB.Menu mnuspacer4 
+      Begin VB.Menu mnuSpacer4 
          Caption         =   "-"
       End
       Begin VB.Menu mnuViewExploitDetections 
@@ -851,6 +866,65 @@ Private Sub mnub64decode_Click()
     If fso.FileExists(b) Then
         MsgBox "Complete 0x" & Hex(FileLen(b)) & " bytes decompressed saved as: " & vbCrLf & vbCrLf & b
     End If
+End Sub
+
+Private Sub mnub64Encode_Click()
+    Dim a As String
+    Dim b As String
+    a = dlg.OpenDialog(AllFiles)
+    If Len(a) = 0 Then Exit Sub
+    b = fso.GetParentFolder(a) & "\" & fso.GetBaseName(a) & ".mime"
+    b64.MimeFileToFile a, b
+    If fso.FileExists(b) Then
+        MsgBox "Complete 0x" & Hex(FileLen(b)) & " bytes decompressed saved as: " & vbCrLf & vbCrLf & b
+    End If
+End Sub
+
+Private Sub mnuDecompressSWC_Click()
+    
+    On Error Resume Next
+    Dim f As String
+    Dim ff As Long
+    Dim outFile As String
+    Dim Header() As Byte
+    Dim b() As Byte
+    Dim bOut() As Byte
+    
+    f = dlg.OpenDialog(AllFiles, , "Open Compressed Flash File (CWS header)")
+    If Not fso.FileExists(f) Then Exit Sub
+    
+     
+    ff = FreeFile
+    ReDim Header(0 To 7)
+    
+    Open f For Binary As ff
+    Get ff, , Header()
+    
+    If Header(0) <> Asc("C") Or Header(1) <> Asc("W") Or Header(2) <> Asc("S") Then
+        If MsgBox("FIle does not have the CWS header try anyway?", vbYesNo) = vbNo Then Exit Sub
+    End If
+    
+    ReDim b(LOF(ff) - 9)
+    Get ff, , b()
+    Close ff
+    
+    If Not Module4.UncompressData(b(), bOut()) Then
+        MsgBox "Decompression Failed", vbInformation
+        Exit Sub
+    End If
+    
+    Header(0) = Asc("F")
+    outFile = f & ".decompressed"
+    ff = FreeFile
+    
+    Open outFile For Binary As ff
+    Put ff, , Header()
+    Put ff, , bOut()
+    Close f
+    
+    MsgBox "Deompressed Data saved as " & vbCrLf & vbCrLf & outFile
+    
+    
 End Sub
 
 Private Sub mnuLoadJSFile_Click()
@@ -1202,7 +1276,7 @@ Private Sub mnuShowRawHeader_Click()
     On Error Resume Next
     Dim s As CPDFStream
     Set s = selli.tag
-    txtUncompressed.Text = s.header
+    txtUncompressed.Text = s.Header
     ts.Tabs(1).Selected = True
     
 End Sub
@@ -1401,12 +1475,12 @@ Public Sub mnuJavascriptUI_Click()
     
 End Sub
 
-Function looksEscaped(header) 'as boolean
+Function looksEscaped(Header) 'as boolean
     
-    header = Replace(header, "#20", " ") 'to common to include with low threshold
-    If GetCount(header, "#") > 2 Then looksEscaped = True
-    If GetCount(header, "\" & vbCrLf) > 1 Then looksEscaped = True
-    If GetCount(header, "\1") > 2 Then looksEscaped = True
+    Header = Replace(Header, "#20", " ") 'to common to include with low threshold
+    If GetCount(Header, "#") > 2 Then looksEscaped = True
+    If GetCount(Header, "\" & vbCrLf) > 1 Then looksEscaped = True
+    If GetCount(Header, "\1") > 2 Then looksEscaped = True
 
 End Function
 
@@ -1438,18 +1512,18 @@ Private Sub mnuSearchFilter_Click(Index As Integer)
         If li.Selected Then li.Selected = False
         
         Select Case Index
-            Case 0:   If AnyofTheseInstr(pound_unescape(s.header), "/JS,/Javascript") Then match = True
+            Case 0:   If AnyofTheseInstr(pound_unescape(s.Header), "/JS,/Javascript") Then match = True
             Case 1:   If s.ContentType = Flash Then match = True
             Case 2:   If s.ContentType = U3d Then match = True
             Case 3:   If s.ContentType = TTFFont Then match = True
             Case 4:   If li.ForeColor = vbGreen Then match = True
-            Case 5:   If looksEscaped(s.header) Then match = True
+            Case 5:   If looksEscaped(s.Header) Then match = True
         End Select
                 
         If match Then
             Set sli = lvSearch.ListItems.Add(, , li.Text)
             Set sli.tag = li.tag
-            sli.Text = sli.Text & "   " & IIf(Index = 5, s.header, pound_unescape(s.header))
+            sli.Text = sli.Text & "   " & IIf(Index = 5, s.Header, pound_unescape(s.Header))
             li.Selected = True
         End If
         
@@ -1460,18 +1534,18 @@ Private Sub mnuSearchFilter_Click(Index As Integer)
         match = False
         
         Select Case Index
-            Case 0:   If AnyofTheseInstr(pound_unescape(s.header), "/JS,/Javascript") Then match = True
+            Case 0:   If AnyofTheseInstr(pound_unescape(s.Header), "/JS,/Javascript") Then match = True
             Case 1:   If s.ContentType = Flash Then match = True
             Case 2:   If s.ContentType = U3d Then match = True
             Case 3:   If s.ContentType = TTFFont Then match = True
             Case 4:   If li.ForeColor = vbGreen Then match = True
-            Case 5:   If looksEscaped(s.header) Then match = True
+            Case 5:   If looksEscaped(s.Header) Then match = True
         End Select
                 
         If match Then
             Set sli = lvSearch.ListItems.Add(, , li.Text)
             Set sli.tag = li.tag
-            sli.Text = sli.Text & "   " & IIf(Index = 5, s.header, pound_unescape(s.header))
+            sli.Text = sli.Text & "   " & IIf(Index = 5, s.Header, pound_unescape(s.Header))
         End If
     Next
     
@@ -1652,7 +1726,7 @@ Private Sub parser_NewStream(stream As CPDFStream)
             li.ForeColor = vbBlue
         Else
             If mnuHideHeaderStreams.Checked = False Then
-                Set li = lv.ListItems.Add(, , stream.Index & " HLen: 0x" & Hex(Len(stream.header)))
+                Set li = lv.ListItems.Add(, , stream.Index & " HLen: 0x" & Hex(Len(stream.Header)))
             End If
         End If
         
@@ -2105,7 +2179,7 @@ Private Sub mnuReplaceStream_Click()
     Close f2
     
     MsgBox "You may have to edit the stream sizes in the obj header I didnt do this. Use the data from the details pane to determine offsets and sizes." & vbCrLf & vbCrLf & _
-            "This streams header is: " & vbCrLf & vbCrLf & stream.header, vbInformation
+            "This streams header is: " & vbCrLf & vbCrLf & stream.Header, vbInformation
             
     If MsgBox("New PDF File Generated, would you like to load it now?", vbYesNo) = vbYes Then
         txtPDFPath = new_file
@@ -2326,9 +2400,9 @@ Private Sub mnuAbout_Click()
                 "Other thanks to Didier Stevens for the info on his blog on tags and encodings.\n" & _
                 "http://blog.didierstevens.com/2008/04/29/pdf-let-me-count-the-ways/"
 
-    Dim header
-    header = "PDFStreamDumper " & App.Major & "." & App.Minor & "." & App.Revision
-    MsgBox header & Replace(msg, "\n", vbCrLf), vbInformation
+    Dim Header
+    Header = "PDFStreamDumper " & App.Major & "." & App.Minor & "." & App.Revision
+    MsgBox Header & Replace(msg, "\n", vbCrLf), vbInformation
 
 End Sub
 
