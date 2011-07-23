@@ -13,6 +13,7 @@ Capabilities
 	- view deflated streams
 	- view stream details such as file offsets, header, etc
 	- save raw and deflated data
+	- decompile Flash ActionScript 3 files with AS3 Sorcerer (Trial included) 
 	- supports filters: FlateDecode, RunLengthDecode, ASCIIHEXDecode, ASCII85Decode, LZWDecode
         - supports filter chaining (ie multiple filters applied to same stream)
         - supports unescaping encoded pdf headers
@@ -189,6 +190,9 @@ Credits:
 
         ScintillaVB by Stu Collier
         http://www.ceditmx.com/software/scintilla-vb/
+
+	AS3 Sorcerer Trial provided courtesy of Manitu Group. 
+	http://www.as3sorcerer.com/
 
 	JS Beautify by Einar Lielmanis, <einar@jsbeautifier.org>_
 	conversion to Javascript code by Vital, <vital76@gmail.com>

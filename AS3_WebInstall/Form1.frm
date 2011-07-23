@@ -50,8 +50,25 @@ Begin VB.Form Form1
       _Version        =   393216
       Appearance      =   1
    End
+   Begin VB.Label Label6 
+      Caption         =   "Already Installed? "
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9.75
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   255
+      Left            =   1920
+      TabIndex        =   9
+      Top             =   3240
+      Width           =   1815
+   End
    Begin VB.Label Label5 
-      Caption         =   "Manually set install path"
+      Caption         =   "Manually set path"
       BeginProperty Font 
          Name            =   "Verdana"
          Size            =   9.75
@@ -63,10 +80,10 @@ Begin VB.Form Form1
       EndProperty
       ForeColor       =   &H00FF0000&
       Height          =   255
-      Left            =   2640
+      Left            =   3840
       TabIndex        =   8
       Top             =   3240
-      Width           =   2415
+      Width           =   1815
    End
    Begin VB.Label Label4 
       Caption         =   "Trial Details"
@@ -174,7 +191,7 @@ Function isAS3Sorcerer_Installed(ByRef exe_path As String) As Boolean
     Dim p As String
     
     p = GetSetting("PDFStreamDumper", "3rdParty", "AS3Sorcerer", "") 'manually specified
-    If fso.FileExists(p) Then
+    If FileExists(p) Then
         exe_path = p
         isAS3Sorcerer_Installed = True
         Exit Function
@@ -187,14 +204,14 @@ Function isAS3Sorcerer_Installed(ByRef exe_path As String) As Boolean
         p = "C:\Program Files\"
     End If
     
-    If Not fso.FolderExists(p) Then
+    If Not FolderExists(p) Then
         MsgBox "Could not locate  %ProgramFiles% Directory?", vbInformation
         Exit Function
     End If
     
     exe_path = p & "\AS3 Sorcerer\as3s.exe"
     
-    If fso.FileExists(exe_path) Then
+    If FileExists(exe_path) Then
         isAS3Sorcerer_Installed = True
     End If
 
@@ -206,7 +223,7 @@ Private Sub Form_Load()
     Dim exe_path As String
     
     If Not isIde() And Len(Command) = 0 Then
-        If Not isAS3Sorcerer_Installed(exe_path) Then End
+        If isAS3Sorcerer_Installed(exe_path) Then End
     End If
         
     Const tmp = "PdfStreamDumper can integrate with AS3 Sorcerer to decompile " & _
@@ -236,11 +253,11 @@ Private Sub Label4_Click()
                 "which is reliable to use on malformed files. " & vbCrLf & _
                 "Also it does not load and execute the swf in anyway unlike others." & vbCrLf & vbCrLf & _
                 "Decompilation results are exactly the same for trial and licensed modes." & vbCrLf & vbCrLf & _
-                "Download size is 2.5mb" & vbCrLf & _
+                "Download size is 5mb" & vbCrLf & _
                 "License cost is $22 US to buy." & vbCrLf & _
                 "No adware or spyware, full uninstaller is included." & vbCrLf & vbCrLf & _
                 "AS3 Sorcerer is developed by Manitu Group and is not affiliated with " & vbCrLf & _
-                "Sandsprite in anyway. I only include this because it is useful software."
+                "Sandsprite in anyway. I include this because i find it to be good software."
 
     MsgBox msg, vbInformation, "Download details"
     
@@ -250,28 +267,28 @@ Private Sub Label5_Click()
     On Error Resume Next
     Dim dlg As New clsCmnDlg
     Dim p As String
-    p = dlg.OpenDialog(exeFiles, , "Manually Specify AS3 Sorcerer Executable Path", Me.hWnd)
+    p = dlg.OpenDialog(exeFiles, , "Manually Specify AS3 Sorcerer Executable Path", Me.hwnd)
     'If Len(p) = 0 Or Dir(p) = "" Then Exit Sub 'I want to be able to reset it to empty with this too..
     SaveSetting "PDFStreamDumper", "3rdParty", "AS3Sorcerer", p
     MsgBox "Installation path manually set!", vbInformation
     End
 End Sub
 
-Private Sub ucAsyncDownload1_DownloadComplete(fPath As String)
+Private Sub ucAsyncDownload1_DownloadComplete(fpath As String)
 
     On Error Resume Next
     
-    Name fPath As fPath & ".exe"
+    Name fpath As fpath & ".exe"
     
     If Err.Number <> 0 Then
-        MsgBox "Error renaming temp file to exe extension" & vbCrLf & vbCrLf & "Installer: " & fPath, vbInformation
+        MsgBox "Error renaming temp file to exe extension" & vbCrLf & vbCrLf & "Installer: " & fpath, vbInformation
         Exit Sub
     End If
     
-    Shell fPath & ".exe", vbNormalFocus
+    Shell fpath & ".exe", vbNormalFocus
     
     If Err.Number <> 0 Then
-        MsgBox "Error executing installer?" & vbCrLf & vbCrLf & "Installer: " & fPath & ".exe", vbInformation
+        MsgBox "Error executing installer?" & vbCrLf & vbCrLf & "Installer: " & fpath & ".exe", vbInformation
         Exit Sub
     End If
     
@@ -291,3 +308,17 @@ Private Sub ucAsyncDownload1_Progress(current As Long, total As Long)
     DoEvents
 End Sub
 
+Function FolderExists(path) As Boolean
+  If Len(path) = 0 Then Exit Function
+  If Dir(path, vbDirectory) <> "" Then FolderExists = True _
+  Else FolderExists = False
+End Function
+
+Function FileExists(path) As Boolean
+  On Error Resume Next
+  If Len(path) = 0 Then Exit Function
+  If Dir(path, vbHidden Or vbNormal Or vbReadOnly Or vbSystem) <> "" Then
+     If Err.Number <> 0 Then Exit Function
+     FileExists = True
+  End If
+End Function

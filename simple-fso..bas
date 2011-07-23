@@ -34,9 +34,29 @@ Public Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 Private Declare Sub SetWindowPos Lib "user32" (ByVal hwnd As Long, ByVal _
     hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx _
     As Long, ByVal cy As Long, ByVal wFlags As Long)
-    
+
+Private Declare Function GetShortPathName Lib "kernel32" Alias "GetShortPathNameA" (ByVal lpszLongPath As String, ByVal lpszShortPath As String, ByVal cchBuffer As Long) As Long
+
 Private Const HWND_TOPMOST = -1
 Private Const HWND_NOTOPMOST = -2
+
+Public Function GetShortName(sFile As String) As String
+    Dim sShortFile As String * 67
+    Dim lResult As Long
+    
+    'the path must actually exist to get the short path name !!
+    If Not fso.FileExists(sFile) Then fso.writeFile sFile, ""
+    
+    'Make a call to the GetShortPathName API
+    lResult = GetShortPathName(sFile, sShortFile, _
+    Len(sShortFile))
+
+    'Trim out unused characters from the string.
+    GetShortName = Left$(sShortFile, lResult)
+    
+    If Len(GetShortName) = 0 Then GetShortName = sFile
+
+End Function
 
 Sub DebugMsg(x As String)
     On Error Resume Next
@@ -263,10 +283,10 @@ Sub FormPos(fform As Form, Optional andSize As Boolean = False, Optional save_mo
     For i = 1 To sz
         If save_mode Then
             ff = CallByName(fform, f(i), VbGet)
-            SaveSetting App.EXEName, fform.Name & ".FormPos", f(i), ff
+            SaveSetting app.EXEName, fform.Name & ".FormPos", f(i), ff
         Else
             def = CallByName(fform, f(i), VbGet)
-            ff = GetSetting(App.EXEName, fform.Name & ".FormPos", f(i), def)
+            ff = GetSetting(app.EXEName, fform.Name & ".FormPos", f(i), def)
             CallByName fform, f(i), VbLet, ff
         End If
     Next
@@ -274,11 +294,11 @@ Sub FormPos(fform As Form, Optional andSize As Boolean = False, Optional save_mo
 End Sub
 
 Sub SaveMySetting(key, Value)
-    SaveSetting App.EXEName, "Settings", key, Value
+    SaveSetting app.EXEName, "Settings", key, Value
 End Sub
 
 Function GetMySetting(key, Optional defaultval = "")
-    GetMySetting = GetSetting(App.EXEName, "Settings", key, defaultval)
+    GetMySetting = GetSetting(app.EXEName, "Settings", key, defaultval)
 End Function
 
 

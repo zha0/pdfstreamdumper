@@ -578,11 +578,14 @@ Begin VB.Form Form1
       Begin VB.Menu mnuSpacer44 
          Caption         =   "-"
       End
+      Begin VB.Menu mnuDecompileFlashTools 
+         Caption         =   "Decompile Flash w/ AS3 Sorcerer"
+      End
       Begin VB.Menu mnuDecompressSWC 
-         Caption         =   "Decompress SWF  (CWS Header)"
+         Caption         =   "Decompress Flash  (CWS Header)"
       End
       Begin VB.Menu mnuDecrypt 
-         Caption         =   "Force_Decrypt"
+         Caption         =   "Decrypt PDF (Force)"
       End
       Begin VB.Menu mnuSpacer77 
          Caption         =   "-"
@@ -644,6 +647,9 @@ Begin VB.Form Form1
       End
       Begin VB.Menu mnuSHowRawObject 
          Caption         =   "Show Raw Object"
+      End
+      Begin VB.Menu mnuDecompileFlash 
+         Caption         =   "Decompile Flash w/ AS3 Sorcerer"
       End
       Begin VB.Menu mnuSpacer99 
          Caption         =   "-"
@@ -878,6 +884,137 @@ Private Sub mnub64Encode_Click()
     If fso.FileExists(b) Then
         MsgBox "Complete 0x" & Hex(FileLen(b)) & " bytes decompressed saved as: " & vbCrLf & vbCrLf & b
     End If
+End Sub
+
+Private Sub mnuDecompileFlash_Click()
+    
+    On Error Resume Next
+    
+    If selli Is Nothing Then
+        MsgBox "No stream selected.", vbInformation
+        Exit Sub
+    End If
+    
+    Dim exe_path As String
+    Dim file As String
+    
+    If Not isAS3Sorcerer_Installed(exe_path) Then
+        file = App.path & "\AS3_webInstall\AS3_webInstall.exe"
+        If Not fso.FileExists(file) Then
+            MsgBox "Can not locate: " & vbCrLf & file, vbInformation
+        Else
+            Shell file, vbNormalFocus
+        End If
+        Exit Sub
+    End If
+    
+    Dim stream As CPDFStream
+    Set stream = selli.tag
+    
+    If stream.ContentType <> Flash Then
+        MsgBox "Stream content is not marked as a flash file?", vbInformation
+        Exit Sub
+    End If
+    
+    Dim b() As Byte
+    If stream.isCompressed Then
+        b() = StrConv(stream.DecompressedData, vbFromUnicode, LANG_US)
+    Else
+        b() = StrConv(stream.OriginalData, vbFromUnicode, LANG_US)
+    End If
+    
+    Dim p As String
+    Dim exe As String
+    
+    Dim f As Long
+    p = App.path & "\tmp.bin"
+    f = FreeFile
+    
+    If fso.FileExists(p) Then Kill p
+    Open p For Binary As f
+    Put f, , b()
+    Close f
+    
+    exe = GetShortName(exe_path)
+    p = GetShortName(p)
+    
+    Shell exe & " " & p, vbNormalFocus
+    
+End Sub
+
+
+Function isAS3Sorcerer_Installed(ByRef exe_path As String) As Boolean
+    On Error Resume Next
+    Dim p As String
+    
+    p = GetSetting("PDFStreamDumper", "3rdParty", "AS3Sorcerer", "") 'manually specified
+    If fso.FileExists(p) Then
+        exe_path = p
+        isAS3Sorcerer_Installed = True
+        Exit Function
+    End If
+    
+    p = Environ("ProgramFiles")
+    
+    If Len(p) = 0 Then
+        'MsgBox "Using default %ProgramFiles% path", vbInformation
+        p = "C:\Program Files\"
+    End If
+    
+    If Not fso.FolderExists(p) Then
+        MsgBox "Could not locate  %ProgramFiles% Directory?", vbInformation
+        Exit Function
+    End If
+    
+    exe_path = p & "\AS3 Sorcerer\as3s.exe"
+    
+    If fso.FileExists(exe_path) Then
+        isAS3Sorcerer_Installed = True
+    End If
+
+End Function
+
+Private Sub mnuDecompileFlashTools_Click()
+    On Error Resume Next
+    
+    Dim file As String
+    Dim exe_path As String
+    
+    If Not isAS3Sorcerer_Installed(exe_path) Then
+        file = App.path & "\AS3_webInstall\AS3_webInstall.exe"
+        If Not fso.FileExists(file) Then
+            MsgBox "Can not locate: " & vbCrLf & file, vbInformation
+        Else
+            Shell file, vbNormalFocus
+        End If
+        Exit Sub
+    End If
+    
+    If Not selli Is Nothing Then
+        Dim stream As CPDFStream
+        Set stream = selli.tag
+        If stream.ContentType = Flash Then
+            mnuDecompileFlash_Click
+            Exit Sub
+        End If
+    End If
+     
+    Dim p As String
+    Dim exe As String
+    
+    p = dlg.OpenDialog(AllFiles, , "Select Flash file to decompile", Me.hwnd)
+    If Len(p) = 0 Or Not fso.FileExists(p) Then Exit Sub
+    
+    exe = GetShortName(exe_path)
+    p = GetShortName(p)
+    
+    If Not fso.FileExists(exe) Then
+        MsgBox "AS3 Sorcerer not found?", vbInformation
+        Exit Sub
+    End If
+    
+    Shell exe & " " & p, vbNormalFocus
+    
 End Sub
 
 Private Sub mnuDecompressSWC_Click()
@@ -1465,12 +1602,12 @@ Public Sub mnuJavascriptUI_Click()
     
     t = Form2.StandardizeLineBreaks(t)
     Form2.Show
-    Form2.txtJS.Text = t
+    Form2.txtJs.Text = t
     
     'comment this out for codemax
     If wasSelection Then
-        Form2.txtJS.SelStart = 0
-        Form2.txtJS.SelLength = Len(t)
+        Form2.txtJs.SelStart = 0
+        Form2.txtJs.SelLength = Len(t)
     End If
     
 End Sub
@@ -1821,6 +1958,10 @@ Private Sub Form_Unload(Cancel As Integer)
        
     FormPos Me, True, True
     
+    Dim tmp As String
+    tmp = App.path & "\tmp.bin"
+    If fso.FileExists(tmp) Then Kill tmp
+    
     For Each f In Forms
          Unload f
     Next
@@ -1828,7 +1969,15 @@ Private Sub Form_Unload(Cancel As Integer)
 End Sub
 
 Private Sub lv_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
-    If Button = 2 And Not selli Is Nothing Then PopupMenu mnuPopup
+    On Error Resume Next
+    
+    Dim stream As CPDFStream
+    If Button = 2 And Not selli Is Nothing Then
+        Set stream = selli.tag
+        mnuDecompileFlash.enabled = IIf(stream.ContentType = Flash, True, False)
+        PopupMenu mnuPopup
+    End If
+    
 End Sub
 
 
@@ -2374,40 +2523,9 @@ Function safe(ByVal x) As String
 End Function
 
 Private Sub mnuAbout_Click()
-    
-    Const msg = "\n\nStream Parser and Decompression code by VBboy136 - 12/9/2008\n" & _
-                "http://www.codeproject.com/KB/DLL/PDF2TXTVB.aspx\n\n" & _
-                 "JS Beautify by Einar Lielmanis, <einar@jsbeautifier.org>\n" & _
-                "conversion to Javascript code by Vital, <vital76@gmail.com>\n" & _
-                "http://jsbeautifier.org/\n\n" & _
-                "Scintilla by Neil Hodgson [neilh@scintilla.org]\n" & _
-                "http://www.scintilla.org/\n\n" & _
-                "ScintillaVB by Stu Collier\n" & _
-                "http://www.ceditmx.com/software/scintilla-vb/\n\n" & _
-                "iTextSharp.dll and iText_Filters.dll code by Bruno Lowagie and Paulo Soares\n" & _
-                "http://itextpdf.com/terms-of-use/index.php\n\n" & _
-                "sclog is a tool i wrote back at iDefense source here:\n" & _
-                "http://labs.idefense.com/software/download/?downloadID=8\n\n" & _
-                "libemu and sctest written by Paul Baecher and Markus Koetter in 2007.\n" & _
-                "http://libemu.carnivore.it/about.html\n\n" & _
-                "zlib.dll by Jean-loup Gailly and Mark Adler\n" & _
-                "http://www.zlib.net/\n\n" & _
-                "Crc32 code by Steve McMahon\n" & _
-                "http://www.vbaccelerator.com/home/vb/code/libraries/CRC32/article.asp\n\n" & _
-                "olly.dll GPL code Copyright (C) 2001 Oleh Yuschuk\n" & _
-                "http://home.t-online.de/home/Ollydbg/\n\n" & _
-                "Interface by dzzie@yahoo.com\nhttp://sandsprite.com\n\n" & _
-                "Other thanks to Didier Stevens for the info on his blog on tags and encodings.\n" & _
-                "http://blog.didierstevens.com/2008/04/29/pdf-let-me-count-the-ways/"
-
-    Dim Header
-    Header = "PDFStreamDumper " & App.Major & "." & App.Minor & "." & App.Revision
-    MsgBox Header & Replace(msg, "\n", vbCrLf), vbInformation
-
+    On Error Resume Next
+    frmAbout.Show 1, Me
 End Sub
-
-
-
 
 Private Sub mnuSearch_Click()
     On Error Resume Next
@@ -2471,12 +2589,13 @@ Private Sub Form_Load()
                      "CVE-2009-4324=media.newPlayer", _
                      "Contains U3D file - possible CVE-2009-4324=^U3D", _
                      "Contains flash file - possible CVE-2010-1297(b4 10.1.53.64-newfunction), CVE-2010-2884(10.1.82.76), CVE-2010-3654(10.1.85.3)=^CWS", _
+                     "Contains flash file - possible CVE-2010-1297(b4 10.1.53.64-newfunction), CVE-2010-2884(10.1.82.76), CVE-2010-3654(10.1.85.3)=^FWS", _
                      "Contains embedded image/tif, - possible CVE-2010-0188=image/tif", _
                      "Header contains a Launch Action - possible CVE-2010-1240=*/Launch*/Action*", _
                      "Header contains a Launch Action - possible CVE-2010-1240=*/Action*/Launch*", _
-                     "CVE-2010-4091=printSeps" _
+                     "CVE-2010-4091=printSeps", _
+                     "CVE-2010-0188=rawValue" _
                      )
-
     
     mnuAutoEscapeHeaders.Checked = IIf(GetMySetting("EscapeHeaders", 1) = 1, True, False)
     mnuVisualFormatHeaders.Checked = IIf(GetMySetting("FormatHeaders", 1) = 1, True, False)
@@ -2514,8 +2633,8 @@ Private Sub Form_Load()
                 x = HexDump(x, 1)
                 x = AddPercentToHexString(x)
                 Form2.Show
-                Form2.txtJS.Text = x
-                Form2.txtJS.SelectAll
+                Form2.txtJs.Text = x
+                Form2.txtJs.SelectAll
             End If
         Else
             'assume its a pdf file for analysis.

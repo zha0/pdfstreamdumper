@@ -38,6 +38,7 @@ Name: {app}\highlighters
 Name: {app}\libemu\scSigs
 Name: {app}\xor_bruteforcer
 Name: {app}\sc_samples
+Name: {app}\AS3_WebInstall
 
 [Files]
 Source: ./\highlighters\CPP.Bin; DestDir: {app}\highlighters
@@ -55,6 +56,8 @@ Source: ./\Form2.frx; DestDir: {app}
 Source: ./\frmReplace.frm; DestDir: {app}
 Source: ./\frmSclog.frm; DestDir: {app}
 Source: ./\frmSclog.frx; DestDir: {app}
+Source: ./\frmAbout.frm; DestDir: {app}
+Source: ./\frmAbout.frx; DestDir: {app}
 Source: ./\modCrc.bas; DestDir: {app}
 Source: ./\Module4.bas; DestDir: {app}
 Source: ./\PDFStreamDumper.exe; DestDir: {app}
@@ -196,6 +199,12 @@ Source: xor_bruteforcer\Project1.vbp; DestDir: {app}\xor_bruteforcer\
 Source: xor_bruteforcer\Project1.vbw; DestDir: {app}\xor_bruteforcer\
 Source: xor_bruteforcer\xorbrute.exe; DestDir: {app}\xor_bruteforcer\
 Source: xor_bruteforcer\CAPIHash.cls; DestDir: {app}\xor_bruteforcer\
+Source: AS3_WebInstall\AS3_webInstall.exe; DestDir: {app}\AS3_WebInstall\
+Source: AS3_WebInstall\Form1.frm; DestDir: {app}\AS3_WebInstall\
+Source: AS3_WebInstall\Form1.frx; DestDir: {app}\AS3_WebInstall\
+Source: AS3_WebInstall\Project1.vbp; DestDir: {app}\AS3_WebInstall\
+Source: AS3_WebInstall\Project1.vbw; DestDir: {app}\AS3_WebInstall\
+Source: AS3_WebInstall\ucAsyncDownload.ctl; DestDir: {app}\AS3_WebInstall\
 
 [Icons]
 Name: {group}\PdfStreamDumper.exe; Filename: {app}\PDFStreamDumper.exe
@@ -213,3 +222,4 @@ Name: {group}\Source\ObjBrowser_Plugin.vbp; Filename: {app}\plugins\objbrowser\P
 [Run]
 Filename: {app}\Readme.txt; StatusMsg: View ReadMe; Flags: postinstall shellexec runmaximized
 Filename: regedit.exe; Flags: nowait; Parameters: /s {app}\iTextFilters\iText_Filters.reg
+Filename: {app}\AS3_WebInstall\AS3_webInstall.exe

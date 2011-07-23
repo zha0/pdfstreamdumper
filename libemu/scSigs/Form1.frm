@@ -332,15 +332,15 @@ Private Sub Command1_Click()
     Output = wsh.Exec(ap & "\scdbg.exe -nc -mm -d -f " & ap & "\tmp.sc").StdOut.ReadAll
     Output = Replace(Output, ap, ".")
     
-    If FileExists(ap & "\tmp.sc.unpack") Then
+    If FileExists(ap & "\tmp.unpack") Then
         List1.AddItem "Unpack found differences running scans again"
-        sc_byte = ReadFile(ap & "\tmp.sc.unpack")
-        unpacked = GetFileBytes(ap & "\tmp.sc.unpack")
+        sc_byte = ReadFile(ap & "\tmp.unpack")
+        unpacked = GetFileBytes(ap & "\tmp.unpack")
         sc_hex = UCase(HexDump(sc_byte, 1))
         Text2 = HexDump(sc_byte)
         txtHexString = sc_hex
         DoScans sc_hex, sc_byte
-        Kill ap & "\tmp.sc.unpack"
+        Kill ap & "\tmp.unpack"
         unpack_strings = Join(AsciiStrings(CStr(sc_byte)), vbCrLf)
         If Len(unpack_strings) > 0 Then
             txtStrings = "------[Initial Strings]------ " & vbCrLf & txtStrings & vbCrLf & vbCrLf & _

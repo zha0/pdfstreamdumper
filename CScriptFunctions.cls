@@ -128,7 +128,7 @@ Public Function GetStream(Index)
         Dim s As CPDFStream
         Dim li As ListItem
         For Each li In Form1.lv.ListItems
-            Set s = li.Tag
+            Set s = li.tag
             If s.Index = Index Then
                 If s.isCompressed Then
                     GetStream = s.DecompressedData

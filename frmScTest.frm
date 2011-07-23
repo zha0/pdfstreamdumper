@@ -561,7 +561,7 @@ End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
     On Error Resume Next
-    Kill App.path & "\libemu\sample.sc.unpack"
+    Kill App.path & "\libemu\sample.unpack"
     Kill App.path & "\libemu\graph.dot"
 End Sub
 
@@ -598,7 +598,7 @@ Private Sub Label6_Click(Index As Integer)
         Shell "cmd /c start http://sandsprite.com/blogs/index.php?uid=7&pid=152"
     End If
     
-    dump = App.path & "\libemu\sample.sc.unpack"
+    dump = App.path & "\libemu\sample.unpack"
     If InStr(1, cap, "dump", 1) > 0 Then
         If Not fso.FileExists(dump) Then
             MsgBox "No dump file found. Maybe no changes were detected.", vbInformation

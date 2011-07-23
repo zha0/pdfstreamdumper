@@ -16,6 +16,8 @@ Attribute VB_Exposed = False
 
 Option Explicit
 
+Const LANG_US = &H409
+
 Private Type OPENFILENAME
     lStructSize As Long
     hWndOwner As Long
