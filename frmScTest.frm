@@ -425,17 +425,17 @@ Public Function GetShortName(sFile As String) As String
 
 End Function
 
-Public Function InitInterface(Optional shellcode = Empty)
+Public Function InitInterface(Optional Shellcode = Empty)
        
     scfile = Empty
     
     If Not checkFor_sctest() Then Command1.enabled = False
     
-    If Len(shellcode) = 0 Then
+    If Len(Shellcode) = 0 Then
         Text1 = "No text selected! you can use demo link."
     Else
-        Text1 = HexDump(shellcode)
-        b() = StrConv(shellcode, vbFromUnicode, LANG_US)
+        Text1 = HexDump(Shellcode)
+        b() = StrConv(Shellcode, vbFromUnicode, LANG_US)
     End If
     
     Me.Visible = True
@@ -591,7 +591,7 @@ Private Sub Label6_Click(Index As Integer)
     End If
     
     If InStr(cap, "Demo") > 0 Then
-        Shell "cmd /c start http://sandsprite.com/CodeStuff/scdbg.wmv"
+        Shell "cmd /c start http://www.youtube.com/watch?v=jFkegwFasIw"
     End If
     
     If InStr(cap, "scdbg") > 0 Then

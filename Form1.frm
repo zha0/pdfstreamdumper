@@ -695,6 +695,13 @@ Begin VB.Form Form1
          Caption         =   "Show Raw Object"
       End
    End
+   Begin VB.Menu mnuHelpTop 
+      Caption         =   "Help_Videos"
+      Begin VB.Menu mnuHelp 
+         Caption         =   "-"
+         Index           =   0
+      End
+   End
 End
 Attribute VB_Name = "Form1"
 Attribute VB_GlobalNameSpace = False
@@ -792,6 +799,7 @@ Public Status As statss
 Public LoadTime As Long
 
 Dim exploits()
+Dim help_vids()
 
 Dim streamCount As Long
 Dim jsCount As Long
@@ -1062,6 +1070,17 @@ Private Sub mnuDecompressSWC_Click()
     MsgBox "Deompressed Data saved as " & vbCrLf & vbCrLf & outFile
     
     
+End Sub
+
+Private Sub mnuHelp_Click(Index As Integer)
+    On Error Resume Next
+    Dim ie
+    ie = Environ("ProgramFiles") & "\Internet Explorer\iexplore.exe"
+    If fso.FileExists(ie) Then
+        Shell ie & " """ & mnuHelp(Index).tag & """", vbNormalFocus
+    Else
+        Shell "cmd /c start """ & mnuHelp(Index).tag & """", vbNormalFocus
+    End If
 End Sub
 
 Private Sub mnuLoadJSFile_Click()
@@ -1602,12 +1621,12 @@ Public Sub mnuJavascriptUI_Click()
     
     t = Form2.StandardizeLineBreaks(t)
     Form2.Show
-    Form2.txtJs.Text = t
+    Form2.txtJS.Text = t
     
     'comment this out for codemax
     If wasSelection Then
-        Form2.txtJs.SelStart = 0
-        Form2.txtJs.SelLength = Len(t)
+        Form2.txtJS.SelStart = 0
+        Form2.txtJS.SelLength = Len(t)
     End If
     
 End Sub
@@ -2596,6 +2615,29 @@ Private Sub Form_Load()
                      "CVE-2010-4091=printSeps", _
                      "CVE-2010-0188=rawValue" _
                      )
+                     
+    help_vids = Array("Introduction (40min);http://sandsprite.com/CodeStuff/PdfStreamDumper_trainer.wmv", _
+                      "Sample Analysis> getPageNthWord (10min);http://www.youtube.com/watch?v=W6dJfdH5jHM", _
+                      "Sample Analysis> URL Decoder(8min);http://www.youtube.com/watch?v=Ih7lRHwZKpo", _
+                      "Sample Analysis> getAnnots (10min);http://sandsprite.com/CodeStuff/getAnnots_demo.wmv", _
+                      "Sample Analysis> arguments.callee encrypted script 1 (14min); http://www.youtube.com/watch?v=lyrbPlHMS2o", _
+                      "Sample Analysis> arguments.callee encrypted script 2 (10min); http://www.youtube.com/watch?v=mY9hIpNY1Yg", _
+                      "Shellcode> scdbg Trainer 1 - General Use; http://www.youtube.com/watch?v=jFkegwFasIw", _
+                      "Shellcode> scdbg trainer 2 - Asm and Debug; http://www.youtube.com/watch?v=qkDPUF3bf6E", _
+                      "Shellcode> sclog gui; http://www.youtube.com/watch?v=XBcmC4jYiRI", _
+                      "Misc> Adobe Api Support(10min);http://sandsprite.com/CodeStuff/Adobe_Api_Support.wmv", _
+                      "Misc> Sample Database Search Plugin (11min);http://sandsprite.com/CodeStuff/database_search_plugin.wmv", _
+                      "Misc> plugin developers and script writers (17min);http://sandsprite.com/CodeStuff/PDFStreamDumper_automation.wmv" _
+                )
+
+    Dim vid, i
+    For Each vid In help_vids
+        vid = Split(vid, ";")
+        i = mnuHelp.Count
+        Load mnuHelp(i)
+        mnuHelp(i).Caption = vid(0)
+        mnuHelp(i).tag = Trim(vid(1))
+    Next
     
     mnuAutoEscapeHeaders.Checked = IIf(GetMySetting("EscapeHeaders", 1) = 1, True, False)
     mnuVisualFormatHeaders.Checked = IIf(GetMySetting("FormatHeaders", 1) = 1, True, False)
@@ -2633,8 +2675,8 @@ Private Sub Form_Load()
                 x = HexDump(x, 1)
                 x = AddPercentToHexString(x)
                 Form2.Show
-                Form2.txtJs.Text = x
-                Form2.txtJs.SelectAll
+                Form2.txtJS.Text = x
+                Form2.txtJS.SelectAll
             End If
         Else
             'assume its a pdf file for analysis.
