@@ -42,6 +42,7 @@ function BSClass(){
 	this.customDictionaryOpen = function (){ tb.DebugLog("Exploit", "customDictionaryOpen called - CVE-2009-1493") }
     this.println = function(){;}  //console
     this.clear = function(){;}     //console
+    this.byteToChar = String.fromCharCode	 
  
 }
 
