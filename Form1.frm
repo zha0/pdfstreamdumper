@@ -141,7 +141,6 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":000D
@@ -164,7 +163,6 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":008F
@@ -1075,6 +1073,20 @@ End Sub
 Private Sub mnuHelp_Click(Index As Integer)
     On Error Resume Next
     Dim ie
+    ie = mnuHelp(Index).tag
+    If ie = "[readme]" Then
+        Shell "notepad.exe """ & App.path & "\readme.txt""", vbNormalFocus
+        Exit Sub
+    End If
+    If ie = "[video_help]" Then
+        Const help = "Note that these videos were created while PDFStreamDumper was under development\n\n" & _
+                     "As support for more Adobe specific API was added, there may be easier ways to " & _
+                     "accomplish some of the techniques shown in the videos. At the end of the day " & _
+                     "knowing how to process the scripts manually is always a plus, but it may be " & _
+                     "easier now than how it was shown in the video."
+        MsgBox Replace(help, "\n", vbCrLf), vbInformation
+        Exit Sub
+    End If
     ie = Environ("ProgramFiles") & "\Internet Explorer\iexplore.exe"
     If fso.FileExists(ie) Then
         Shell ie & " """ & mnuHelp(Index).tag & """", vbNormalFocus
@@ -2616,7 +2628,9 @@ Private Sub Form_Load()
                      "CVE-2010-0188=rawValue" _
                      )
                      
-    help_vids = Array("Introduction (40min);http://sandsprite.com/CodeStuff/PdfStreamDumper_trainer.wmv", _
+    help_vids = Array("Readme file;[readme]", _
+                      "Note on help videos;[video_help]", _
+                      "Introduction (40min);http://sandsprite.com/CodeStuff/PdfStreamDumper_trainer.wmv", _
                       "Sample Analysis> getPageNthWord (10min);http://www.youtube.com/watch?v=W6dJfdH5jHM", _
                       "Sample Analysis> URL Decoder(8min);http://www.youtube.com/watch?v=Ih7lRHwZKpo", _
                       "Sample Analysis> getAnnots (10min);http://sandsprite.com/CodeStuff/getAnnots_demo.wmv", _

@@ -1,7 +1,9 @@
 
 
-           PdfStream Dumper v.9
+           PdfStream Dumper v.9.275
 
+Developer: David Zimmer <dzzie@yahoo.com>
+Homepage:  http://sandsprite.com/blogs/index.php?uid=7&pid=57
 
 Capabilities
 --------------------------------------
@@ -50,25 +52,17 @@ Capabilities
 Notes:
 -----------------------------------------
 
-	The filters and pdf decrypt features are optional
+	Some filters and the pdf decrypt features are optional
 	they require .NET 2.0 (or above) installed. The app should run fine without
         them, just wont support these extra features.
 	
-	if you want to use the sclog shellcode analysis feature download the
-	Malcode Analyst Pack from iDefense and install to its default location. 
-	
-	If you dont have it, the download will be initiated (visibly) 
-	when you goto use it. 
+	sclog (iDefense) and scdbg (libemu) shellcode analysis tools are included with the installer.
 	
 	 -----> sclog runs LIVE SHELLCODE so    <----
 	 -----> ONLY USE IT ON A TEST MACHINE ! <---- (duh)
 	
-	Download Link: http://labs.idefense.com/software/download/?downloadID=8
-	
-	I have now also integrated in sctest shellcode analysis tool from the guys
-	at libemu project. This tool analyzes shellcode in an emulation envirnoment
-	so should be safe(r). A binary is included with the install package. Would also
-	like to thank the malzilla project for bringing this cool tool to my attention.
+	scdbg is powered by libemu and analyzes shellcode in an emulation envirnoment
+	so should be safe(r).
 
 	If you find a pdf which pdfstreamdumper cant deal with, feel free to mail
 	it in a password protected zip file to me at dzzie@yahoo.com
@@ -117,67 +111,17 @@ Hot Keys and other Behaviors:
 Source Code and projects
 ---------------------------------------
 
-	Source code for all components is included with this installer. 
+	Source code is included with this installer. 
 	You will find a \source directory on the start menu entry with the
 	project files. 
 	
-	There are also a couple other smaller debug projects
-	nested in the various directories which I didnt list in the start menu. 
-	
-	See other projects for descriptions of the main project files.
-	
-	
-	pdf_stream_dumper.exe - main app and vb6 source
-		
-	
-	iTextDecode.exe
-	---------------------------------------
-	small command line app that implements the following decode filters from
-	the iTextSharp project source.
-	
-	LZWDecode, FlateDecode, ASCIIHexDecode, ASCII85HexDecode.
-	
-	I also added a RunLengthDecode function that I ported from Didier Stevens python code
-	
-	This standalone exe uses input and output files. I use it for testing/developing filters
-	since it can be run manually and debugged as an exe. 
-	
-	this application requires the .NET 2.0 framework (or above), 
-	C# source to exe included.
-	
-	
-	iTextFilters.dll
-	----------------------------------------
-	
-	this is the dll version of iTextDecode so that it can be used easily from VB 
-	over COM. it uses global memory offsets to pass binary data between VB6 and
-	the managed memory of C#.
-	
-	pdfStreamDumper does not depend on this component in case you dont have the 
-	.NET 2.0 framework installed. It still supports FlateDecode and ASCIIHEXDecode
-	natively.
-	
-	this application requires the .NET 2.0 framework (or above), 
-	C# source included.
-	
-	
-	olly.dll
-	----------------------------------------
-	
-	This is a x86 opcode disassembler engine taken from source by Oleh Yuschuk.
-	more details here: http://sandsprite.com/CodeStuff/olly_dll.html
+	latest source can always be pulled from github:
 
-
-To Do:
-----------------------------------------
-
-	- implement JBig2,Jpx, CTTI, and DCT filters into iTextFilters/iTextDecode
-	- i dont think my page count is accurate, need to figure that out so I can 
-            implement script toolbox command to get page and words for scripts which
-            (ab)use that in their decoding. 
-        - xor brute forcer to search for embedded executables (or strings) in main 
-            file or streams as well as shellcode
-
+	pdfstreamdumper https://github.com/dzzie/pdfstreamdumper
+        sclog           https://github.com/dzzie/sclog
+	scdbg
+	 - vc/win32     https://github.com/dzzie/VS_LIBEMU
+         - gcc/*nix     https://github.com/dzzie/SCDBG
 
 Credits:
 ---------------------------
@@ -209,12 +153,16 @@ Credits:
 	
 	olly.dll GPL code Copyright (C) 2001 Oleh Yuschuk.
 	http://home.t-online.de/home/Ollydbg/
+        http://sandsprite.com/CodeStuff/olly_dll.html
 	
-	libemu and sctest.exe written by Paul Baecher and Markus Koetter 2007.	
+	libemu written by Paul Baecher and Markus Koetter 2007.	
 	http://libemu.carnivore.it/about.html
+
+	scdbg homepage
+	http://sandsprite.com/blogs/index.php?uid=7&pid=152
 	
-        sclog is a tool i wrote back at iDefense source here  
-        http://labs.idefense.com/software/download/?downloadID=8 
+        sclog is a tool i wrote back at iDefense (no longer available on their site)
+        https://github.com/dzzie/sclog
 
 	Interface by dzzie@yahoo.com 
 	http://sandsprite.com

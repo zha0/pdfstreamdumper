@@ -5,106 +5,17 @@ Begin VB.Form Form1
    ClientHeight    =   8250
    ClientLeft      =   60
    ClientTop       =   345
-   ClientWidth     =   13275
+   ClientWidth     =   14400
    LinkTopic       =   "Form1"
    ScaleHeight     =   8250
-   ScaleWidth      =   13275
+   ScaleWidth      =   14400
    StartUpPosition =   2  'CenterScreen
-   Begin VB.Frame frmLoad 
-      Caption         =   "Add new Files to Database "
-      Height          =   6990
-      Left            =   225
-      TabIndex        =   1
-      Top             =   540
-      Width           =   11265
-      Begin VB.CheckBox chkScanSubFolders 
-         Caption         =   "Recursive"
-         Height          =   285
-         Left            =   6480
-         TabIndex        =   26
-         Top             =   405
-         Width           =   2850
-      End
-      Begin VB.TextBox txtBatch 
-         Height          =   285
-         Left            =   1305
-         TabIndex        =   17
-         Text            =   "default"
-         Top             =   450
-         Width           =   2355
-      End
-      Begin VB.CommandButton cmdClearDB 
-         Caption         =   "ClearDB"
-         Height          =   285
-         Left            =   9945
-         TabIndex        =   15
-         Top             =   450
-         Width           =   1095
-      End
-      Begin VB.ListBox List1 
-         Height          =   5130
-         Left            =   495
-         TabIndex        =   6
-         Top             =   1530
-         Width           =   10635
-      End
-      Begin VB.CommandButton cmdScan 
-         Caption         =   "Scan"
-         Height          =   285
-         Left            =   9990
-         TabIndex        =   5
-         Top             =   810
-         Width           =   1095
-      End
-      Begin VB.CommandButton cmdBrowse 
-         Caption         =   "..."
-         Height          =   285
-         Left            =   9180
-         TabIndex        =   4
-         Top             =   810
-         Width           =   510
-      End
-      Begin MSComctlLib.ProgressBar pb 
-         Height          =   285
-         Left            =   495
-         TabIndex        =   7
-         Top             =   1170
-         Width           =   10590
-         _ExtentX        =   18680
-         _ExtentY        =   503
-         _Version        =   393216
-         Appearance      =   1
-      End
-      Begin VB.TextBox txtDir 
-         Height          =   330
-         Left            =   1305
-         TabIndex        =   3
-         Top             =   765
-         Width           =   7620
-      End
-      Begin VB.Label Label3 
-         Caption         =   "Batch ID"
-         Height          =   285
-         Left            =   540
-         TabIndex        =   16
-         Top             =   495
-         Width           =   780
-      End
-      Begin VB.Label Label1 
-         Caption         =   "Directory"
-         Height          =   240
-         Left            =   540
-         TabIndex        =   2
-         Top             =   810
-         Width           =   690
-      End
-   End
    Begin VB.Frame frmBatchExaminer 
       Caption         =   "Examine Batch "
       Height          =   6945
-      Left            =   585
+      Left            =   1080
       TabIndex        =   39
-      Top             =   540
+      Top             =   2385
       Visible         =   0   'False
       Width           =   11265
       Begin VB.CommandButton cmdUpdateNotes 
@@ -268,12 +179,101 @@ Begin VB.Form Form1
          Width           =   870
       End
    End
+   Begin VB.Frame frmLoad 
+      Caption         =   "Add new Files to Database "
+      Height          =   6990
+      Left            =   180
+      TabIndex        =   1
+      Top             =   405
+      Width           =   11265
+      Begin VB.CheckBox chkScanSubFolders 
+         Caption         =   "Recursive"
+         Height          =   285
+         Left            =   6480
+         TabIndex        =   26
+         Top             =   405
+         Width           =   2850
+      End
+      Begin VB.TextBox txtBatch 
+         Height          =   285
+         Left            =   1305
+         TabIndex        =   17
+         Text            =   "default"
+         Top             =   450
+         Width           =   2355
+      End
+      Begin VB.CommandButton cmdClearDB 
+         Caption         =   "ClearDB"
+         Height          =   285
+         Left            =   9945
+         TabIndex        =   15
+         Top             =   450
+         Width           =   1095
+      End
+      Begin VB.ListBox List1 
+         Height          =   5130
+         Left            =   495
+         TabIndex        =   6
+         Top             =   1530
+         Width           =   10635
+      End
+      Begin VB.CommandButton cmdScan 
+         Caption         =   "Scan"
+         Height          =   285
+         Left            =   9990
+         TabIndex        =   5
+         Top             =   810
+         Width           =   1095
+      End
+      Begin VB.CommandButton cmdBrowse 
+         Caption         =   "..."
+         Height          =   285
+         Left            =   9180
+         TabIndex        =   4
+         Top             =   810
+         Width           =   510
+      End
+      Begin MSComctlLib.ProgressBar pb 
+         Height          =   285
+         Left            =   495
+         TabIndex        =   7
+         Top             =   1170
+         Width           =   10590
+         _ExtentX        =   18680
+         _ExtentY        =   503
+         _Version        =   393216
+         Appearance      =   1
+      End
+      Begin VB.TextBox txtDir 
+         Height          =   330
+         Left            =   1305
+         TabIndex        =   3
+         Top             =   765
+         Width           =   7620
+      End
+      Begin VB.Label Label3 
+         Caption         =   "Batch ID"
+         Height          =   285
+         Left            =   540
+         TabIndex        =   16
+         Top             =   495
+         Width           =   780
+      End
+      Begin VB.Label Label1 
+         Caption         =   "Directory"
+         Height          =   240
+         Left            =   540
+         TabIndex        =   2
+         Top             =   810
+         Width           =   690
+      End
+   End
    Begin VB.Frame frmSearch 
       Caption         =   "Search Database "
       Height          =   6945
-      Left            =   1755
+      Left            =   3240
       TabIndex        =   8
-      Top             =   1935
+      Top             =   1260
       Visible         =   0   'False
       Width           =   11175
       Begin VB.Frame frmRawSQL 
@@ -693,6 +693,13 @@ Begin VB.Form Form1
       Begin VB.Menu mnuFields 
          Caption         =   "MD5"
          Index           =   3
+      End
+   End
+   Begin VB.Menu mnuPopup4 
+      Caption         =   "mnuStreamsPopup4"
+      Visible         =   0   'False
+      Begin VB.Menu mnuStreamsCopyAll 
+         Caption         =   "Copy All entries"
       End
    End
 End
@@ -1254,6 +1261,10 @@ Private Sub lvBatchFiles_ItemClick(ByVal Item As MSComctlLib.ListItem)
     cn.Close
 End Sub
 
+Private Sub lvStreams_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+    If Button = 2 Then PopupMenu mnuPopup4
+End Sub
+
 Private Sub mnuChangeBatchID_Click()
     
     On Error Resume Next
@@ -1583,6 +1594,33 @@ End Sub
 
 Private Sub mnuShowRaw_Click()
     frmRawSQL.Visible = True
+End Sub
+
+Private Sub mnuStreamsCopyAll_Click()
+    On Error Resume Next
+    Dim li As ListItem
+    
+    If lvStreams.ListItems.Count < 1 Then Exit Sub
+    
+    tmp = "File: " & txtBatchFile & vbCrLf & vbCrLf
+    
+    For i = 1 To lvStreams.ColumnHeaders.Count
+        tmp = tmp & lvStreams.ColumnHeaders(i).Text & vbTab
+    Next
+    
+    tmp = tmp & vbCrLf
+    
+    For Each li In lvStreams.ListItems
+        tmp = tmp & li.Text & vbTab
+        For i = 1 To lvStreams.ColumnHeaders.Count
+            tmp = tmp & li.SubItems(i) & vbTab
+        Next
+        tmp = tmp & vbCrLf
+    Next
+    
+    Clipboard.Clear
+    Clipboard.SetText tmp
+    MsgBox Len(tmp) & " characters copied to clipboard", vbInformation
 End Sub
 
 Private Sub TabStrip1_Click()
