@@ -198,7 +198,6 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0000
@@ -254,7 +253,6 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   2249
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0080
@@ -354,6 +352,9 @@ Begin VB.Form Form2
       End
       Begin VB.Menu mnuVarPrefix 
          Caption         =   "Prefix Sel Lines with var"
+      End
+      Begin VB.Menu mnuHex2Unicode 
+         Caption         =   "HexString to %u encoded"
       End
    End
    Begin VB.Menu mnuExploitScan 
@@ -540,7 +541,7 @@ End Sub
 
  
 
-Private Sub lv2_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub lv2_MouseUp(Button As Integer, Shift As Integer, x As Single, Y As Single)
     If Button = 2 Then PopupMenu mnuPopup3
 End Sub
 
@@ -570,9 +571,9 @@ End Sub
 Private Sub mnuCopyFuncsNames_Click()
     On Error Resume Next
     x = Split(txtJS.Text, vbCrLf)
-    For Each y In x
-        If InStr(y, "function") > 0 Then
-            tmp = tmp & y & vbCrLf
+    For Each Y In x
+        If InStr(Y, "function") > 0 Then
+            tmp = tmp & Y & vbCrLf
         End If
     Next
     tmp = Replace(tmp, vbTab, Empty)
@@ -597,6 +598,26 @@ Private Sub mnuGotoLine_Click()
     On Error Resume Next
     x = InputBox("Enter line to goto:")
     txtJS.GotoLine CLng(x)
+End Sub
+
+Private Sub mnuHex2Unicode_Click()
+    On Error Resume Next
+    x = Replace(txtJS.SelText, vbCrLf, Empty)
+    x = Replace(x, Chr(0), "")
+    If Len(x) = 0 Then
+        MsgBox "Nothing selected!"
+        Exit Sub
+    End If
+    While Len(x) Mod 2 <> 0
+        x = x & "0"
+    Wend
+    For i = 1 To Len(x) Step 4
+       a = Mid(x, i, 2)
+       b = Mid(x, i + 2, 2)
+       ret = ret & "%u" & b & a
+    Next
+    If Right(ret, 2) = "%u" Then ret = Mid(ret, 1, Len(ret) - 2)
+    txtJS.SelText = ret
 End Sub
 
 Private Sub mnuIndentGuide_Click()
@@ -748,7 +769,7 @@ End Sub
 
 'splitter code
 '------------------------------------------------
-Private Sub splitter_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub splitter_MouseMove(Button As Integer, Shift As Integer, x As Single, Y As Single)
     Dim a1&
 
     If Button = 1 Then 'The mouse is down
@@ -758,7 +779,7 @@ Private Sub splitter_MouseMove(Button As Integer, Shift As Integer, x As Single,
             Capturing = True
         End If
         With splitter
-            a1 = .Top + y
+            a1 = .Top + Y
             If MoveOk(a1) Then
                 .Top = a1
             End If
@@ -766,7 +787,7 @@ Private Sub splitter_MouseMove(Button As Integer, Shift As Integer, x As Single,
     End If
 End Sub
 
-Private Sub splitter_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub splitter_MouseUp(Button As Integer, Shift As Integer, x As Single, Y As Single)
     If Capturing Then
         ReleaseCapture
         Capturing = False
@@ -785,9 +806,9 @@ Private Sub DoMove()
 End Sub
 
 
-Private Function MoveOk(y&) As Boolean  'Put in any limiters you desire
+Private Function MoveOk(Y&) As Boolean  'Put in any limiters you desire
     MoveOk = False
-    If y > Frame1.Height * 2 And y < Me.Height - (Frame1.Height * 2) Then
+    If Y > Frame1.Height * 2 And Y < Me.Height - (Frame1.Height * 2) Then
         MoveOk = True
     End If
 End Function
@@ -1013,7 +1034,7 @@ Private Sub lv_KeyDown(KeyCode As Integer, Shift As Integer)
 End Sub
 
 
-Private Sub lv_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub lv_MouseDown(Button As Integer, Shift As Integer, x As Single, Y As Single)
     If Button = 2 Then PopupMenu mnuPopup
 End Sub
 
@@ -1371,7 +1392,7 @@ Private Sub mnuShellcode2Exe_Click(Index As Integer)
     
     Dim pth As String
     Dim f As Long
-    Dim shellcode() As Byte
+    Dim Shellcode() As Byte
     Dim husk() As Byte
     Dim hFile As String
     Dim simple_husk As Boolean
@@ -1408,13 +1429,13 @@ Private Sub mnuShellcode2Exe_Click(Index As Integer)
     End If
     
     x = PrepareShellcode(x)
-    shellcode() = StrConv(x, vbFromUnicode, LANG_US)
+    Shellcode() = StrConv(x, vbFromUnicode, LANG_US)
     
-    If simple_husk And UBound(shellcode) > &H1A49 Then
+    If simple_husk And UBound(Shellcode) > &H1A49 Then
         MsgBox "Shellcode is larger than buffer in husk..may cause errors"
     End If
     
-    If Not simple_husk And UBound(shellcode) > 6000 Then
+    If Not simple_husk And UBound(Shellcode) > 6000 Then
         MsgBox "Shellcode is larger than buffer in husk..may cause errors"
     End If
     
@@ -1444,9 +1465,9 @@ Private Sub mnuShellcode2Exe_Click(Index As Integer)
         For i = 0 To &H1000 'this is some stupid shit...
             Get f, , b
         Next
-        Put f, , shellcode()
+        Put f, , Shellcode()
     Else
-        Put f, offset + 1, shellcode()
+        Put f, offset + 1, Shellcode()
     End If
     
     Close

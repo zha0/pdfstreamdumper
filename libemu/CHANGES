@@ -1,5 +1,21 @@
 		Changelog for libemu
 
+12.7.11  - added repne support for stosx (0xAB)
+
+11.16.11 - new hooks: GetWindowThreadProcessId, OpenProcess
+		 - added support for -u to -dir mode
+		 - added /support/parseBulk (data visualizer for -dir mode output)
+		 
+10.3.11 - emu_env_w32_load_dll use actual module size to copy k32 and ntdll live memory to emu
+          (some system like CN had crash with hardcoded default - thanks Zhi Liu)
+        - added repne support for stosb
+
+9.26.11 - hooks: msvcrt.strstr, msvcrt.strtoul, CreateDirectoryA, SetCurrentDirectoryA
+
+8.8.11  - /min (min steps to trigger findsc record), findsc now honors /foff
+		
+7.20.11 - new opcode: rdtsc, tested/enabled existing: instr_imul_69
+
 6.24.11 - new export emu_memory_read_wide_string, 9 new hooks (SCM)
         - CloseServiceHandle, DeleteService, ControlService
 		- OpenServiceA/W, RegOpenKeyExA/W, OpenSCManagerA/W
