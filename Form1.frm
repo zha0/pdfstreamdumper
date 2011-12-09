@@ -141,6 +141,7 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":000D
@@ -163,6 +164,7 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":008F
@@ -1079,12 +1081,12 @@ Private Sub mnuHelp_Click(Index As Integer)
         Exit Sub
     End If
     If ie = "[video_help]" Then
-        Const help = "Note that these videos were created while PDFStreamDumper was under development\n\n" & _
+        Const Help = "Note that these videos were created while PDFStreamDumper was under development\n\n" & _
                      "As support for more Adobe specific API was added, there may be easier ways to " & _
                      "accomplish some of the techniques shown in the videos. At the end of the day " & _
                      "knowing how to process the scripts manually is always a plus, but it may be " & _
                      "easier now than how it was shown in the video."
-        MsgBox Replace(help, "\n", vbCrLf), vbInformation
+        MsgBox Replace(Help, "\n", vbCrLf), vbInformation
         Exit Sub
     End If
     ie = Environ("ProgramFiles") & "\Internet Explorer\iexplore.exe"
@@ -1204,7 +1206,7 @@ Private Sub lv_KeyDown(KeyCode As Integer, Shift As Integer)
     
 End Sub
 
-Private Sub lv2_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub lv2_MouseUp(Button As Integer, Shift As Integer, x As Single, Y As Single)
     If Button = 2 Then PopupMenu mnuPopup2
 End Sub
 
@@ -1999,7 +2001,7 @@ Private Sub Form_Unload(Cancel As Integer)
      
 End Sub
 
-Private Sub lv_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub lv_MouseDown(Button As Integer, Shift As Integer, x As Single, Y As Single)
     On Error Resume Next
     
     Dim stream As CPDFStream
@@ -2327,8 +2329,17 @@ Private Sub mnuReplaceStream_Click()
     new_data = fso.ReadFile(new_file)
     new_bytes() = StrConv(new_data, vbFromUnicode, LANG_US)
     
+    If MsgBox("Do i need to compress this file before inserting it?", vbYesNo) = vbYes Then
+        Dim tmp_bytes() As Byte
+        If Not Module4.CompressData(new_bytes(), tmp_bytes()) Then
+            MsgBox "Compression failed!", vbExclamation
+            Exit Sub
+        End If
+        new_bytes() = tmp_bytes()
+    End If
+    
     msg = "Original Compressed Stream size: " & Hex(stream.CompressedSize) & vbCrLf & _
-          "New stream file size: " & Hex(Len(new_data)) & vbCrLf & vbCrLf & _
+          "New stream file size: " & Hex(UBound(new_bytes)) & vbCrLf & vbCrLf & _
           "Are you sure you want to continue?"
     
     If MsgBox(msg, vbYesNo) = vbNo Then Exit Sub
@@ -2847,7 +2858,7 @@ Private Sub ts_Click()
 End Sub
 
 
-Private Sub txtPDFPath_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub txtPDFPath_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, Y As Single)
     On Error Resume Next
     AutomatationRun = False
     txtPDFPath = Data.Files(1)
