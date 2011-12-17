@@ -134,14 +134,14 @@ hell:   ErrorMessage = "Error in " & method & " : " & Err.Description
 End Function
 
 
-Function Decrypt(infile As String, retString As String, Optional startMsg As String = "PDF is encrypted try to decrypt it?") As Boolean
+Function Decrypt(inFile As String, retString As String, Optional startMsg As String = "PDF is encrypted try to decrypt it?") As Boolean
         
     On Error Resume Next
     
-    Dim outfile As String
+    Dim outFile As String
     Dim ret As String
     
-    outfile = fso.GetParentFolder(infile) & "\" & fso.GetBaseName(infile) & ".decrypted.pdf"
+    outFile = fso.GetParentFolder(inFile) & "\" & fso.GetBaseName(inFile) & ".decrypted.pdf"
     
     If Len(startMsg) > 0 Then If MsgBox(startMsg, vbYesNo) = vbNo Then Exit Function
     
@@ -150,23 +150,59 @@ Function Decrypt(infile As String, retString As String, Optional startMsg As Str
         Exit Function
     End If
     
-    If fso.FileExists(outfile) Then Kill outfile
+    If fso.FileExists(outFile) Then Kill outFile
     
-    If Not iTextFilters.Decrypt(infile, outfile) Then
+    If Not iTextFilters.Decrypt(inFile, outFile) Then
         retString = iTextFilters.ErrorMessage
     Else
     
-         If FileLen(outfile) = 0 Then
+         If FileLen(outFile) = 0 Then
              retString = "Decryption failed file probably has user password set?"
-             Kill outfile
+             Kill outFile
              Exit Function
          End If
          
-         retString = outfile
+         retString = outFile
          Decrypt = True
     
     End If
            
+End Function
+
+Function QuickDeflate(DataIn() As Byte, DataOut() As Byte, Optional startOffset As Long = 0) As Boolean
+    
+    On Error GoTo hell
+        
+    If Not Initilized Then
+        If Not surpressErrorMsg Then MsgBox ErrorMessage, vbInformation
+        Exit Function
+    End If
+    
+    Dim b() As Byte
+    Dim addr As Long
+    Dim bufsize As Long
+    
+    b() = DataIn()
+    addr = VarPtr(b(startOffset))
+    bufsize = UBound(b) - startOffset
+    
+    iTextFilters.Debug = False
+    
+    If iTextFilters.decode(addr, bufsize, 1) Then
+        ReDim DataOut(bufsize - 1) 'addr, bufsize - these were set byref in csharp to describe response buffer
+        CopyFromMem DataOut(0), addr, bufsize
+        QuickDeflate = True
+    Else
+        ErrorMessage = iTextFilters.ErrorMessage
+        Exit Function
+    End If
+    
+    iTextFilters.ReleaseMem
+    
+    Exit Function
+    'hell is only for vb errors, .net errors get caught with output
+hell:   ErrorMessage = "Error in " & method & " : " & Err.Description
+        If Not surpressErrorMsg Then MsgBox ErrorMessage, vbInformation
 End Function
 
 

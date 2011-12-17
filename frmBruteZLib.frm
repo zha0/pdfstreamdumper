@@ -47,7 +47,6 @@ Begin VB.Form frmBruteZLib
       _ExtentX        =   19235
       _ExtentY        =   9313
       _Version        =   393217
-      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"frmBruteZLib.frx":0000
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -209,30 +208,19 @@ Private Sub Command1_Click()
     Get f, , b()
     Close f
     
-    'this can be horrbily slow on large byte buffers since we are doing it all as string
-    'manipulations and then converting back and forth ALLOT..I should optimize this to make it faster
-    'but this is just an add on right now using existing code, this can be much improved..but for now
-    'it is what it is...the native zlib class didnt work for this for some reason. would be way faster
-    
-    d = StrConv(b, vbUnicode, LANG_US)
-    
     For i = 0 To UBound(b)
     
-        csharp.decode Mid(d, i), FlateDecode
-        
-        'Module4.UncompressData b, bout, i
         setPB i, UBound(b)
         DoEvents
         Me.Refresh
         DoEvents
         If abort Then Exit For
         
-        'If Not AryIsEmpty(bout) Then
-        If Len(csharp.DecodedBuffer) > 0 Then
-            bOut = StrConv(csharp.DecodedBuffer, vbFromUnicode, LANG_US)
+        If csharp.QuickDeflate(b(), bOut(), i) Then
+        
             Module4.CompressData bOut, tmp 'figure out how big compressed block was
             Set c = New CPDFStream
-            c.StartOffset = i - 1
+            c.startOffset = i - 1
             
             If Not AryIsEmpty(tmp) Then
                 c.EndOffset = i + UBound(tmp) - 1
@@ -245,7 +233,7 @@ Private Sub Command1_Click()
             c.DecompressedData = StrConv(bOut, vbUnicode, LANG_US)
             c.DecompressedDataCRC = CRC32(c.DecompressedData)
             
-            Set li = lv.ListItems.Add(, , "offset: 0x" & Hex(c.StartOffset) & " sz: 0x" & Hex(c.DecompressedSize))
+            Set li = lv.ListItems.Add(, , "offset: 0x" & Hex(c.startOffset) & " sz: 0x" & Hex(c.DecompressedSize))
             Set li.tag = c
             
             If c.EndOffset <> 0 Then i = c.EndOffset  'advance file pointer to after this chunk
@@ -259,6 +247,91 @@ Private Sub Command1_Click()
             
         
 End Sub
+
+'Private Sub Command1_Click()
+'
+'    If Not fso.FileExists(txtFile) Then Exit Sub
+'
+'    On Error Resume Next
+'
+'    If Not csharp.Initilized Then
+'        MsgBox csharp.ErrorMessage, vbExclamation
+'        Exit Sub
+'    End If
+'
+'    Dim f As Long
+'    Dim b() As Byte
+'    Dim bOut() As Byte
+'    Dim tmp() As Byte
+'    Dim d As String
+'
+'    Dim c As CPDFStream
+'
+'    Dim li As ListItem
+'    Dim i As Long
+'
+'    abort = False
+'    lv.ListItems.Clear
+'    pb.Value = 0
+'    rtf.Text = Empty
+'    txtDetails = Empty
+'
+'    f = FreeFile
+'    Open txtFile For Binary As f
+'    ReDim b(LOF(f))
+'    Get f, , b()
+'    Close f
+'
+'    'this can be horrbily slow on large byte buffers since we are doing it all as string
+'    'manipulations and then converting back and forth ALLOT..I should optimize this to make it faster
+'    'but this is just an add on right now using existing code, this can be much improved..but for now
+'    'it is what it is...the native zlib class didnt work for this for some reason. would be way faster
+'
+'    d = StrConv(b, vbUnicode, LANG_US)
+'
+'    For i = 0 To UBound(b)
+'
+'        csharp.decode Mid(d, i), FlateDecode
+'
+'        'Module4.UncompressData b, bout, i
+'        setPB i, UBound(b)
+'        DoEvents
+'        Me.Refresh
+'        DoEvents
+'        If abort Then Exit For
+'
+'        'If Not AryIsEmpty(bout) Then
+'        If Len(csharp.DecodedBuffer) > 0 Then
+'            bOut = StrConv(csharp.DecodedBuffer, vbFromUnicode, LANG_US)
+'            Module4.CompressData bOut, tmp 'figure out how big compressed block was
+'            Set c = New CPDFStream
+'            c.startOffset = i - 1
+'
+'            If Not AryIsEmpty(tmp) Then
+'                c.EndOffset = i + UBound(tmp) - 1
+'                Erase tmp
+'            Else
+'                c.EndOffset = 0
+'            End If
+'
+'            c.DecompressedSize = UBound(bOut)
+'            c.DecompressedData = StrConv(bOut, vbUnicode, LANG_US)
+'            c.DecompressedDataCRC = CRC32(c.DecompressedData)
+'
+'            Set li = lv.ListItems.Add(, , "offset: 0x" & Hex(c.startOffset) & " sz: 0x" & Hex(c.DecompressedSize))
+'            Set li.tag = c
+'
+'            If c.EndOffset <> 0 Then i = c.EndOffset  'advance file pointer to after this chunk
+'            csharp.DecodedBuffer = Empty
+'
+'        End If
+'    Next
+'
+'    pb.Value = 0
+'    MsgBox lv.ListItems.Count & " Streams found!", vbInformation
+'
+'
+'End Sub
 
 Function AryIsEmpty(ary) As Boolean
     On Error Resume Next
@@ -310,7 +383,7 @@ Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
     rtf.Text = Empty
     Set selli = Item
     
-    r = "Start Offset: 0x" & Hex(c.StartOffset) & " (" & c.StartOffset & ")" & vbCrLf
+    r = "Start Offset: 0x" & Hex(c.startOffset) & " (" & c.startOffset & ")" & vbCrLf
     r = r & "End Offset: 0x" & Hex(c.EndOffset) & " (" & c.EndOffset & ")" & vbCrLf
     r = r & "DecompressedSize: 0x" & Hex(c.DecompressedSize) & " (" & c.DecompressedSize & ")" & vbCrLf
     r = r & "DecompressedDataCRC: " & c.DecompressedDataCRC & vbCrLf
@@ -333,7 +406,7 @@ Private Sub mnuCopyAllStats_Click()
     
     For Each li In lv.ListItems
         Set c = li.tag
-        r = r & "Start Offset: 0x" & Hex(c.StartOffset) & " (" & c.StartOffset & ")" & vbCrLf
+        r = r & "Start Offset: 0x" & Hex(c.startOffset) & " (" & c.startOffset & ")" & vbCrLf
         r = r & "End Offset: 0x" & Hex(c.EndOffset) & " (" & c.EndOffset & ")" & vbCrLf
         r = r & "DecompressedSize: 0x" & Hex(c.DecompressedSize) & " (" & c.DecompressedSize & ")" & vbCrLf
         r = r & "DecompressedDataCRC: " & c.DecompressedDataCRC & vbCrLf & vbCrLf
@@ -377,7 +450,7 @@ Private Sub mnuSaveAll_Click()
     
     For Each li In lv.ListItems
         Set c = li.tag
-        f = d & "\zbrute_" & Hex(c.StartOffset) & ".dat"
+        f = d & "\zbrute_" & Hex(c.startOffset) & ".dat"
         If fso.FileExists(f) Then Kill f
         If SaveStream(c, f) Then ok = ok + 1
     Next
@@ -392,7 +465,7 @@ Private Sub mnuSaveToFile_Click()
     
     If selli.tag Is Nothing Then Exit Sub
     Set c = selli.tag
-    f = Form1.dlg.SaveDialog(AllFiles, , "Save file as", , Me.hwnd, "zbrute_" & Hex(c.StartOffset) & ".dat")
+    f = Form1.dlg.SaveDialog(AllFiles, , "Save file as", , Me.hwnd, "zbrute_" & Hex(c.startOffset) & ".dat")
     If Len(f) = 0 Then Exit Sub
     
     MsgBox "Saved to file: " & SaveStream(c, f)
