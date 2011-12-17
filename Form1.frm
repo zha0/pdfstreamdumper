@@ -560,6 +560,9 @@ Begin VB.Form Form1
    End
    Begin VB.Menu mnuTools 
       Caption         =   "Tools"
+      Begin VB.Menu mnuZlibBrute 
+         Caption         =   "Zlib Brute Forcer"
+      End
       Begin VB.Menu mnuDecompress 
          Caption         =   "Zlib Decompress_File"
       End
@@ -1852,6 +1855,11 @@ Private Sub mnuUpdateCurrent_Click()
     txtPDFPath = new_file
     cmdDecode_Click
   
+End Sub
+
+Private Sub mnuZlibBrute_Click()
+    Dim f As New frmBruteZLib
+    f.Show 'this way we can compare multiple files..
 End Sub
 
 Private Sub muLoadShellcode_Click()
