@@ -203,4 +203,19 @@ Function SimpleDecompress(ByVal s As String) As String
                 
 End Function
 
-
+Function SimpleCompress(ByVal s As String) As String
+    Dim b() As Byte
+    Dim bOut() As Byte
+    
+    b = StrConv(s, vbFromUnicode, LANG_US)
+                
+    CompressData b(), bOut()
+    
+    If Not AryIsEmpty(bOut) Then
+        SimpleCompress = StrConv(bOut, vbUnicode, LANG_US)
+    Else
+        SimpleCompress = Empty
+        'MsgBox "Decompression Error"
+    End If
+                
+End Function

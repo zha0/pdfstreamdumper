@@ -141,7 +141,6 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":000D
@@ -164,7 +163,6 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":008F
@@ -1260,7 +1258,7 @@ Private Sub mnuErrorSaveRaw_Click()
     GetActiveData lv2.SelectedItem, , c
     
     b() = StrConv(c.OriginalData, vbFromUnicode, LANG_US)
-    pth = dlg.SaveDialog(AllFiles, pf, "Save Stream", , Me.hwnd, "error_stream_0x" & Hex(c.StartOffset) & ".txt")
+    pth = dlg.SaveDialog(AllFiles, pf, "Save Stream", , Me.hwnd, "error_stream_0x" & Hex(c.startOffset) & ".txt")
     
     If Len(pth) = 0 Then Exit Sub
     
@@ -1592,7 +1590,7 @@ Private Sub mnuHideHeaderStreams_Click()
     Else
         For i = lv.ListItems.Count To 1 Step -1
             Set s = lv.ListItems(i).tag
-            If s.StartOffset = 0 Then ' no stream
+            If s.startOffset = 0 Then ' no stream
                 lv.ListItems.Remove i
                 h = h + 1
             End If
@@ -1638,12 +1636,12 @@ Public Sub mnuJavascriptUI_Click()
     
     t = Form2.StandardizeLineBreaks(t)
     Form2.Show
-    Form2.txtJS.Text = t
+    Form2.txtJs.Text = t
     
     'comment this out for codemax
     If wasSelection Then
-        Form2.txtJS.SelStart = 0
-        Form2.txtJS.SelLength = Len(t)
+        Form2.txtJs.SelStart = 0
+        Form2.txtJs.SelLength = Len(t)
     End If
     
 End Sub
@@ -1839,7 +1837,7 @@ Private Sub mnuUpdateCurrent_Click()
     f2 = FreeFile
     Open new_file For Binary As f2
     
-    ReDim b(stream.StartOffset - 1)
+    ReDim b(stream.startOffset - 1)
     Get f, , b() 'load the file up to the original stream
     Put f2, , b() 'save it to the new file
     
@@ -1889,7 +1887,6 @@ Private Sub parser_NewStream(stream As CPDFStream)
         DoEvents
         Me.Refresh
         DoEvents
-        'should i add a progress bar?
         
         IncProgressBar
         
@@ -1899,8 +1896,8 @@ Private Sub parser_NewStream(stream As CPDFStream)
         If Len(stream.Message) > 0 Then
             'add it to the error list
             Set li = lv2.ListItems.Add(, , "stream # " & stream.Index & " org sz = (0x" & Hex(Len(stream.RawObject)) & ")")
-        ElseIf stream.StartOffset > 0 Then
-            Set li = lv.ListItems.Add(, , stream.Index & " 0x" & Hex(stream.StartOffset) & "-0x" & Hex(stream.EndOffset))
+        ElseIf stream.startOffset > 0 Then
+            Set li = lv.ListItems.Add(, , stream.Index & " 0x" & Hex(stream.startOffset) & "-0x" & Hex(stream.EndOffset))
             li.ForeColor = vbBlue
         Else
             If mnuHideHeaderStreams.Checked = False Then
@@ -1935,7 +1932,7 @@ Private Sub parser_NewStream(stream As CPDFStream)
                 jsCount = jsCount + 1
                 li.ToolTipText = "Javascript Block"
                 
-            ElseIf stream.StartOffset > 0 Then
+            ElseIf stream.startOffset > 0 Then
                 If stream.ContentType = TTFFont Then
                     li.ForeColor = &HFFFF&     'yellow
                     li.ToolTipText = "TTF Font"
@@ -2118,7 +2115,11 @@ Public Sub cmdDecode_Click()
     
     If Not FileExists(txtPDFPath) Then GoTo end_of_func
     
-    parser.ParseFile txtPDFPath
+    'If MsgBox("Use new parser?", vbYesNo) = vbYes Then
+        parser.ParseFile txtPDFPath 'optimized by a factor of 15x - 800k file was 130sec, now 9..
+    'Else
+    '    parser.Old_ParseFile txtPDFPath
+    'End If
     
     If lv.ListItems.Count = 0 And lv2.ListItems.Count = 0 Then
        'MsgBox "No stream markers found in this file", vbInformation
@@ -2166,14 +2167,14 @@ end_of_func:
         
     End If
     
-    Dim fsize As Long
+    Dim fSize As Long
     
     Status = stComplete
     endTime = GetTickCount()
     LoadTime = endTime - startTime
-    fsize = FileLen(txtPDFPath)
+    fSize = FileLen(txtPDFPath)
     
-    Me.Caption = "PDFStreamDumper  - http://sandsprite.com     FileSize: " & fsize & "    LoadTime: " & LoadTime
+    Me.Caption = "PDFStreamDumper  - http://sandsprite.com     FileSize: " & fSize & "    LoadTime: " & LoadTime
     
     Dim oBrowser As Object
     Set oBrowser = GetObject("", "obj_Browser.plugin") 'not much of a plugin is it! more of a lib at this point :P
@@ -2361,7 +2362,7 @@ Private Sub mnuReplaceStream_Click()
     f2 = FreeFile
     Open new_file For Binary As f2
     
-    ReDim b(stream.StartOffset - 1)
+    ReDim b(stream.startOffset - 1)
     Get f, , b() 'load the file up to the original stream
     Put f2, , b() 'save it to the new file
     
@@ -2441,7 +2442,7 @@ Private Sub mnuSaveStream_Click()
         
     b() = StrConv(GetActiveData(lv.SelectedItem, , c), vbFromUnicode, LANG_US)
     
-    pth = dlg.SaveDialog(AllFiles, pf, "Save Stream", , Me.hwnd, "decomp_stream_0x" & Hex(c.StartOffset) & ".txt")
+    pth = dlg.SaveDialog(AllFiles, pf, "Save Stream", , Me.hwnd, "decomp_stream_0x" & Hex(c.startOffset) & ".txt")
     
     If Len(pth) = 0 Then Exit Sub
     
@@ -2472,7 +2473,7 @@ Private Sub mnusSaveRawStream_Click()
     pf = GetParentFolder(txtPDFPath)
     GetActiveData lv.SelectedItem, False, c
     
-    pth = dlg.SaveDialog(AllFiles, pf, "Save Raw Stream", , Me.hwnd, "raw_stream_0x" & Hex(c.StartOffset) & ".txt")
+    pth = dlg.SaveDialog(AllFiles, pf, "Save Raw Stream", , Me.hwnd, "raw_stream_0x" & Hex(c.startOffset) & ".txt")
     If Len(pth) = 0 Then Exit Sub
   
     b() = StrConv(c.OriginalData, vbFromUnicode, LANG_US)
@@ -2650,17 +2651,17 @@ Private Sub Form_Load()
     help_vids = Array("Readme file;[readme]", _
                       "Note on help videos;[video_help]", _
                       "Introduction (40min);http://sandsprite.com/CodeStuff/PdfStreamDumper_trainer.wmv", _
-                      "Sample Analysis> getPageNthWord (10min);http://www.youtube.com/watch?v=W6dJfdH5jHM", _
-                      "Sample Analysis> URL Decoder(8min);http://www.youtube.com/watch?v=Ih7lRHwZKpo", _
-                      "Sample Analysis> getAnnots (10min);http://sandsprite.com/CodeStuff/getAnnots_demo.wmv", _
-                      "Sample Analysis> arguments.callee encrypted script 1 (14min); http://www.youtube.com/watch?v=lyrbPlHMS2o", _
-                      "Sample Analysis> arguments.callee encrypted script 2 (10min); http://www.youtube.com/watch?v=mY9hIpNY1Yg", _
+                      "Pdf Analysis> getPageNthWord (10min);http://www.youtube.com/watch?v=W6dJfdH5jHM", _
+                      "      URL Decoder(8min);http://www.youtube.com/watch?v=Ih7lRHwZKpo", _
+                      "      getAnnots (10min);http://sandsprite.com/CodeStuff/getAnnots_demo.wmv", _
+                      "      arguments.callee encrypted script 1 (14min); http://www.youtube.com/watch?v=lyrbPlHMS2o", _
+                      "      arguments.callee encrypted script 2 (10min); http://www.youtube.com/watch?v=mY9hIpNY1Yg", _
                       "Shellcode> scdbg Trainer 1 - General Use; http://www.youtube.com/watch?v=jFkegwFasIw", _
-                      "Shellcode> scdbg trainer 2 - Asm and Debug; http://www.youtube.com/watch?v=qkDPUF3bf6E", _
-                      "Shellcode> sclog gui; http://www.youtube.com/watch?v=XBcmC4jYiRI", _
+                      "      scdbg trainer 2 - Asm and Debug; http://www.youtube.com/watch?v=qkDPUF3bf6E", _
+                      "      sclog gui; http://www.youtube.com/watch?v=XBcmC4jYiRI", _
                       "Misc> Adobe Api Support(10min);http://sandsprite.com/CodeStuff/Adobe_Api_Support.wmv", _
-                      "Misc> Sample Database Search Plugin (11min);http://sandsprite.com/CodeStuff/database_search_plugin.wmv", _
-                      "Misc> plugin developers and script writers (17min);http://sandsprite.com/CodeStuff/PDFStreamDumper_automation.wmv" _
+                      "      Sample Database Search Plugin (11min);http://sandsprite.com/CodeStuff/database_search_plugin.wmv", _
+                      "      plugin developers and script writers (17min);http://sandsprite.com/CodeStuff/PDFStreamDumper_automation.wmv" _
                 )
 
     Dim vid, i
@@ -2708,8 +2709,8 @@ Private Sub Form_Load()
                 x = HexDump(x, 1)
                 x = AddPercentToHexString(x)
                 Form2.Show
-                Form2.txtJS.Text = x
-                Form2.txtJS.SelectAll
+                Form2.txtJs.Text = x
+                Form2.txtJs.SelectAll
             End If
         Else
             'assume its a pdf file for analysis.

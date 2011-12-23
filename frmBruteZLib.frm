@@ -11,6 +11,121 @@ Begin VB.Form frmBruteZLib
    ScaleHeight     =   8055
    ScaleWidth      =   14175
    StartUpPosition =   3  'Windows Default
+   Begin VB.Frame fraReplaceStream 
+      Caption         =   "Replace Stream "
+      Height          =   2490
+      Left            =   3735
+      TabIndex        =   10
+      Top             =   2250
+      Visible         =   0   'False
+      Width           =   8430
+      Begin VB.OptionButton Option1 
+         Caption         =   "after recompression"
+         Height          =   285
+         Index           =   1
+         Left            =   3510
+         TabIndex        =   20
+         Top             =   2025
+         Width           =   1860
+      End
+      Begin VB.OptionButton Option1 
+         Caption         =   "before recompression"
+         Height          =   285
+         Index           =   0
+         Left            =   1440
+         TabIndex        =   19
+         Top             =   2025
+         Value           =   -1  'True
+         Width           =   1860
+      End
+      Begin VB.CommandButton Command4 
+         Caption         =   "Update Stream"
+         Height          =   330
+         Left            =   6930
+         TabIndex        =   18
+         Top             =   2025
+         Width           =   1410
+      End
+      Begin VB.TextBox txtPadChar 
+         Height          =   285
+         Left            =   4860
+         TabIndex        =   17
+         Text            =   "20"
+         Top             =   1665
+         Width           =   690
+      End
+      Begin VB.CheckBox chkPadifSmaller 
+         Caption         =   "if replacment stream is smaller pad with hex char"
+         Height          =   285
+         Left            =   1080
+         TabIndex        =   16
+         Top             =   1665
+         Width           =   3750
+      End
+      Begin VB.CommandButton cmdLoadNewStream 
+         Caption         =   "..."
+         Height          =   285
+         Left            =   7650
+         TabIndex        =   15
+         Top             =   630
+         Width           =   645
+      End
+      Begin VB.TextBox txtNewStream 
+         Height          =   285
+         Left            =   1080
+         TabIndex        =   14
+         Top             =   630
+         Width           =   6450
+      End
+      Begin VB.Label lblNewStatsLine2 
+         Height          =   285
+         Left            =   1035
+         TabIndex        =   22
+         Top             =   1305
+         Width           =   7170
+      End
+      Begin VB.Label lblNewStream 
+         Height          =   330
+         Left            =   1080
+         TabIndex        =   21
+         Top             =   990
+         Width           =   6495
+      End
+      Begin VB.Label Label2 
+         Caption         =   "New Stream;"
+         Height          =   285
+         Left            =   90
+         TabIndex        =   13
+         Top             =   630
+         Width           =   1095
+      End
+      Begin VB.Label lblReplaceStats 
+         Caption         =   "Label2"
+         Height          =   375
+         Left            =   180
+         TabIndex        =   12
+         Top             =   225
+         Width           =   4020
+      End
+      Begin VB.Label lblClose 
+         BackColor       =   &H00FFFFFF&
+         Caption         =   "  X "
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   13.5
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   375
+         Left            =   7830
+         TabIndex        =   11
+         Top             =   45
+         Width           =   465
+      End
+   End
    Begin VB.CommandButton cmdStop 
       Caption         =   "Stop"
       Height          =   330
@@ -160,6 +275,9 @@ Begin VB.Form frmBruteZLib
       Begin VB.Menu mnuCopyAllStats 
          Caption         =   "Copy Stats for all Streams"
       End
+      Begin VB.Menu mnuCompareWithMain 
+         Caption         =   "Compare to Streams in Main UI"
+      End
    End
 End
 Attribute VB_Name = "frmBruteZLib"
@@ -169,6 +287,45 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Dim selli As ListItem
 Dim abort As Boolean
+Dim replacementStream As CPDFStream
+
+Private Sub cmdLoadNewStream_Click()
+    Dim f As Long
+    Dim b() As Byte
+    Dim c As CPDFStream
+    
+    On Error Resume Next
+    Set c = selli.tag
+    If c Is Nothing Then
+        fraReplaceStream.Visible = False
+        Exit Sub
+    End If
+    
+    txtNewStream.Text = Form1.dlg.OpenDialog(AllFiles, , , Me.hwnd)
+    If fso.FileExists(txtNewStream) Then
+        Set replacementStream = New CPDFStream
+        f = FreeFile
+        Open txtNewStream For Binary As f
+        ReDim b(LOF(f))
+        Get f, , b()
+        Close f
+        With replacementStream
+            .DecompressedData = StrConv(b(), vbUnicode, LANG_US)
+            .DecompressedSize = Len(.DecompressedData)
+            .OriginalData = SimpleCompress(.DecompressedData)
+            .CompressedSize = Len(.OriginalData)
+            lblNewStream = "RawSize: " & Hex(.DecompressedSize) & " Compressed: " & Hex(.CompressedSize)
+            lblNewStatsLine2 = "Replacement stream is " & Abs(c.CompressedSize - .CompressedSize) & _
+                                " " & IIf(c.CompressedSize > .CompressedSize, "SMALLER", "BIGGER") & _
+                                " than original"
+            If .CompressedSize > c.CompressedSize Then
+                chkPadifSmaller.Value = 0
+                chkPadifSmaller.enabled = False
+            End If
+        End With
+    End If
+        
+End Sub
 
 Private Sub cmdStop_Click()
     abort = True
@@ -232,6 +389,7 @@ Private Sub Command1_Click()
             c.DecompressedSize = UBound(bOut)
             c.DecompressedData = StrConv(bOut, vbUnicode, LANG_US)
             c.DecompressedDataCRC = CRC32(c.DecompressedData)
+            c.CompressedSize = c.EndOffset - c.startOffset
             
             Set li = lv.ListItems.Add(, , "offset: 0x" & Hex(c.startOffset) & " sz: 0x" & Hex(c.DecompressedSize))
             Set li.tag = c
@@ -357,18 +515,92 @@ Private Sub Command3_Click()
                 " find sections compressed with ZLIB. Found offsets will be added to \n" & _
                 "the list on the left, details on top, hexdump on bottom. Right click on \n" & _
                 "listview to save data to file.\n\n" & _
-                "This can be VERY slow on files over 50k because the routines are \n" & _
-                "_completely_ unoptimized for this task!"
+                "This can be slow on large files, progress can jump quickly however as it \n" & _
+                "skips past compressed blocks it finds"
     MsgBox Replace(msg, "\n", vbCrLf), vbInformation
+End Sub
+
+Private Sub Command4_Click()
+    If replacementStream Is Nothing Then
+        MsgBox "No replacement stream loaded yet.", vbInformation
+        Exit Sub
+    End If
+    On Error Resume Next
+    Dim c As CPDFStream
+    Set c = selli.tag
+    
+    Dim f As String
+    Dim fNew As Long, fBase As Long
+    Dim b() As Byte, new_bytes() As Byte
+    
+    txtNew = Form1.dlg.SaveDialog(AllFiles, fso.GetParentFolder(txtFile), , , Me.hwnd, _
+                "mod_" & fso.GetBaseName(txtFile) & "." & fso.GetExtension(txtFile))
+                
+    If Len(txtNew) = 0 Then Exit Sub
+    
+    With replacementStream
+        If .CompressedSize < c.CompressedSize And chkPadifSmaller.Value = 1 Then
+            If Option1(0).Value = True Then 'pad before recompression...
+                MsgBox "do stuff here"
+                Exit Sub
+            Else
+                diff = c.CompressedSize - .CompressedSize
+                .OriginalData = .OriginalData & String(diff, Chr(CLng("&h" & txtPadChar)))
+                .CompressedSize = Len(.OriginalData)
+                If .CompressedSize <> c.CompressedSize Then Stop
+            End If
+        End If
+        
+        new_bytes() = StrConv(replacementStream.OriginalData, vbFromUnicode, LANG_US)
+        
+        fBase = FreeFile
+        Open txtFile For Binary As fBase
+        
+        fNew = FreeFile
+        Open txtNew For Binary As fNew
+        
+        ReDim b(c.startOffset)
+        Get fBase, , b() 'load the file up to the original stream
+        Put fNew, , b() 'save it to the new file
+        
+        Put fNew, , new_bytes() 'save our new stream to new file
+        
+        'ReDim b(stream.CompressedSize)
+        'Get f, , b() 'advance file pointer size of orginal compressed data
+        
+        ReDim b(LOF(fBase) - c.EndOffset)
+        Get fBase, c.EndOffset + 1, b() 'load teh rest of the original file
+        Put fNew, , b() 'save rest of file to new file
+        
+        Close fBase
+        Close fNew
+        
+    End With
+    
+    If Err.Number <> 0 Then
+        MsgBox "Error: " & Err.Description, vbExclamation
+    Else
+        MsgBox "File successfully created.", vbInformation
+        fraReplaceStream.Visible = False
+        lv.enabled = True
+    End If
+    
+    
 End Sub
 
 Private Sub Form_Load()
     pb.Value = 0
     lv.ColumnHeaders(1).Width = lv.Width - 100
+    txtFile = Form1.txtPDFPath
 End Sub
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
     abort = True
+End Sub
+
+Private Sub lblClose_Click()
+    fraReplaceStream.Visible = False
+    lv.enabled = True
 End Sub
 
 Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
@@ -397,6 +629,49 @@ Private Sub lv_MouseUp(Button As Integer, Shift As Integer, x As Single, Y As Si
     If Button = 2 Then PopupMenu mnuPopup
 End Sub
 
+Private Sub mnuCompareWithMain_Click()
+    On Error Resume Next
+    Dim c As CPDFStream
+    Dim li As ListItem
+    Dim matches As Long
+    
+    If lv.ListItems.Count = 0 Then
+        MsgBox "No streams loaded in zlib brute. This feature will compare streams found by bruting with streams found by pdf parsing and remove all common streams from this form to see if any were hidden.", vbInformation
+        Exit Sub
+    End If
+    
+    If Form1.lv.ListItems.Count = 0 Then
+        MsgBox "No streams loaded in main UI listview nothing to do", vbInformation
+        Exit Sub
+    End If
+    
+    For i = lv.ListItems.Count To 1 Step -1
+        Set li = lv.ListItems(i)
+        Set c = li.tag
+        If FindStreamInMain(c) Then
+            lv.ListItems.Remove i
+            matches = matches + 1
+        End If
+    Next
+    
+    MsgBox matches & " made - " & lv.ListItems.Count & " hidden streams identified!"
+    
+End Sub
+
+Function FindStreamInMain(c As CPDFStream) As Boolean
+    Dim m As CPDFStream
+    For Each li In Form1.lv.ListItems
+        Set m = li.tag
+        If m.isCompressed Then
+            If m.startOffset = c.startOffset + 1 Then
+                FindStreamInMain = True
+                Exit Function
+            End If
+        End If
+    Next
+End Function
+
+
 Private Sub mnuCopyAllStats_Click()
     On Error Resume Next
     Dim c As CPDFStream
@@ -421,17 +696,19 @@ Private Sub mnuCopyAllStats_Click()
 End Sub
 
 Private Sub mnuReplaceStream_Click()
-    
-    On Error Resume Next
-    Dim f As String
-    Dim b() As Byte
-    
     If selli Is Nothing Then Exit Sub
+    
+    If InStr(1, App.path, "ftp_root", vbTextCompare) < 1 Then
+        MsgBox "Not quite debugged yet..", vbInformation
+        Exit Sub
+    End If
     
     Dim c As CPDFStream
     Set c = selli.tag
-    
-    MsgBox "Not yet implemented!", vbInformation
+    lblReplaceStats = "Start Offsest: " & Hex(c.startOffset) & " Compressed Size: " & Hex(c.CompressedSize)
+    lv.enabled = False 'dont want selli to be updated...
+    Set replacementStream = Nothing
+    fraReplaceStream.Visible = True
     
 End Sub
 
