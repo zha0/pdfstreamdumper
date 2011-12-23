@@ -121,8 +121,20 @@ retry:
         
     Loop
     
+    If Len(sStr) > 0 Then
+        Set stream = New CPDFStream
+        stream.ObjectStartOffset = globalOffset
+        stream.ObjectEndOffset = globalOffset + Len(sStr)
+        stream.Index = 0
+        stream.RawObject = sStr
+        stream.Header = stream.RawObject
+        stream.OriginalData = stream.RawObject
+        RaiseEvent NewStream(stream)
+        stream.Message = "Holds data found after end of last object."
+    End If
+     
     RaiseEvent DebugMessage("Parsing Complete Objects: " & Form1.lv.ListItems.Count + Form1.lv2.ListItems.Count & "  Elapsed Time: " & ((GetTickCount() - starttick) / 1000) & " seconds")
-    RaiseEvent DebugMessage("Parsing complete 0x" & Hex(fSize - lastObjEnd) & " bytes after end of last object @ 0x" & Hex(lastObjEnd))
+    RaiseEvent DebugMessage("0x" & Hex(fSize - lastObjEnd) & " bytes after end of last object @ offset 0x" & Hex(lastObjEnd))
     RaiseEvent Complete
     
 End Function
@@ -219,11 +231,11 @@ End Function
 '
 'End Function
 
-Private Function HalveString(strIn As String, secondPart As String)
+Private Function HalveString(strin As String, secondPart As String)
     Dim x As Long
-    x = Len(strIn) / 2
-    secondPart = Mid(strIn, x)
-    strIn = Mid(strIn, 1, x - 1)
+    x = Len(strin) / 2
+    secondPart = Mid(strin, x)
+    strin = Mid(strin, 1, x - 1)
 End Function
 
 Function Old_ParseFile(fpath As String) As String

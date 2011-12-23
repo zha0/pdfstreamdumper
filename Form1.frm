@@ -141,6 +141,7 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":000D
@@ -163,6 +164,7 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":008F
@@ -1636,12 +1638,12 @@ Public Sub mnuJavascriptUI_Click()
     
     t = Form2.StandardizeLineBreaks(t)
     Form2.Show
-    Form2.txtJs.Text = t
+    Form2.txtJS.Text = t
     
     'comment this out for codemax
     If wasSelection Then
-        Form2.txtJs.SelStart = 0
-        Form2.txtJs.SelLength = Len(t)
+        Form2.txtJS.SelStart = 0
+        Form2.txtJS.SelLength = Len(t)
     End If
     
 End Sub
@@ -2631,22 +2633,25 @@ Private Sub Form_Load()
     
     Set parser = New CPdfParser
     
-    exploits = Array("CVE-2007-5020=mailto:%/..", _
-                     "CVE-2007-5659=collectEmailInfo", _
-                     "CVE-2008-2992=util.printf", _
-                     "CVE-2009-0927=getIcon", _
-                     "CVE-2009-1492=getAnnots", _
-                     "CVE-2009-1493=customDictionaryOpen", _
-                     "CVE-2009-4324=media.newPlayer", _
-                     "Contains U3D file - possible CVE-2009-4324=^U3D", _
+    exploits = Array("CVE-2007-5020 10.22.07 v8.1=mailto:%/..", _
+                     "CVE-2007-5659 5.6.08 v8.1.1=collectEmailInfo", _
+                     "CVE-2008-2992 11.4.08 v8.1.2=util.printf", _
+                     "CVE-2009-0927 3.18.09 v9.0=getIcon", _
+                     "CVE-2009-1492 5.12.09 v9.1=getAnnots", _
+                     "CVE-2009-1493 5.12.09 v9.1=customDictionaryOpen", _
+                     "CVE-2009-4324 12.15.09 v9.2=media.newPlayer", _
+                     "Contains U3D file - possible CVE-2009-4324(v9.1.3) or CVE-2011-2462(12.16.11 v9.4.6) =^U3D", _
                      "Contains flash file - possible CVE-2010-1297(b4 10.1.53.64-newfunction), CVE-2010-2884(10.1.82.76), CVE-2010-3654(10.1.85.3)=^CWS", _
                      "Contains flash file - possible CVE-2010-1297(b4 10.1.53.64-newfunction), CVE-2010-2884(10.1.82.76), CVE-2010-3654(10.1.85.3)=^FWS", _
-                     "Contains embedded image/tif, - possible CVE-2010-0188=image/tif", _
-                     "Header contains a Launch Action - possible CVE-2010-1240=*/Launch*/Action*", _
-                     "Header contains a Launch Action - possible CVE-2010-1240=*/Action*/Launch*", _
-                     "CVE-2010-4091=printSeps", _
-                     "CVE-2010-0188=rawValue" _
+                     "Contains embedded image/tif, - possible CVE-2010-0188 2.32.10 v9.3=image/tif", _
+                     "Header contains a Launch Action - possible CVE-2010-1240 6.29.10 v9.3.2=*/Launch*/Action*", _
+                     "Header contains a Launch Action - possible CVE-2010-1240 6.29.10 v9.3.2=*/Action*/Launch*", _
+                     "CVE-2010-4091 11.4.10 v9.2 or v8.1.7=printSeps", _
+                     "CVE-2010-0188 2.32.10 v9.3=rawValue", _
+                     "Contains PRC file - possible CVE-2011-4369 (12.16.11 v9.4.6)=^PRC" _
                      )
+                     
+                     
                      
     help_vids = Array("Readme file;[readme]", _
                       "Note on help videos;[video_help]", _
@@ -2709,8 +2714,8 @@ Private Sub Form_Load()
                 x = HexDump(x, 1)
                 x = AddPercentToHexString(x)
                 Form2.Show
-                Form2.txtJs.Text = x
-                Form2.txtJs.SelectAll
+                Form2.txtJS.Text = x
+                Form2.txtJS.SelectAll
             End If
         Else
             'assume its a pdf file for analysis.
