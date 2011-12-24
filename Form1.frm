@@ -4,10 +4,10 @@ Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Begin VB.Form Form1 
    Caption         =   "PDF Stream Dumper - http://sandsprite.com"
-   ClientHeight    =   9015
+   ClientHeight    =   9105
    ClientLeft      =   165
    ClientTop       =   735
-   ClientWidth     =   13710
+   ClientWidth     =   13950
    BeginProperty Font 
       Name            =   "Courier New"
       Size            =   9.75
@@ -18,54 +18,251 @@ Begin VB.Form Form1
       Strikethrough   =   0   'False
    EndProperty
    LinkTopic       =   "Form1"
-   ScaleHeight     =   9015
-   ScaleWidth      =   13710
+   ScaleHeight     =   9105
+   ScaleWidth      =   13950
    StartUpPosition =   3  'Windows Default
-   Begin VB.CommandButton cmdAbortProcessing 
-      Caption         =   "Abort"
-      Height          =   375
-      Left            =   12600
-      TabIndex        =   16
-      Top             =   8325
-      Width           =   1005
+   Begin VB.Frame fraLower 
+      BorderStyle     =   0  'None
+      Height          =   1860
+      Left            =   2115
+      TabIndex        =   14
+      Top             =   6525
+      Width           =   11625
+      Begin MSComctlLib.ListView lvDebug 
+         Height          =   1455
+         Left            =   1200
+         TabIndex        =   15
+         Top             =   0
+         Visible         =   0   'False
+         Width           =   10275
+         _ExtentX        =   18124
+         _ExtentY        =   2566
+         View            =   3
+         LabelEdit       =   1
+         LabelWrap       =   -1  'True
+         HideSelection   =   0   'False
+         _Version        =   393217
+         ForeColor       =   -2147483640
+         BackColor       =   -2147483643
+         BorderStyle     =   1
+         Appearance      =   1
+         BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+            Name            =   "Courier New"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         NumItems        =   1
+         BeginProperty ColumnHeader(1) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+            Text            =   "Message"
+            Object.Width           =   2540
+         EndProperty
+      End
+      Begin MSComctlLib.ListView lvSearch 
+         Height          =   1455
+         Left            =   360
+         TabIndex        =   16
+         Top             =   0
+         Visible         =   0   'False
+         Width           =   11175
+         _ExtentX        =   19711
+         _ExtentY        =   2566
+         View            =   3
+         LabelEdit       =   1
+         LabelWrap       =   -1  'True
+         HideSelection   =   0   'False
+         _Version        =   393217
+         ForeColor       =   -2147483640
+         BackColor       =   -2147483643
+         BorderStyle     =   1
+         Appearance      =   1
+         BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+            Name            =   "Courier New"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         NumItems        =   1
+         BeginProperty ColumnHeader(1) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+            Text            =   "Search Results"
+            Object.Width           =   2540
+         EndProperty
+      End
+      Begin MSComctlLib.ListView lv2 
+         Height          =   1455
+         Left            =   0
+         TabIndex        =   17
+         Top             =   0
+         Width           =   11415
+         _ExtentX        =   20135
+         _ExtentY        =   2566
+         View            =   3
+         LabelEdit       =   1
+         LabelWrap       =   -1  'True
+         HideSelection   =   0   'False
+         _Version        =   393217
+         ForeColor       =   -2147483640
+         BackColor       =   -2147483643
+         BorderStyle     =   1
+         Appearance      =   1
+         BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+            Name            =   "Courier New"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         NumItems        =   1
+         BeginProperty ColumnHeader(1) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+            Text            =   "Errors"
+            Object.Width           =   2540
+         EndProperty
+      End
+      Begin MSComctlLib.TabStrip TabStrip1 
+         Height          =   1815
+         Left            =   30
+         TabIndex        =   18
+         Top             =   0
+         Width           =   11535
+         _ExtentX        =   20346
+         _ExtentY        =   3201
+         MultiRow        =   -1  'True
+         Placement       =   1
+         TabStyle        =   1
+         _Version        =   393216
+         BeginProperty Tabs {1EFB6598-857C-11D1-B16A-00C0F0283628} 
+            NumTabs         =   3
+            BeginProperty Tab1 {1EFB659A-857C-11D1-B16A-00C0F0283628} 
+               Caption         =   "Errors"
+               ImageVarType    =   2
+            EndProperty
+            BeginProperty Tab2 {1EFB659A-857C-11D1-B16A-00C0F0283628} 
+               Caption         =   "Search"
+               ImageVarType    =   2
+            EndProperty
+            BeginProperty Tab3 {1EFB659A-857C-11D1-B16A-00C0F0283628} 
+               Caption         =   "Debug"
+               ImageVarType    =   2
+            EndProperty
+         EndProperty
+         BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+            Name            =   "Courier New"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+      End
    End
-   Begin MSComctlLib.ListView lvDebug 
-      Height          =   1455
-      Left            =   3240
-      TabIndex        =   15
-      Top             =   6480
-      Visible         =   0   'False
-      Width           =   10275
-      _ExtentX        =   18124
-      _ExtentY        =   2566
-      View            =   3
-      LabelEdit       =   1
-      LabelWrap       =   -1  'True
-      HideSelection   =   0   'False
-      _Version        =   393217
-      ForeColor       =   -2147483640
-      BackColor       =   -2147483643
-      BorderStyle     =   1
-      Appearance      =   1
-      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
-         Name            =   "Courier New"
-         Size            =   8.25
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      NumItems        =   1
-      BeginProperty ColumnHeader(1) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
-         Text            =   "Message"
-         Object.Width           =   2540
-      EndProperty
+   Begin VB.Frame fraControls 
+      BorderStyle     =   0  'None
+      Height          =   465
+      Left            =   45
+      TabIndex        =   7
+      Top             =   8370
+      Width           =   14055
+      Begin VB.TextBox txtPDFPath 
+         BeginProperty Font 
+            Name            =   "Courier New"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   315
+         Left            =   2040
+         OLEDropMode     =   1  'Manual
+         TabIndex        =   12
+         Text            =   "Drag and drop pdf file here"
+         Top             =   90
+         Width           =   8535
+      End
+      Begin VB.CommandButton cmdDecode 
+         Caption         =   "Load"
+         BeginProperty Font 
+            Name            =   "Courier New"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   375
+         Left            =   11250
+         TabIndex        =   11
+         Top             =   45
+         Width           =   1335
+      End
+      Begin VB.CommandButton cmdBrowse 
+         Caption         =   "..."
+         BeginProperty Font 
+            Name            =   "System"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   375
+         Left            =   10665
+         TabIndex        =   10
+         Top             =   45
+         Width           =   615
+      End
+      Begin VB.CommandButton Command1 
+         Caption         =   "Shell"
+         Enabled         =   0   'False
+         Height          =   375
+         Left            =   0
+         TabIndex        =   9
+         Top             =   0
+         Width           =   855
+      End
+      Begin VB.CommandButton cmdAbortProcessing 
+         Caption         =   "Abort"
+         Height          =   375
+         Left            =   12600
+         TabIndex        =   8
+         Top             =   45
+         Width           =   1005
+      End
+      Begin VB.Label Label1 
+         Alignment       =   1  'Right Justify
+         Caption         =   "PDF Path"
+         BeginProperty Font 
+            Name            =   "Courier New"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   255
+         Left            =   840
+         TabIndex        =   13
+         Top             =   120
+         Width           =   1095
+      End
    End
    Begin MSComctlLib.ProgressBar pb 
       Height          =   285
       Left            =   5805
-      TabIndex        =   14
+      TabIndex        =   6
       Top             =   6165
       Width           =   7710
       _ExtentX        =   13600
@@ -91,10 +288,10 @@ Begin VB.Form Form1
       Align           =   2  'Align Bottom
       Height          =   255
       Left            =   0
-      TabIndex        =   13
-      Top             =   8760
-      Width           =   13710
-      _ExtentX        =   24183
+      TabIndex        =   5
+      Top             =   8850
+      Width           =   13950
+      _ExtentX        =   24606
       _ExtentY        =   450
       _Version        =   393216
       BeginProperty Panels {8E3867A5-8586-11D1-B16A-00C0F0283628} 
@@ -136,7 +333,7 @@ Begin VB.Form Form1
       Left            =   4005
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
-      TabIndex        =   9
+      TabIndex        =   3
       Text            =   "Form1.frx":0000
       Top             =   1980
       Visible         =   0   'False
@@ -145,13 +342,12 @@ Begin VB.Form Form1
    Begin RichTextLib.RichTextBox txtUncompressed 
       Height          =   4095
       Left            =   3120
-      TabIndex        =   3
+      TabIndex        =   0
       Top             =   1620
       Width           =   9855
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":000D
@@ -168,13 +364,12 @@ Begin VB.Form Form1
    Begin RichTextLib.RichTextBox he 
       Height          =   5895
       Left            =   2160
-      TabIndex        =   12
+      TabIndex        =   4
       Top             =   120
       Width           =   11295
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":008F
@@ -188,155 +383,10 @@ Begin VB.Form Form1
          Strikethrough   =   0   'False
       EndProperty
    End
-   Begin VB.CommandButton Command1 
-      Caption         =   "Shell"
-      Enabled         =   0   'False
-      Height          =   375
-      Left            =   0
-      TabIndex        =   11
-      Top             =   8280
-      Width           =   855
-   End
-   Begin VB.CommandButton cmdBrowse 
-      Caption         =   "..."
-      BeginProperty Font 
-         Name            =   "System"
-         Size            =   9.75
-         Charset         =   0
-         Weight          =   700
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   375
-      Left            =   10665
-      TabIndex        =   10
-      Top             =   8325
-      Width           =   615
-   End
-   Begin VB.CommandButton cmdDecode 
-      Caption         =   "Load"
-      BeginProperty Font 
-         Name            =   "Courier New"
-         Size            =   9.75
-         Charset         =   0
-         Weight          =   700
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   375
-      Left            =   11250
-      TabIndex        =   0
-      Top             =   8325
-      Width           =   1335
-   End
-   Begin MSComctlLib.ListView lvSearch 
-      Height          =   1455
-      Left            =   2400
-      TabIndex        =   7
-      Top             =   6480
-      Visible         =   0   'False
-      Width           =   11175
-      _ExtentX        =   19711
-      _ExtentY        =   2566
-      View            =   3
-      LabelEdit       =   1
-      LabelWrap       =   -1  'True
-      HideSelection   =   0   'False
-      _Version        =   393217
-      ForeColor       =   -2147483640
-      BackColor       =   -2147483643
-      BorderStyle     =   1
-      Appearance      =   1
-      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
-         Name            =   "Courier New"
-         Size            =   8.25
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      NumItems        =   1
-      BeginProperty ColumnHeader(1) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
-         Text            =   "Search Results"
-         Object.Width           =   2540
-      EndProperty
-   End
-   Begin MSComctlLib.ListView lv2 
-      Height          =   1455
-      Left            =   2040
-      TabIndex        =   6
-      Top             =   6480
-      Width           =   11415
-      _ExtentX        =   20135
-      _ExtentY        =   2566
-      View            =   3
-      LabelEdit       =   1
-      LabelWrap       =   -1  'True
-      HideSelection   =   0   'False
-      _Version        =   393217
-      ForeColor       =   -2147483640
-      BackColor       =   -2147483643
-      BorderStyle     =   1
-      Appearance      =   1
-      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
-         Name            =   "Courier New"
-         Size            =   8.25
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      NumItems        =   1
-      BeginProperty ColumnHeader(1) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
-         Text            =   "Errors"
-         Object.Width           =   2540
-      EndProperty
-   End
-   Begin MSComctlLib.TabStrip TabStrip1 
-      Height          =   1815
-      Left            =   2040
-      TabIndex        =   5
-      Top             =   6480
-      Width           =   11535
-      _ExtentX        =   20346
-      _ExtentY        =   3201
-      MultiRow        =   -1  'True
-      Placement       =   1
-      TabStyle        =   1
-      _Version        =   393216
-      BeginProperty Tabs {1EFB6598-857C-11D1-B16A-00C0F0283628} 
-         NumTabs         =   3
-         BeginProperty Tab1 {1EFB659A-857C-11D1-B16A-00C0F0283628} 
-            Caption         =   "Errors"
-            ImageVarType    =   2
-         EndProperty
-         BeginProperty Tab2 {1EFB659A-857C-11D1-B16A-00C0F0283628} 
-            Caption         =   "Search"
-            ImageVarType    =   2
-         EndProperty
-         BeginProperty Tab3 {1EFB659A-857C-11D1-B16A-00C0F0283628} 
-            Caption         =   "Debug"
-            ImageVarType    =   2
-         EndProperty
-      EndProperty
-      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
-         Name            =   "Courier New"
-         Size            =   9.75
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-   End
    Begin MSComctlLib.ListView lv 
       Height          =   8295
       Left            =   0
-      TabIndex        =   4
+      TabIndex        =   1
       Top             =   0
       Width           =   2055
       _ExtentX        =   3625
@@ -366,28 +416,10 @@ Begin VB.Form Form1
          Object.Width           =   2540
       EndProperty
    End
-   Begin VB.TextBox txtPDFPath 
-      BeginProperty Font 
-         Name            =   "Courier New"
-         Size            =   9.75
-         Charset         =   0
-         Weight          =   700
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   315
-      Left            =   2040
-      OLEDropMode     =   1  'Manual
-      TabIndex        =   1
-      Text            =   "Drag and drop pdf file here"
-      Top             =   8370
-      Width           =   8535
-   End
    Begin MSComctlLib.TabStrip ts 
       Height          =   6495
       Left            =   2040
-      TabIndex        =   8
+      TabIndex        =   2
       Top             =   0
       Width           =   11535
       _ExtentX        =   20346
@@ -420,24 +452,6 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-   End
-   Begin VB.Label Label1 
-      Alignment       =   1  'Right Justify
-      Caption         =   "PDF Path"
-      BeginProperty Font 
-         Name            =   "Courier New"
-         Size            =   9.75
-         Charset         =   0
-         Weight          =   700
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   255
-      Left            =   840
-      TabIndex        =   2
-      Top             =   8400
-      Width           =   1095
    End
    Begin VB.Menu mnuLoadTop 
       Caption         =   "Load"
@@ -1181,15 +1195,37 @@ End Function
 
 Private Sub Form_Resize()
     On Error Resume Next
+    'Me.Caption = Me.Height & " w: " & Me.Width
+    If Me.Height < 6500 Then Me.Height = 6500
+    If Me.Width < 13000 Then Me.Width = 13000
+    
+    fraControls.Top = Me.Height - fraControls.Height - StatusBar.Height - 750
+    fraLower.Top = fraControls.Top - fraLower.Height
+    lv.Height = fraControls.Top - lv.Top - 100
+    
+    ts.Height = fraLower.Top - ts.Top - 100
+    he.Height = ts.Height - 600
+    txtDetails.Height = he.Height
+    txtUncompressed.Height = he.Height
+    pb.Top = ts.Top + ts.Height - 335
+    
     txtUncompressed.Width = Me.Width - txtUncompressed.Left - 300
     TabStrip1.Width = txtUncompressed.Width + 300
     ts.Width = TabStrip1.Width
     he.Width = txtUncompressed.Width
     txtDetails.Width = he.Width
+    fraLower.Width = he.Width
+    
+    fraControls.Width = Me.Width
+    cmdAbortProcessing.Left = fraControls.Width - fraControls.Left - cmdAbortProcessing.Width - 100
+    cmdDecode.Left = cmdAbortProcessing.Left - cmdDecode.Width - 10
+    cmdBrowse.Left = cmdDecode.Left - cmdBrowse.Width - 10
+    txtPDFPath.Width = cmdBrowse.Left - txtPDFPath.Left - 10
+    
     lv2.Width = he.Width
     lvSearch.Width = he.Width
     lvDebug.Width = he.Width
-    pb.Width = Me.Width - pb.Left - 100
+    pb.Width = Me.Width - pb.Left - 200
 End Sub
 
 Private Sub lv_KeyDown(KeyCode As Integer, Shift As Integer)
