@@ -21,6 +21,7 @@ Public Enum ObjType
     Flash = 1
     U3d = 2
     TTFFont = 3
+    prc = 4
 End Enum
     
 Public Index As Long
@@ -36,7 +37,7 @@ Public isCompressed As Boolean
 'Public isASCIIHexDecode As Boolean
 
 'theses are related to streams
-Public StartOffset As Long
+Public startOffset As Long
 Public EndOffset As Long
 
 Public CompressedSize As Long
@@ -138,7 +139,7 @@ Function ParseSelf()
         ContainsStream = True
         sStart = sStart + Len("stream")
         
-        StartOffset = ObjectStartOffset + sStart - 1
+        startOffset = ObjectStartOffset + sStart - 1
         EndOffset = ObjectStartOffset + sEnd - 1
         
         OriginalData = MyTrim(Mid(RawObject, sStart, sEnd - sStart))
@@ -179,6 +180,8 @@ Private Sub SetContentType(ad)
         ContentType = Flash
     ElseIf VBA.Left(ad, 3) = "U3D" Then
         ContentType = U3d
+    ElseIf VBA.Left(ad, 3) = "PRC" Then
+        ContentType = prc
     ElseIf InStr(1, ad, "maxp", vbTextCompare) > 0 Then
         ContentType = TTFFont
     ElseIf InStr(1, ad, "glyf", vbTextCompare) > 0 Then
@@ -203,7 +206,7 @@ Private Function MyTrim(strin As String)
         
         While VBA.Left(s, 1) = Chr(&HD) Or Left(s, 1) = Chr(&HA)
             s = Mid(s, 2)
-            StartOffset = StartOffset + 1
+            startOffset = startOffset + 1
         Wend
         
         MyTrim = s
@@ -248,7 +251,7 @@ Function GetDetailsReport()
 
     If Me.ContainsStream Then
         
-        push r, lpad("Stream Start Offset: 0x", sz) & Hex(StartOffset) & "  (" & StartOffset & ")"
+        push r, lpad("Stream Start Offset: 0x", sz) & Hex(startOffset) & "  (" & startOffset & ")"
         push r, lpad("Stream End Offset: 0x", sz) & Hex(EndOffset) & "  (" & EndOffset & ")"
         
         If Me.isCompressed Then

@@ -19,6 +19,8 @@ Event DebugMessage(msg As String)
 Event SetObjectCount(cnt As Long)
 Event Complete()
 
+Public abort As Boolean
+
 Private Declare Function GetTickCount Lib "kernel32" () As Long
 
 Private Function GetCount(marker, blob)
@@ -27,6 +29,10 @@ Private Function GetCount(marker, blob)
     If Err.Number <> 0 Then GetCount = 0
 End Function
 
+
+'this is as optimized as we can get i think..800k -> 6sec, 300k -> .4sec
+'loads the file as a byte array in chunks, converts to string, defrags string on demand
+'as it searchs for markers..dont make chunks to small or else large blobs take forever..
 Function ParseFile(fpath As String) As String
         
    ' On Error GoTo hell
@@ -49,7 +55,8 @@ Function ParseFile(fpath As String) As String
         Exit Function
     End If
         
-    sStr = LoadFile(fpath)
+    abort = False
+    sStr = LoadFile(fpath) 'this is kind of wasteful but...
     fSize = Len(sStr)
     
     RaiseEvent SetObjectCount(GetCount("endobj", sStr))
@@ -63,19 +70,32 @@ Function ParseFile(fpath As String) As String
         End If
     End If
     
-    Dim part2 As String, part3 As String, part4 As String
+    Dim parts()  As String
     Dim defragLevel As Long
     
-    HalveString sStr, part3 'divide the input file up into 4 parts for quicker parsing..(smaller strings)
-    HalveString sStr, part2
-    HalveString part3, part4
-    
-    defragLevel = 0
+    sStr = Empty
+    parts() = load_fragmented(fpath)
+    sStr = parts(0)
+    defragLevel = 1
     globalOffset = 0
     starttick = GetTickCount()
     
     objStart = InStr(1, sStr, "obj", vbTextCompare)
+    
+    Do While objStart < 1 And defragLevel <= UBound(parts) 'this loop should never really happen but jut in case..
+        DoEvents: Form1.Refresh
+        sStr = sStr & parts(defragLevel)
+        defragLevel = defragLevel + 1
+        objStart = InStr(1, sStr, "obj", vbTextCompare)
+    Loop
+    
     Do While objStart > 0
+    
+        If abort Then
+            RaiseEvent DebugMessage("User abort triggered")
+            Exit Do
+        End If
+        
         Set stream = New CPDFStream
         
 retry:
@@ -83,10 +103,9 @@ retry:
         endObj = InStr(objStart, sStr, "objend", vbTextCompare) 'this works too (found in sample 1df9249930f1f26edf367aceb614c603.pdf)
         
         If objEnd < 1 And endObj < 1 Then
-            If defragLevel < 3 Then
-                If defragLevel = 0 Then sStr = sStr & part2
-                If defragLevel = 1 Then sStr = sStr & part3
-                If defragLevel = 2 Then sStr = sStr & part4
+            If defragLevel <= UBound(parts) Then
+                DoEvents: Form1.Refresh
+                sStr = sStr & parts(defragLevel)
                 defragLevel = defragLevel + 1
                 GoTo retry
             End If
@@ -110,13 +129,12 @@ retry:
         objStart = InStr(1, sStr, "obj", vbTextCompare)
         
         If objStart < 1 Then
-            If defragLevel < 3 Then
-                If defragLevel = 0 Then sStr = sStr & part2
-                If defragLevel = 1 Then sStr = sStr & part3
-                If defragLevel = 2 Then sStr = sStr & part4
+            Do While objStart < 1 And defragLevel <= UBound(parts)
+                DoEvents: Form1.Refresh
+                sStr = sStr & parts(defragLevel)
                 defragLevel = defragLevel + 1
                 objStart = InStr(1, sStr, "obj", vbTextCompare)
-            End If
+            Loop
         End If
         
     Loop
@@ -139,6 +157,66 @@ retry:
     
 End Function
 
+
+Private Function load_fragmented(fpath As String, Optional ByRef totSize As Long) As String()
+    Dim ret() As String
+    Dim max_sz As Long
+    Dim sz As Long
+    Dim pointer As Long
+    Dim f As Long
+    Dim b() As Byte
+    Dim blocks As Long
+    Dim last_chunk As Long
+    
+    max_sz = 99000
+    ReDim b(1 To max_sz)
+    f = FreeFile
+    
+    Open fpath For Binary As f
+    sz = LOF(f)
+    totSize = sz
+    'Debug.Print "Total size is " & sz
+    
+    If sz < max_sz Then
+        'Debug.Print "Min chunk size not met, loading all at once."
+        ReDim b(sz)
+        Get f, , b()
+        string_push ret, StrConv(b(), vbUnicode, LANG_US)
+        load_fragmented = ret()
+        Close f
+        Exit Function
+    End If
+    
+    blocks = CLng(sz \ max_sz)
+    last_chunk = sz - (blocks * max_sz)
+    'Debug.Print "Breaking into " & blocks & " of " & max_sz & " - " & last_chunk & " bytes remaining"
+    For i = 1 To blocks
+        Get f, , b()
+        string_push ret, StrConv(b(), vbUnicode, LANG_US)
+    Next
+    
+    If last_chunk <> 0 Then
+        ReDim b(1 To last_chunk)
+        Get f, , b()
+        push ret, StrConv(b(), vbUnicode, LANG_US)
+    End If
+    
+    load_fragmented = ret()
+    Close f
+    
+End Function
+
+Private Sub string_push(ary() As String, Value As String)  'this modifies parent ary object
+    On Error GoTo init
+    x = UBound(ary) '<-throws Error If Not initalized
+    ReDim Preserve ary(UBound(ary) + 1)
+    ary(UBound(ary)) = Value
+    Exit Sub
+init: ReDim ary(0): ary(0) = Value
+End Sub
+
+
+'uses string halving and string shrinking.. 800k - 9.5sec.. 300k -> .8sec
 'Function ParseFile(fpath As String) As String
 '
 '   ' On Error GoTo hell
@@ -161,6 +239,7 @@ End Function
 '        Exit Function
 '    End If
 '
+'    ABORT = False
 '    sStr = LoadFile(fpath)
 '    fSize = Len(sStr)
 '
@@ -175,17 +254,25 @@ End Function
 '        End If
 '    End If
 '
-'    Dim part2 As String
-'    Dim defragged As Boolean
+'    Dim part2 As String, part3 As String, part4 As String
+'    Dim defragLevel As Long
 '
-'    HalveString sStr, part2 'divide the input file up in two parts for quicker parsing..(smaller strings)
+'    HalveString sStr, part3 'divide the input file up into 4 parts for quicker parsing..(smaller strings)
+'    HalveString sStr, part2
+'    HalveString part3, part4
 '
-'    defragged = False
+'    defragLevel = 0
 '    globalOffset = 0
 '    starttick = GetTickCount()
 '
 '    objStart = InStr(1, sStr, "obj", vbTextCompare)
 '    Do While objStart > 0
+'
+'        If ABORT Then
+'            RaiseEvent DebugMessage("User abort triggered")
+'            Exit Do
+'        End If
+'
 '        Set stream = New CPDFStream
 '
 'retry:
@@ -193,9 +280,11 @@ End Function
 '        endObj = InStr(objStart, sStr, "objend", vbTextCompare) 'this works too (found in sample 1df9249930f1f26edf367aceb614c603.pdf)
 '
 '        If objEnd < 1 And endObj < 1 Then
-'            If defragged = False Then
-'                sStr = sStr & part2
-'                defragged = True
+'            If defragLevel < 3 Then
+'                If defragLevel = 0 Then sStr = sStr & part2
+'                If defragLevel = 1 Then sStr = sStr & part3
+'                If defragLevel = 2 Then sStr = sStr & part4
+'                defragLevel = defragLevel + 1
 '                GoTo retry
 '            End If
 '            RaiseEvent DebugMessage("Missing endstream marker objStart = 0x" & Hex(objStart))
@@ -217,19 +306,36 @@ End Function
 '        globalOffset = globalOffset + objEnd + Len("endobj") - 1
 '        objStart = InStr(1, sStr, "obj", vbTextCompare)
 '
-'        If objStart < 1 And defragged = False Then
-'            sStr = sStr & part2
-'            defragged = True
-'            objStart = InStr(1, sStr, "obj", vbTextCompare)
+'        If objStart < 1 Then
+'            If defragLevel < 3 Then
+'                If defragLevel = 0 Then sStr = sStr & part2
+'                If defragLevel = 1 Then sStr = sStr & part3
+'                If defragLevel = 2 Then sStr = sStr & part4
+'                defragLevel = defragLevel + 1
+'                objStart = InStr(1, sStr, "obj", vbTextCompare)
+'            End If
 '        End If
 '
 '    Loop
 '
+'    If Len(sStr) > 0 Then
+'        Set stream = New CPDFStream
+'        stream.ObjectStartOffset = globalOffset
+'        stream.ObjectEndOffset = globalOffset + Len(sStr)
+'        stream.Index = 0
+'        stream.RawObject = sStr
+'        stream.Header = stream.RawObject
+'        stream.OriginalData = stream.RawObject
+'        RaiseEvent NewStream(stream)
+'        stream.Message = "Holds data found after end of last object."
+'    End If
+'
 '    RaiseEvent DebugMessage("Parsing Complete Objects: " & Form1.lv.ListItems.Count + Form1.lv2.ListItems.Count & "  Elapsed Time: " & ((GetTickCount() - starttick) / 1000) & " seconds")
-'    RaiseEvent DebugMessage("Parsing complete 0x" & Hex(fSize - lastObjEnd) & " bytes after end of last object @ 0x" & Hex(lastObjEnd))
+'    RaiseEvent DebugMessage("0x" & Hex(fSize - lastObjEnd) & " bytes after end of last object @ offset 0x" & Hex(lastObjEnd))
 '    RaiseEvent Complete
 '
 'End Function
+
 
 Private Function HalveString(strin As String, secondPart As String)
     Dim x As Long
@@ -238,7 +344,9 @@ Private Function HalveString(strin As String, secondPart As String)
     strin = Mid(strin, 1, x - 1)
 End Function
 
-Function Old_ParseFile(fpath As String) As String
+
+'original parser...800k -> 130 seconds
+Function Orginal_ParseFile(fpath As String) As String
         
    ' On Error GoTo hell
     

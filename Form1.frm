@@ -4,7 +4,7 @@ Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Begin VB.Form Form1 
    Caption         =   "PDF Stream Dumper - http://sandsprite.com"
-   ClientHeight    =   8940
+   ClientHeight    =   9015
    ClientLeft      =   165
    ClientTop       =   735
    ClientWidth     =   13710
@@ -18,9 +18,17 @@ Begin VB.Form Form1
       Strikethrough   =   0   'False
    EndProperty
    LinkTopic       =   "Form1"
-   ScaleHeight     =   8940
+   ScaleHeight     =   9015
    ScaleWidth      =   13710
    StartUpPosition =   3  'Windows Default
+   Begin VB.CommandButton cmdAbortProcessing 
+      Caption         =   "Abort"
+      Height          =   375
+      Left            =   12600
+      TabIndex        =   16
+      Top             =   8325
+      Width           =   1005
+   End
    Begin MSComctlLib.ListView lvDebug 
       Height          =   1455
       Left            =   3240
@@ -84,13 +92,13 @@ Begin VB.Form Form1
       Height          =   255
       Left            =   0
       TabIndex        =   13
-      Top             =   8685
+      Top             =   8760
       Width           =   13710
       _ExtentX        =   24183
       _ExtentY        =   450
       _Version        =   393216
       BeginProperty Panels {8E3867A5-8586-11D1-B16A-00C0F0283628} 
-         NumPanels       =   9
+         NumPanels       =   10
          BeginProperty Panel1 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
          EndProperty
          BeginProperty Panel2 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
@@ -108,6 +116,8 @@ Begin VB.Form Form1
          BeginProperty Panel8 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
          EndProperty
          BeginProperty Panel9 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
+         EndProperty
+         BeginProperty Panel10 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
          EndProperty
       EndProperty
    End
@@ -199,9 +209,9 @@ Begin VB.Form Form1
          Strikethrough   =   0   'False
       EndProperty
       Height          =   375
-      Left            =   11640
+      Left            =   10665
       TabIndex        =   10
-      Top             =   8280
+      Top             =   8325
       Width           =   615
    End
    Begin VB.CommandButton cmdDecode 
@@ -216,9 +226,9 @@ Begin VB.Form Form1
          Strikethrough   =   0   'False
       EndProperty
       Height          =   375
-      Left            =   12240
+      Left            =   11250
       TabIndex        =   0
-      Top             =   8280
+      Top             =   8325
       Width           =   1335
    End
    Begin MSComctlLib.ListView lvSearch 
@@ -372,7 +382,7 @@ Begin VB.Form Form1
       TabIndex        =   1
       Text            =   "Drag and drop pdf file here"
       Top             =   8370
-      Width           =   9615
+      Width           =   8535
    End
    Begin MSComctlLib.TabStrip ts 
       Height          =   6495
@@ -553,6 +563,10 @@ Begin VB.Form Form1
       Begin VB.Menu mnuSearchFilter 
          Caption         =   "Obsfuscated Headers "
          Index           =   5
+      End
+      Begin VB.Menu mnuSearchFilter 
+         Caption         =   "PRC Files"
+         Index           =   6
       End
    End
    Begin VB.Menu mnuFindReplace 
@@ -813,6 +827,7 @@ Dim U3DCount As Long
 Dim flashCount As Long
 Dim unspFilterCount As Long
 Dim ActionCount As Long
+Dim PRCCount As Long
 Dim surpressHideWarnings As Boolean
 
 Sub LoadPlugins()
@@ -868,6 +883,10 @@ Function RegisterPlugin(intMenu As Integer, strMenuName As String, intStartupArg
      'same thing to some other menu
      
 End Function
+
+Private Sub cmdAbortProcessing_Click()
+    parser.abort = True
+End Sub
 
 Private Sub mnuAlwaysUseZlib_Click()
     mnuAlwaysUseZlib.Checked = Not mnuAlwaysUseZlib.Checked
@@ -1691,6 +1710,7 @@ Private Sub mnuSearchFilter_Click(Index As Integer)
             Case 3:   If s.ContentType = TTFFont Then match = True
             Case 4:   If li.ForeColor = vbGreen Then match = True
             Case 5:   If looksEscaped(s.Header) Then match = True
+            Case 6:   If s.ContentType = prc Then match = True
         End Select
                 
         If match Then
@@ -1918,6 +1938,7 @@ Private Sub parser_NewStream(stream As CPDFStream)
             If stream.ContentType = Flash Then flashCount = flashCount + 1
             If stream.ContentType = TTFFont Then ttfCount = ttfCount + 1
             If stream.ContentType = U3d Then U3DCount = U3DCount + 1
+            If stream.ContentType = prc Then PRCCount = PRCCount + 1
             
             'add some color highlighting in order of importance
             
@@ -1984,6 +2005,7 @@ Private Sub Form_Unload(Cancel As Integer)
     Dim f As Form
     On Error Resume Next
     
+    parser.abort = True
     SaveSetting App.EXEName, "Settings", "LastFile", txtPDFPath
     
     SaveMySetting "EscapeHeaders", IIf(mnuAutoEscapeHeaders.Checked, 1, 0)
@@ -2102,6 +2124,7 @@ Public Sub cmdDecode_Click()
     flashCount = 0
     unspFilterCount = 0
     ActionCount = 0
+    PRCCount = 0
     
     Set parser = Nothing
     Set parser = New CPdfParser
@@ -2141,6 +2164,7 @@ Public Sub cmdDecode_Click()
         .Panels(7).Text = "flash: " & flashCount
         .Panels(8).Text = "UnkFlt: " & unspFilterCount
         .Panels(9).Text = "Action: " & ActionCount
+        .Panels(10).Text = "PRC: " & PRCCount
     End With
     
     surpressHideWarnings = True

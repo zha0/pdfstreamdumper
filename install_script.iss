@@ -1,6 +1,6 @@
 [Setup]
 AppName=PDFStreamDumper
-AppVerName=PDFStreamDumper 0.9.2xx
+AppVerName=PDFStreamDumper 0.9.3xx
 DefaultDirName=c:\PDFStreamDumper
 DefaultGroupName=PDFStreamDumper
 UninstallDisplayIcon={app}\unins000.exe
@@ -138,6 +138,8 @@ Source: scripts\pdfbox_extract_text_page_by_page.vbs; DestDir: {app}\scripts\
 Source: frmScTest.frm; DestDir: {app}
 Source: husk.exe; DestDir: {app}
 Source: simple_husk.dat; DestDir: {app}
+Source: frmBruteZLib.frm; DestDir: {app}
+Source: frmBruteZLib.frx; DestDir: {app}
 Source: sclog\bin\sclog.exe; DestDir: {app}\sclog\bin
 Source: sclog\hooker\asmserv.c; DestDir: {app}\sclog\hooker
 Source: sclog\hooker\assembl.c; DestDir: {app}\sclog\hooker
