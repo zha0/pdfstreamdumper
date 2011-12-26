@@ -162,6 +162,7 @@ Begin VB.Form frmBruteZLib
       _ExtentX        =   19235
       _ExtentY        =   9313
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"frmBruteZLib.frx":0000
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -589,6 +590,7 @@ Private Sub Command4_Click()
 End Sub
 
 Private Sub Form_Load()
+    Me.Icon = Form1.Icon
     pb.Value = 0
     lv.ColumnHeaders(1).Width = lv.Width - 100
     txtFile = Form1.txtPDFPath

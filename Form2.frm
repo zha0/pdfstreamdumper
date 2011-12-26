@@ -198,6 +198,7 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   10398
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0000
@@ -253,6 +254,7 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   2249
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0080
@@ -876,6 +878,7 @@ End Sub
 Private Sub Form_Load()
     On Error Resume Next
     
+    Me.Icon = Form1.Icon
     mnuWordWrap.Checked = IIf(GetMySetting("WordWrap", 1) = 1, True, False)
     mnuIndentGuide.Checked = IIf(GetMySetting("IndentGuide", 0) = 1, True, False)
     mnuCodeFolding.Checked = IIf(GetMySetting("CodeFolding", 0) = 1, True, False)

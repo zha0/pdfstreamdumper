@@ -17,6 +17,7 @@ Begin VB.Form Form1
       Italic          =   0   'False
       Strikethrough   =   0   'False
    EndProperty
+   Icon            =   "Form1.frx":0000
    LinkTopic       =   "Form1"
    ScaleHeight     =   9105
    ScaleWidth      =   13950
@@ -334,7 +335,7 @@ Begin VB.Form Form1
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   3
-      Text            =   "Form1.frx":0000
+      Text            =   "Form1.frx":1142
       Top             =   1980
       Visible         =   0   'False
       Width           =   9135
@@ -350,7 +351,7 @@ Begin VB.Form Form1
       _Version        =   393217
       HideSelection   =   0   'False
       ScrollBars      =   2
-      TextRTF         =   $"Form1.frx":000D
+      TextRTF         =   $"Form1.frx":114F
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "Courier New"
          Size            =   12
@@ -372,7 +373,7 @@ Begin VB.Form Form1
       _Version        =   393217
       HideSelection   =   0   'False
       ScrollBars      =   2
-      TextRTF         =   $"Form1.frx":008F
+      TextRTF         =   $"Form1.frx":11D1
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "Courier New"
          Size            =   12

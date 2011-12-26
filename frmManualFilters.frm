@@ -167,7 +167,6 @@ Begin VB.Form frmManualFilters
       _ExtentX        =   22251
       _ExtentY        =   9340
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"frmManualFilters.frx":0000
@@ -375,7 +374,7 @@ Private Sub Command2_Click()
 End Sub
 
 Private Sub Form_Load()
-    
+    Me.Icon = Form1.Icon
     Dim enabled As Boolean, i As Long
     
     For i = 0 To cmdDecode.Count - 1

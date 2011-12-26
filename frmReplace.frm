@@ -195,7 +195,7 @@ Dim lastkey As Integer
 Dim lastIndex As Long
 Dim lastsearch As String
 
-Private Declare Sub SetWindowPos Lib "user32" (ByVal hwnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long)
+Private Declare Sub SetWindowPos Lib "user32" (ByVal hwnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal Y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long)
 Private Const HWND_TOPMOST = -1
 Private Const HWND_NOTOPMOST = -2
 Private Const SWP_SHOWWINDOW = &H40
@@ -393,6 +393,7 @@ End Sub
 
 
 Private Sub Form_Load()
+    Me.Icon = Form1.Icon
     SetWindowPos Me.hwnd, HWND_TOPMOST, Me.Left / 15, Me.Top / 15, Me.Width / 15, Me.Height / 15, SWP_SHOWWINDOW
     FormPos Me, False
 End Sub
@@ -408,7 +409,7 @@ Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
     active_object.SelectLine
 End Sub
 
-Private Sub lv_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub lv_MouseDown(Button As Integer, Shift As Integer, x As Single, Y As Single)
     If Button = 2 Then PopupMenu mnuPopup
 End Sub
 

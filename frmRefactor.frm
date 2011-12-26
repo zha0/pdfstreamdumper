@@ -1,5 +1,5 @@
 VERSION 5.00
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Begin VB.Form frmRefactor 
    Caption         =   "Form3"
    ClientHeight    =   7050
@@ -170,7 +170,7 @@ Private Sub chkUseOriginalText_Click()
     End If
     
     Dim f As CFunc
-    Set f = selli.Tag
+    Set f = selli.tag
     
     f.UseOriginalText = IIf(chkUseOriginalText.Value = 1, True, False)
     selli.ForeColor = IIf(f.UseOriginalText, vbBlue, vbBlack)
@@ -184,11 +184,11 @@ Private Sub Command4_Click()
     Dim f As CFunc
     
     If global_script.UseOriginalText Then
-        complete = global_script.OrgText
+        Complete = global_script.OrgText
     ElseIf global_script.OverRides.Count > 0 Then
-        complete = global_script.OverRideScript
+        Complete = global_script.OverRideScript
     Else
-        complete = global_script.CleanText
+        Complete = global_script.CleanText
     End If
     
     For Each f In funcs
@@ -200,15 +200,15 @@ Private Sub Command4_Click()
             rest = Mid(tmp(0), p1)
             tmp(0) = "function " & f.NewName & rest
             UpdatedOrg = Join(tmp, vbCrLf)
-            complete = Replace(complete, "__function_" & f.Index & "_placeholder", UpdatedOrg)
+            Complete = Replace(Complete, "__function_" & f.Index & "_placeholder", UpdatedOrg)
         ElseIf f.OverRides.Count > 0 Then
-            complete = Replace(complete, "__function_" & f.Index & "_placeholder", f.OverRideScript)
+            Complete = Replace(Complete, "__function_" & f.Index & "_placeholder", f.OverRideScript)
         Else
-            complete = Replace(complete, "__function_" & f.Index & "_placeholder", f.CleanText)
+            Complete = Replace(Complete, "__function_" & f.Index & "_placeholder", f.CleanText)
         End If
     Next
     
-    Form2.txtJs.Text = complete
+    Form2.txtJS.Text = Complete
     Unload Me
     
 End Sub
@@ -223,7 +223,7 @@ Private Sub Command1_Click()
     End If
     
     Dim f As CFunc
-    Set f = selli.Tag
+    Set f = selli.tag
 
     Text1 = f.OrgText
     
@@ -284,7 +284,7 @@ Function LoadFunctions(scriptIn As String, Optional debugMode As Boolean = False
             f.Index = funcs.Count
             f.ParseName
             Set li = lv.ListItems.Add(, , f.NewName & " = " & f.OrgName)
-            Set li.Tag = f
+            Set li.tag = f
         End If
         fstart = InStr(fstart + 10, a, vbCrLf & "function")
     Wend
@@ -292,7 +292,7 @@ Function LoadFunctions(scriptIn As String, Optional debugMode As Boolean = False
     Set global_script = New CFunc
     
     For Each li In lv.ListItems 'remove all function blocks from global script block
-        Set f = li.Tag
+        Set f = li.tag
         a = Replace(a, f.OrgText, "__function_" & f.Index & "_placeholder")
     Next
     
@@ -301,10 +301,10 @@ Function LoadFunctions(scriptIn As String, Optional debugMode As Boolean = False
     global_script.OrgText = a
     global_script.ParseAsGlobal
     Set li = lv.ListItems.Add(, , "global_script")
-    Set li.Tag = global_script
+    Set li.tag = global_script
     
     For Each li In lv.ListItems 'this has to be last in case functions use global variables
-        Set f = li.Tag
+        Set f = li.tag
         f.ParseSelf
     Next
     
@@ -331,15 +331,15 @@ Private Sub Command2_Click()
     End If
     
     Dim f As CFunc
-    Set f = selli.Tag
+    Set f = selli.tag
 
     Set f.OverRides = New Collection
     
     For Each li In lvArgs.ListItems
-        If Len(li.Tag) > 0 Then
+        If Len(li.tag) > 0 Then
             didSomething = True
             tmp = Split(li.Text, " = ")
-            f.OverRides.Add tmp(0) & "->" & li.Tag
+            f.OverRides.Add tmp(0) & "->" & li.tag
         End If
     Next
     
@@ -359,7 +359,7 @@ Private Sub Command3_Click()
     End If
     
     Dim f As CFunc
-    Set f = selli.Tag
+    Set f = selli.tag
 
     Set f.OverRides = New Collection
     Text2 = f.CleanText
@@ -368,11 +368,15 @@ End Sub
 
 
 
+Private Sub Form_Load()
+Me.Icon = Form1.Icon
+End Sub
+
 Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
 
     Dim f As CFunc
     Set selli = Item
-    Set f = Item.Tag
+    Set f = Item.tag
     Text1 = f.OrgText
     
     If f.OverRides.Count > 0 Then
@@ -396,6 +400,6 @@ End Sub
 Private Sub lvArgs_ItemClick(ByVal Item As MSComctlLib.ListItem)
     x = InputBox("Override default variable name with your own?")
     If Len(x) = 0 Then Exit Sub
-    Item.Tag = x
+    Item.tag = x
     Item.SubItems(1) = x
 End Sub
