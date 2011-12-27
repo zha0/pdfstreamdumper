@@ -307,7 +307,7 @@ Public Function HexStringUnescape(str, Optional stripWhite As Boolean = False, O
         str = Replace(str, Chr(0), Empty)
     End If
     
-    For i = 1 To Len(str) Step 2
+    For i = 1 To Len(str) Step 2 'this is to agressive for headers...
         x = Empty
         x = Mid(str, i, 2)
         x = cHex(x)
@@ -411,10 +411,21 @@ Function EscapeHeader(ByVal raw As String) As String
     offset = InStr(raw, "<")
     rchar = &H41
     Do While offset > 0
-        b = InStr(offset, raw, ">")
+        b = InStr(offset, raw, ">") 'bug: if header has JS and > is embedded in quoted string bug...
         If b > 0 Then
-            hexstring = Mid(raw, offset + 1, b - 1 - offset)
-            decoded = HexStringUnescape(hexstring, True)
+            hexstring = Trim(Mid(raw, offset + 1, b - 1 - offset))
+            
+            If InStr(hexstring, " ") < 1 Then
+                decoded = HexStringUnescape(hexstring, True) 'to agressive for generic use...
+            Else
+                decoded = hexstring
+            End If
+            
+            If InStr(1, decoded, "javascript", vbTextCompare) > 0 Then
+                decoded = Replace(decoded, "/(", "(")
+                decoded = Replace(decoded, "/)", ")")
+            End If
+            
             push mods(), decoded
             
             'this style of replace could cause overlap with user data (a string of AAA?)

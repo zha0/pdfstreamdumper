@@ -186,13 +186,21 @@ Begin VB.Form Form1
       TabIndex        =   1
       Top             =   405
       Width           =   11265
+      Begin VB.CheckBox Check1 
+         Caption         =   "OverRide DB Connection String"
+         Height          =   255
+         Left            =   3840
+         TabIndex        =   50
+         Top             =   480
+         Width           =   2595
+      End
       Begin VB.CheckBox chkScanSubFolders 
          Caption         =   "Recursive"
          Height          =   285
-         Left            =   6480
+         Left            =   7800
          TabIndex        =   26
-         Top             =   405
-         Width           =   2850
+         Top             =   420
+         Width           =   1170
       End
       Begin VB.TextBox txtBatch 
          Height          =   285
@@ -250,6 +258,24 @@ Begin VB.Form Form1
          TabIndex        =   3
          Top             =   765
          Width           =   7620
+      End
+      Begin VB.Label Label8 
+         Caption         =   "?"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   -1  'True
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H00C00000&
+         Height          =   195
+         Left            =   6480
+         TabIndex        =   51
+         Top             =   480
+         Width           =   255
       End
       Begin VB.Label Label3 
          Caption         =   "Batch ID"
@@ -715,7 +741,8 @@ Dim selLi As ListItem
 Dim orgZlibSetting As Boolean
 Dim abortSearch As Boolean
 Dim lastSQL As String
-
+Dim isLoaded As Boolean
+Dim defConstr As String
 
 Private Sub cbo2_Click()
     On Error Resume Next
@@ -743,6 +770,44 @@ Private Sub cbo2_Click()
     If rs.BOF And rs.EOF Then txtBatchNotes.Text = Empty Else txtBatchNotes.Text = rs!notes
     cn.Close
     
+End Sub
+
+Private Sub Check1_Click()
+    
+    On Error Resume Next
+    
+    If Not isLoaded Then Exit Sub
+    
+    If Check1.value = 0 Then
+        cn.ConnectionString = defConstr
+        ShowStats
+        Exit Sub
+    End If
+        
+    db = GetSetting("PDFStreamDumper", "config", "connection_string", cn.ConnectionString)
+    If Len(db) = 0 Then db = cn.ConnectionString
+    db = InputBox("Enter new ODBC Connection string:", , db)
+    SaveSetting "PDFStreamDumper", "config", "connection_string", db
+    
+    If Len(db) = 0 Then
+        isLoaded = False
+        Check1.value = 0
+        isLoaded = True
+        cn.ConnectionString = defConstr
+        ShowStats
+        MsgBox "Reverted to default connection string...", vbInformation
+        SaveSetting "PDFStreamDumper", "config", "override_constr", Check1.value
+        Exit Sub
+    End If
+    
+    SaveSetting "PDFStreamDumper", "config", "override_constr", Check1.value
+    
+    cn.Close
+    cn.ConnectionString = db
+    ShowStats
+    MsgBox "Active connection string set and saved for next time."
+        
+    If Err.Number <> 0 Then MsgBox "Error: " & Err.Description
 End Sub
 
 Private Sub chkHexDump_Click()
@@ -1131,7 +1196,26 @@ Private Sub Form_Load()
         End If
     End If
     
-    cn.ConnectionString = "Provider=MSDASQL;Driver={Microsoft Access Driver (*.mdb)};DBQ=" & db & ";"
+    isLoaded = False
+    dbConstr = ""
+    Check1.value = GetSetting("PDFStreamDumper", "config", "override_constr", 0)
+    If Check1.value = 1 Then
+        dbConstr = GetSetting("PDFStreamDumper", "config", "connection_string", "")
+        If Len(dbConstr) = 0 Then
+            Check1.value = 0
+            dbConstr = Empty
+        End If
+    End If
+    isLoaded = True
+    
+    defConstr = "Provider=MSDASQL;Driver={Microsoft Access Driver (*.mdb)};DBQ=" & db & ";"
+    
+    If Len(dbConstr) > 0 Then
+        'MsgBox "Using constr: " & dbConstr
+        cn.ConnectionString = dbConstr
+    Else
+        cn.ConnectionString = defConstr
+    End If
     
     Me.Width = TabStrip1.Width + 200
     Me.Height = TabStrip1.Height + 200
@@ -1171,6 +1255,15 @@ Private Sub Form_Unload(Cancel As Integer)
 End Sub
 
  
+
+Private Sub Label8_Click()
+    MsgBox "Allows you to override the default ODBC connection string used to specify database. " & _
+    "With this you can switch to a different backend database. " & _
+    "You will be prompted for the connection string and it will be saved between runs. " & _
+    "If you get this wrong, this form may hang on startup until connection timesout. " & _
+    "You can edit string in registry as well under" & _
+    vbCrLf & vbCrLf & "HKCU\Software\VB and VBA Program Settings\PDFStreamDumper\config", vbInformation
+End Sub
 
 Private Sub lblCloseRaw_Click()
     frmRawSQL.Visible = False
@@ -1237,7 +1330,7 @@ Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
     
 End Sub
 
-Private Sub lv_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub lv_MouseUp(Button As Integer, Shift As Integer, x As Single, Y As Single)
     If Button = 2 Then PopupMenu mnuPopup
 End Sub
 
@@ -1261,7 +1354,7 @@ Private Sub lvBatchFiles_ItemClick(ByVal Item As MSComctlLib.ListItem)
     cn.Close
 End Sub
 
-Private Sub lvStreams_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub lvStreams_MouseUp(Button As Integer, Shift As Integer, x As Single, Y As Single)
     If Button = 2 Then PopupMenu mnuPopup4
 End Sub
 

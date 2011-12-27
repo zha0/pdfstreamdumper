@@ -47,7 +47,7 @@ Begin VB.Form Form2
       Top             =   90
       _ExtentX        =   1005
       _ExtentY        =   1005
-      Language        =   "jscript"
+      Language        =   "javascript"
    End
    Begin MSScriptControlCtl.ScriptControl sc2 
       Left            =   13140
@@ -198,7 +198,6 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0000
@@ -254,7 +253,6 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   2249
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0080
