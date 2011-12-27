@@ -1196,18 +1196,25 @@ Private Sub Form_Load()
         End If
     End If
     
-    isLoaded = False
-    dbConstr = ""
-    Check1.value = GetSetting("PDFStreamDumper", "config", "override_constr", 0)
-    If Check1.value = 1 Then
-        dbConstr = GetSetting("PDFStreamDumper", "config", "connection_string", "")
-        If Len(dbConstr) = 0 Then
-            Check1.value = 0
-            dbConstr = Empty
+    If GetMySetting("formLoaded", 1) = 0 And GetSetting("PDFStreamDumper", "config", "override_constr", 0) = 1 Then
+        MsgBox "Form failed to load last time, clearing connection string override", vbInformation
+        SaveSetting "PDFStreamDumper", "config", "override_constr", 0
+        SaveMySetting "formLoaded", 1
+    Else
+        isLoaded = False
+        dbConstr = ""
+        Check1.value = GetSetting("PDFStreamDumper", "config", "override_constr", 0)
+        If Check1.value = 1 Then
+            dbConstr = GetSetting("PDFStreamDumper", "config", "connection_string", "")
+            If Len(dbConstr) = 0 Then
+                Check1.value = 0
+                dbConstr = Empty
+            End If
         End If
+        isLoaded = True
     End If
-    isLoaded = True
     
+    SaveMySetting "formLoaded", 0
     defConstr = "Provider=MSDASQL;Driver={Microsoft Access Driver (*.mdb)};DBQ=" & db & ";"
     
     If Len(dbConstr) > 0 Then
@@ -1230,6 +1237,7 @@ Private Sub Form_Load()
     If Len(txtSearchFields) = 0 Then mnuFields_Click 0
     
     TabStrip1.Tabs(2).Selected = True
+    SaveMySetting "formLoaded", 1
     
     'txtDir = "C:\Documents and Settings\david\Desktop\demo"
     'cmdScan_Click
