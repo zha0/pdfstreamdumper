@@ -291,10 +291,11 @@ Function nl_unescape(ByVal x)
     
 End Function
 
-Public Function HexStringUnescape(str, Optional stripWhite As Boolean = False, Optional noNulls As Boolean = False)
+Public Function HexStringUnescape(str, Optional stripWhite As Boolean = False, Optional noNulls As Boolean = False, Optional bailOnManyErrors As Boolean = False)
         
     Dim ret As String
     Dim x As String
+    Dim errCount As Long
     
     On Error Resume Next
     
@@ -310,23 +311,30 @@ Public Function HexStringUnescape(str, Optional stripWhite As Boolean = False, O
     For i = 1 To Len(str) Step 2 'this is to agressive for headers...
         x = Empty
         x = Mid(str, i, 2)
-        x = cHex(x)
+        x = cHex(x, errCount)
         ret = ret & x
     Next
     
     If noNulls Then
         HexStringUnescape = Replace(ret, Chr(0), Empty)
     Else
-        HexStringUnescape = ret
+        If bailOnManyErrors And (errCount > 5) Then
+            HexStringUnescape = str
+        Else
+            HexStringUnescape = ret
+        End If
     End If
     
         
 End Function
 
-Public Function cHex(v) As String
+Public Function cHex(v, Optional ByRef eCount As Long) As String
     On Error Resume Next
     cHex = Chr(CLng("&h" & v))
-    If Err.Number <> 0 Then cHex = v
+    If Err.Number <> 0 Then
+        eCount = eCount + 1
+        cHex = v
+    End If
     Err.Clear
 End Function
 
@@ -410,20 +418,21 @@ Function EscapeHeader(ByVal raw As String) As String
     
     offset = InStr(raw, "<")
     rchar = &H41
-    Do While offset > 0
+    
+    'handle JS headers extra lightly may have embedded < > which below routine is to harsh for...
+    isJSHeader = IIf(LCase(raw) Like "*/js*(*", True, False)
+    
+    'If InStr(raw, "/JS(") > 0 Then Stop
+    
+    Do While offset > 0 And Not isJSHeader
         b = InStr(offset, raw, ">") 'bug: if header has JS and > is embedded in quoted string bug...
         If b > 0 Then
             hexstring = Trim(Mid(raw, offset + 1, b - 1 - offset))
             
             If InStr(hexstring, " ") < 1 Then
-                decoded = HexStringUnescape(hexstring, True) 'to agressive for generic use...
+                decoded = HexStringUnescape(hexstring, True, False, True) 'to agressive for generic use...
             Else
                 decoded = hexstring
-            End If
-            
-            If InStr(1, decoded, "javascript", vbTextCompare) > 0 Then
-                decoded = Replace(decoded, "/(", "(")
-                decoded = Replace(decoded, "/)", ")")
             End If
             
             push mods(), decoded
@@ -454,6 +463,10 @@ Function EscapeHeader(ByVal raw As String) As String
         offset = InStr(offset + 1, raw, "<")
     Loop
         
+    If isJSHeader Then
+            raw = Replace(raw, "/(", "(")
+            raw = Replace(raw, "/)", ")")
+    End If
     
     raw = pound_unescape(raw)
     raw = octal_unescape(raw)

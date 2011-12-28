@@ -690,6 +690,9 @@ Begin VB.Form Form1
       Begin VB.Menu mnuFindUnsupported 
          Caption         =   "Find Unsupported Filters"
       End
+      Begin VB.Menu mnuFindHeadersWJS 
+         Caption         =   "Find Headers w/ JS"
+      End
       Begin VB.Menu mnuSpacer3 
          Caption         =   "-"
       End
@@ -1495,6 +1498,16 @@ Private Sub mnuFields_Click(Index As Integer)
         Case 3: txtSearchFields = "md5"
     End Select
         
+End Sub
+
+Private Sub mnuFindHeadersWJS_Click()
+    On Error Resume Next
+    Dim c As New Collection
+    lv.ListItems.Clear
+    txtSearch = "/Javascript%("
+    cn.Open
+    ShowResults "header", c
+    cn.Close
 End Sub
 
 Private Sub mnuFindUnsupported_Click()

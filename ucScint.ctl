@@ -38,6 +38,16 @@ Attribute VB_Exposed = False
 'we wrap this control so that its interchangable with the rtf box
 'i used to use just in case i want to switch back!
 
+Event AutoCompleteEvent(className As String)
+
+Property Let AutoCompleteString(x As String)
+    sciMain.AutoCompleteString = x
+End Property
+
+Sub ShowAutoComplete(api As String)
+    sciMain.ShowAutoComplete api
+End Sub
+
 Sub ShowOptions()
     On Error Resume Next
     hlMain.DoOptions App.path & "\highlighters"
@@ -140,12 +150,23 @@ End Sub
 Private Sub sciMain_KeyUp(KeyCode As Long, Shift As Long)
     'Debug.Print KeyCode & " " & Shift
     On Error Resume Next
+    
+    If KeyCode = 190 Then
+        RaiseEvent AutoCompleteEvent(sciMain.GetCurrentWord)
+    End If
+    
     If Shift = 4 Then 'ctrl
         Select Case KeyCode
             Case 65: sciMain.SelectAll 'a
             Case 88: sciMain.Cut 'x
             Case 67: sciMain.Copy 'c
             Case 86: sciMain.Paste 'v
+            Case 32: 'ctrl space show auto complete - little messy but it correctly supports multiple objects.
+                     Dim x As Long
+                     x = sciMain.SelStart - 1
+                     sciMain.SetCurrentPosition x
+                     sciMain.SelStart = x
+                     RaiseEvent AutoCompleteEvent(sciMain.GetCurrentWord)
         End Select
     End If
 End Sub
@@ -162,19 +183,13 @@ Private Sub UserControl_Initialize()
         
         sciMain.InitScintilla UserControl.hwnd
         sciMain.LoadAPIFile App.path & "\api.api"
-        
-        'sciMain.AutoCompleteOnCTRLSpace = True
-        'sciMain.AutoCompleteString = "Save2Clipboard GetClipboard t eval unescape alert Hexdump WriteFile ReadFile HexString2Bytes Disasm pad EscapeHexString GetStream CRC getPageNumWords GetPageNthWord"
-        sciMain.AutoShowAutoComplete = False
-        
+               
         hlMain.LoadHighlighters f
-        hlMain.ReadSettings App.path & "\user.dat"
+        hlMain.ReadSettings "PDFStreamDumper"
         n = hlMain.SetStylesAndOptions(sciMain, "CPP")
-        
-        'Debug.Print "SetStyleAndOption: " & n
-        
+                
         sciMain.AutoCompleteOnCTRLSpace = True
-        sciMain.AutoCompleteString = "Save2Clipboard GetClipboard t eval unescape alert Hexdump WriteFile ReadFile HexString2Bytes Disasm pad EscapeHexString GetStream CRC getPageNumWords GetPageNthWord"
+        'sciMain.AutoCompleteString = "Save2Clipboard GetClipboard t eval unescape alert Hexdump WriteFile ReadFile HexString2Bytes Disasm pad EscapeHexString GetStream CRC getPageNumWords GetPageNthWord"
         sciMain.AutoShowAutoComplete = False
 
         sciMain.EndAtLastLine = True
@@ -218,5 +233,5 @@ End Sub
 
  
 Private Sub UserControl_Terminate()
-    hlMain.WriteSettings App.path & "\user.dat"
+    hlMain.WriteSettings "PDFStreamDumper"
 End Sub

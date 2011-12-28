@@ -198,6 +198,7 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   10398
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0000
@@ -253,6 +254,7 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   2249
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0080
@@ -1541,9 +1543,11 @@ Private Sub sc_Error()
     Dim tmp() As String
     Dim cCount As Long
     Dim adjustedLine As Long
+    Dim curLine As Long
     
     With sc.error
     
+        curLine = txtJS.CurrentLine
         adjustedLine = .Line - IIf(USING_MYMAIN, 4, 0)
         
         txtOut.Text = "Time: " & Now & vbCrLf & "Error: " & .Description & vbCrLf & "Line: " & adjustedLine
@@ -1553,7 +1557,11 @@ Private Sub sc_Error()
         tmp = Split(txtJS.Text, vbCrLf)
         For i = 0 To adjustedLine - 1
             If i = (adjustedLine - 1) Then
-                txtJS.GotoLine adjustedLine 'vbsci specific
+                If curLine > i And (adjustedLine - 5 > 0) Then
+                    txtJS.GotoLine adjustedLine - 5 'display bug
+                Else
+                    txtJS.GotoLine adjustedLine
+                End If
                 txtJS.SelStart = cCount
                 txtJS.SelLength = Len(tmp(i))
                 Exit For
@@ -1566,6 +1574,12 @@ Private Sub sc_Error()
     
 End Sub
 
+
+Private Sub txtJS_AutoCompleteEvent(className As String)
+    If className = "tb" Then
+        txtJS.ShowAutoComplete "Save2Clipboard GetClipboard t eval unescape alert Hexdump WriteFile ReadFile HexString2Bytes Disasm pad EscapeHexString GetStream CRC getPageNumWords GetPageNthWord"
+    End If
+End Sub
 
 'Private Const WM_USER = &H400
 'Private Const EM_SETTARGETDEVICE = (WM_USER + 72)
