@@ -39,6 +39,7 @@ Attribute VB_Exposed = False
 'i used to use just in case i want to switch back!
 
 Event AutoCompleteEvent(className As String)
+Event CtrlH()
 
 Property Let AutoCompleteString(x As String)
     sciMain.AutoCompleteString = x
@@ -157,6 +158,7 @@ Private Sub sciMain_KeyUp(KeyCode As Long, Shift As Long)
     
     If Shift = 4 Then 'ctrl
         Select Case KeyCode
+            Case 72: RaiseEvent CtrlH
             Case 65: sciMain.SelectAll 'a
             Case 88: sciMain.Cut 'x
             Case 67: sciMain.Copy 'c

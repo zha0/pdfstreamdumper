@@ -32,7 +32,6 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
-      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -351,6 +350,7 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -373,6 +373,7 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1246
@@ -2241,13 +2242,26 @@ end_of_func:
     End If
     
     Dim fSize As Long
+    Dim szName As String
     
     Status = stComplete
     endTime = GetTickCount()
     LoadTime = endTime - startTime
     fSize = FileLen(txtPDFPath)
     
-    Me.Caption = "PDFStreamDumper  - http://sandsprite.com     FileSize: " & fSize & "    LoadTime: " & LoadTime
+    szName = " bytes"
+    If fSize > 1024 Then
+        fSize = fSize / 1024
+        szName = " Kb"
+    End If
+    
+    If fSize > 1024 Then
+        fSize = fSize / 1024
+        szName = " Mb"
+    End If
+    
+    Me.Caption = "PDFStreamDumper  - http://sandsprite.com     FileSize: " & fSize & szName & _
+                 "    LoadTime: " & LoadTime / 1000 & " seconds"
     
     Dim oBrowser As Object
     Set oBrowser = GetObject("", "obj_Browser.plugin") 'not much of a plugin is it! more of a lib at this point :P

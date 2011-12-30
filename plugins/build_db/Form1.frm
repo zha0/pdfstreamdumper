@@ -387,7 +387,6 @@ Begin VB.Form Form1
       End
       Begin VB.CommandButton cmdAbortSearch 
          Caption         =   "Abort"
-         Enabled         =   0   'False
          Height          =   330
          Left            =   9945
          TabIndex        =   25
@@ -1074,7 +1073,7 @@ Private Sub cmdSearch_Click()
     Set selLi = Nothing
     abortSearch = False
     lv.ListItems.Clear
-    cmdAbortSearch.Enabled = True
+    'cmdAbortSearch.Enabled = True
     
     cn.Open
     
@@ -1085,7 +1084,7 @@ Private Sub cmdSearch_Click()
         End If
     Next
     
-    cmdAbortSearch.Enabled = False
+    'cmdAbortSearch.Enabled = False
     Me.Caption = lv.ListItems.Count & " results found"
     cn.Close
     
@@ -1127,13 +1126,13 @@ Sub ShowResults(field, uc As Collection)
     
     If rs.BOF And rs.EOF Then Exit Sub
     
-    While Not rs.EOF
+    Do While Not rs.EOF
     
         'Set rs2 = cn.Execute("Select fname from tblFiles where autoid=" & rs!pid)
         fname = rs!fname
         
-        If abortSearch Then Exit Sub
-        
+        If abortSearch Then Exit Do
+    
         'If Not keyExists(rs!pid, uc) Then
             Set li = lv.ListItems.Add(, , fname)
             li.SubItems(1) = field
@@ -1155,7 +1154,7 @@ Sub ShowResults(field, uc As Collection)
         Me.Refresh
         DoEvents
             
-    Wend
+    Loop
     
 End Sub
 
@@ -1539,7 +1538,8 @@ Private Sub mnuFindObsfuscated_Click()
     cn.Open
     
     Set rs = cn.Execute("Select * from tblHeaders where rawHeader like '%#%' or rawHeader like '%\\1%'")
-    While Not rs.EOF
+    Do While Not rs.EOF
+        If abortSearch Then Exit Do
         rh = rs!rawheader
         If looksEscaped(rh) Then
             Set rs2 = cn.Execute("Select fname from tblFiles where autoid=" & rs!pid)
@@ -1554,7 +1554,7 @@ Private Sub mnuFindObsfuscated_Click()
         DoEvents
         Me.Refresh
         DoEvents
-    Wend
+    Loop
     
     cn.Close
     Me.Caption = lv.ListItems.Count & " search results"

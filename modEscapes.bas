@@ -1,11 +1,10 @@
 Attribute VB_Name = "modEscapes"
-'pretty much nothing in this module is unicode safe when it comes to machines
-'that are set to extended character set languages such as chinese. this is especially
-'true if the setting on the advanced tab of language options control panel is not US English.
-'i dont really understand all the complexties of this, but its more than I am going to fix at this
-'point...
+'just had major rework done in escapes to try to support correct results on non US systems...
+'--> still a couple more to go
 
 Function ExtractValidHex(x, Optional assumeUnicode As Boolean = False)
+    'NOT unicode safe yet
+    
     On Error Resume Next
     Dim b() As Byte
     Dim ret As String
@@ -93,54 +92,61 @@ Function EscapeHexString(hexstr)
     
 End Function
 
-
-Function unescape(x) '%uxxxx and %xx
+'this should now be unicode safe on foreign systems..
+Function unescape(x) As String '%uxxxx and %xx
     
-    On Error GoTo hell
+    'On Error GoTo hell
     
     Dim tmp() As String
-    Dim b1, b2
+    Dim b1 As String, b2 As String
     Dim i As Long
+    Dim r() As Byte
+    Dim elems As Long
     
-    'if instr(x, "%") < 1 then
     tmp = Split(x, "%")
+    
+    s_bpush r(), tmp(0) 'any prefix before encoded part..
     
     For i = 1 To UBound(tmp)
         t = tmp(i)
         
         If LCase(VBA.Left(t, 1)) = "u" Then
-            If Len(t) >= 5 Then
-                decode = Mid(t, 1, 5)
-                b1 = Mid(decode, 2, 2)
-                b2 = Mid(decode, 4, 2)
-                tmp(i) = cHex(b2) & cHex(b1)
-                If Len(t) > 5 Then tmp(i) = tmp(i) & Mid(t, 6)
+        
+            If Len(t) < 5 Then '%u21 -> %u0021
+                t = "u" & String(5 - Len(t), "0") & Mid(t, 2)
             End If
+
+            b1 = Mid(t, 2, 2)
+            b2 = Mid(t, 4, 2)
+            
+            If isHexChar(b1) And isHexChar(b2) Then
+                hex_bpush r(), b2
+                hex_bpush r(), b1
+            Else
+                s_bpush r(), "%u" & b1 & b2
+            End If
+            
+            If Len(t) > 5 Then s_bpush r(), Mid(t, 6)
+             
         Else
-            If Len(t) >= 2 Then
-                decode = Mid(t, 1, 2)
-                'If isHex(decode) Then
-                    tmp(i) = cHex(decode)
-                    If Len(t) > 2 Then tmp(i) = tmp(i) & Mid(t, 3)
-                'Else
-                '    tmp(i) = "%" & tmp(i)
-                'End If
-            'Else
-            '    tmp(i) = "%" & tmp(i)
-            End If
+               b1 = Mid(t, 1, 2)
+               If Not hex_bpush(r(), b1) Then s_bpush r(), "%" & b1
+               If Len(t) > 2 Then s_bpush r(), Mid(t, 3)
         End If
         
     Next
             
 hell:
-    unescape = Join(tmp, "")
+    unescape = StrConv(r(), vbUnicode, LANG_US)
      
      If Err.Number <> 0 Then
-        MsgBox "Error in unescape:( " & Err.Description
+        MsgBox "Error in unescape: " & Err.Description
      End If
      
 End Function
 
+
+'should be safe for unicode
 Function pound_unescape(x) '#xx
     
     On Error GoTo hell
@@ -148,30 +154,32 @@ Function pound_unescape(x) '#xx
     Dim tmp() As String
     Dim b1, b2
     Dim i As Long
+    Dim r() As Byte
+    Dim decode As String
     
     tmp = Split(x, "#")
     
-    If UBound(tmp) > 0 Then
+        s_bpush r(), tmp(0)
         For i = 1 To UBound(tmp)
             t = tmp(i)
             
             If Len(t) >= 2 Then
                 decode = Mid(t, 1, 2)
-                If isHex(decode) Then 'bug fix added 12.5.10 others need it too!
-                    tmp(i) = cHex(decode)
-                    If Len(t) > 2 Then tmp(i) = tmp(i) & Mid(t, 3)
+                If isHexChar(decode) Then 'bug fix added 12.5.10 others need it too!
+                    hex_bpush r(), decode
+                    If Len(t) > 2 Then s_bpush r(), Mid(t, 3)
                 Else
-                    tmp(i) = "#" & tmp(i) 'bf
+                    s_bpush r(), "#" & tmp(i)
                 End If
             Else
-                tmp(i) = "#" & tmp(i) 'bf
+                s_bpush r(), "#" & tmp(i) 'bf
             End If
             
         Next
-    End If
+
             
 hell:
-    pound_unescape = Join(tmp, "")
+    pound_unescape = StrConv(r(), vbUnicode, LANG_US)
      
      If Err.Number <> 0 Then
         MsgBox "Error in pound unescape:( " & Err.Description
@@ -179,6 +187,7 @@ hell:
      
 End Function
 
+'should be safe for unicode
 Function octal_unescape(ByVal strin)
     
     On Error Resume Next
@@ -187,15 +196,19 @@ Function octal_unescape(ByVal strin)
     Dim v As Long
     Dim nextThree As String
     Dim rest As String
+    Dim r() As Byte
     
     tmp = Split(strin, "\")
-    For i = 0 To UBound(tmp)
+    
+    s_bpush r(), tmp(0)
+    
+    For i = 1 To UBound(tmp)
         If Len(tmp(i)) < 4 And IsNumeric(tmp(i)) Then
             v = CLng("&O" & tmp(i))
             If v < 255 Then
-                tmp(i) = Chr(v)
+                bpush r(), CByte(v)
             Else
-                If Len(tmp(i)) > 0 And i <> 0 Then tmp(i) = "\" & tmp(i) 'cause we join with ""
+                If Len(tmp(i)) > 0 And i <> 0 Then s_bpush r(), "\" & tmp(i) 'cause we join with ""
             End If
         Else
             rest = ""
@@ -204,46 +217,23 @@ Function octal_unescape(ByVal strin)
             If IsNumeric(nextThree) Then
                 v = CLng("&O" & nextThree)
                 If v < 255 Then
-                    tmp(i) = Chr(v) & rest
+                    bpush r(), CByte(v)
+                    If Len(rest) > 0 Then s_bpush r(), rest
                 Else
-                    If Len(tmp(i)) > 0 And i <> 0 Then tmp(i) = "\" & tmp(i) 'cause we join with ""
+                    If Len(tmp(i)) > 0 And i <> 0 Then s_bpush r(), "\" & tmp(i) 'cause we join with ""
                 End If
             Else
-                If Len(tmp(i)) > 0 And i <> 0 Then tmp(i) = "\" & tmp(i) 'cause we join with ""
+                If Len(tmp(i)) > 0 And i <> 0 Then s_bpush r(), "\" & tmp(i) 'cause we join with ""
             End If
         End If
     Next
             
-    octal_unescape = Join(tmp, "")
+    octal_unescape = StrConv(r(), vbUnicode, LANG_US)
         
 End Function
 
-'Function octal_unescape(ByVal strIn)
-'
-'    On Error Resume Next
-'    Dim tmp() As String
-'    Dim i As Long
-'    Dim v As Long
-'
-'    tmp = Split(strIn, "\")
-'    For i = 0 To UBound(tmp)
-'        If Len(tmp(i)) < 4 And IsNumeric(tmp(i)) Then
-'            v = CLng("&O" & tmp(i))
-'            If v < 255 Then
-'                tmp(i) = Chr(v)
-'            Else
-'                tmp(i) = "\" & tmp(i) 'cause we join with ""
-'            End If
-'        Else
-'            tmp(i) = "\" & tmp(i) 'cause we join with ""
-'        End If
-'    Next
-'
-'    octal_unescape = Join(tmp, "")
-'
-'
-'End Function
 
+'should be safe now for unicode
 Function js_unescape(x)
     
     On Error GoTo hell
@@ -251,30 +241,35 @@ Function js_unescape(x)
     Dim tmp() As String
     Dim b1, b2
     Dim i As Long
+    Dim r() As Byte
+    Dim decode As String
     
     tmp = Split(x, "\x")
     
-    If UBound(tmp) > 0 Then
-        For i = 1 To UBound(tmp)
-            t = tmp(i)
-            
-            If Len(t) >= 2 Then
-                decode = Mid(t, 1, 2)
-                'If isHex(decode) Then
-                    tmp(i) = cHex(decode)
-                    If Len(t) > 2 Then tmp(i) = tmp(i) & Mid(t, 3)
-                'Else
-                '    tmp(i) = "\x" & tmp(i)
-                'End If
-            'Else
-            '    tmp(i) = "\x" & tmp(i)
+    s_bpush r(), tmp(0)
+    
+    For i = 1 To UBound(tmp)
+        t = tmp(i)
+        
+        '\x9 is not expanded to \x09 throws error...
+        
+        If Len(t) >= 2 Then
+            decode = Mid(t, 1, 2)
+            If isHexChar(decode) Then
+                hex_bpush r(), decode
+                If Len(t) > 2 Then s_bpush r(), Mid(t, 3)
+            Else
+                s_bpush r(), "\x" & tmp(i)
             End If
-            
-        Next
-    End If
+        Else
+            s_bpush r(), "\x" & tmp(i)
+        End If
+        
+    Next
+     
             
 hell:
-     js_unescape = Join(tmp, "")
+     js_unescape = StrConv(r(), vbUnicode, LANG_US)
      
      'If Err.Number <> 0 Then
      '   MsgBox "Error in unescape:( " & Err.Description
@@ -297,7 +292,8 @@ Function nl_unescape(ByVal x)
 End Function
 
 Public Function HexStringUnescape(str, Optional stripWhite As Boolean = False, Optional noNulls As Boolean = False, Optional bailOnManyErrors As Boolean = False)
-        
+    'NOT unicode safe yet...
+    
     Dim ret As String
     Dim x As String
     Dim errCount As Long
@@ -528,3 +524,59 @@ Private Function AryIsEmpty(ary) As Boolean
   Exit Function
 oops: AryIsEmpty = True
 End Function
+
+Private Sub s_bpush(bary() As Byte, sValue As String)
+    Dim tmp() As Byte
+    Dim i As Long
+    tmp() = StrConv(sValue, vbFromUnicode, LANG_US)
+    For i = 0 To UBound(tmp)
+        bpush bary, tmp(i)
+    Next
+End Sub
+
+Private Sub bpush(bary() As Byte, b As Byte) 'this modifies parent ary object
+    On Error GoTo init
+    Dim x As Long
+    
+    x = UBound(bary) '<-throws Error If Not initalized
+    ReDim Preserve bary(UBound(bary) + 1)
+    bary(UBound(bary)) = b
+    
+    Exit Sub
+
+init:
+    ReDim bary(0)
+    bary(0) = b
+    
+End Sub
+
+Public Function isHexChar(hexValue As String, Optional b As Byte) As Boolean
+    On Error Resume Next
+    Dim v As Long
+    
+    
+    If Len(hexValue) = 0 Then GoTo nope
+    If Len(hexValue) > 2 Then GoTo nope 'expecting hex char code like FF or 90
+    
+    v = CLng("&h" & hexValue)
+    If Err.Number <> 0 Then GoTo nope 'invalid hex code
+    
+    b = CByte(v)
+    If Err.Number <> 0 Then GoTo nope  'shouldnt happen.. > 255 cant be with len() <=2 ?
+
+    isHexChar = True
+    
+    Exit Function
+nope:
+    Err.Clear
+    isHexChar = False
+End Function
+
+Private Function hex_bpush(bary() As Byte, hexValue As String) As Boolean   'this modifies parent ary object
+    On Error Resume Next
+    Dim b As Byte
+    If Not isHexChar(hexValue, b) Then Exit Function
+    bpush bary, b
+    hex_bpush = True
+End Function
+

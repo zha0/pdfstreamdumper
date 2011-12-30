@@ -1579,6 +1579,10 @@ Private Sub txtJS_AutoCompleteEvent(className As String)
     End If
 End Sub
 
+Private Sub txtJS_CtrlH()
+    mnuReplace_Click
+End Sub
+
 'Private Const WM_USER = &H400
 'Private Const EM_SETTARGETDEVICE = (WM_USER + 72)
 'Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
