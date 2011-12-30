@@ -198,7 +198,6 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0000
@@ -254,7 +253,6 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   2249
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0080
@@ -1196,9 +1194,9 @@ Private Sub mnuLaunchSclog_Click(Index As Integer)
     x = PrepareShellcode(x)
     
     If Index = 0 Then
-        frmSclog.InitInterface x
+        frmSclog.InitInterface CStr(x)
     Else
-        frmScTest.InitInterface x
+        frmScTest.InitInterface CStr(x)
     End If
     
 End Sub

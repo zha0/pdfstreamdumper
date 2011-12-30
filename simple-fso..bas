@@ -32,13 +32,34 @@ End Enum
 Public Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 
 Private Declare Sub SetWindowPos Lib "user32" (ByVal hwnd As Long, ByVal _
-    hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx _
+    hWndInsertAfter As Long, ByVal x As Long, ByVal Y As Long, ByVal cx _
     As Long, ByVal cy As Long, ByVal wFlags As Long)
 
 Private Declare Function GetShortPathName Lib "kernel32" Alias "GetShortPathNameA" (ByVal lpszLongPath As String, ByVal lpszShortPath As String, ByVal cchBuffer As Long) As Long
+Private Declare Function NtQueryDefaultLocale Lib "ntdll" (ByVal UserProfile As Integer, ByRef lcid As Long) As Long
+Private Declare Function NtSetDefaultLocale Lib "ntdll" (ByVal UserProfile As Integer, ByVal lcid As Long) As Long
 
 Private Const HWND_TOPMOST = -1
 Private Const HWND_NOTOPMOST = -2
+
+Public Enum LCIDMode
+    UserMode = 0
+    kernelmode = 1
+End Enum
+
+Public Function GetLocale(Optional mode As LCIDMode = kernelmode) As Long
+    Dim lcid As Long
+    NtQueryDefaultLocale CInt(mode), lcid
+    GetLocale = (lcid And &HFFFF)
+End Function
+
+Public Sub SetLocale(lcid As Long, Optional mode As LCIDMode = kernelmode)
+    NtSetDefaultLocale CInt(mode), lcid
+End Sub
+
+
+
+
 
 Public Function GetShortName(sFile As String) As String
     Dim sShortFile As String * 67
@@ -231,7 +252,8 @@ Function HexDump(ByVal str, Optional hexOnly = 0) As String
         If Len(tt) = 1 Then tt = "0" & tt
         tmp = tmp & tt & " "
         x = ary(i)
-        chars = chars & IIf((x > 32 And x < 127) Or x > 191, Chr(x), ".")
+        'chars = chars & IIf((x > 32 And x < 127) Or x > 191, Chr(x), ".") 'x > 191 causes \x0 problems on non us systems... asc(chr(x)) = 0
+        chars = chars & IIf((x > 32 And x < 127), Chr(x), ".")
         If i > 1 And i Mod 16 = 0 Then
             h = Hex(offset)
             While Len(h) < 6: h = "0" & h: Wend
@@ -283,10 +305,10 @@ Sub FormPos(fform As Form, Optional andSize As Boolean = False, Optional save_mo
     For i = 1 To sz
         If save_mode Then
             ff = CallByName(fform, f(i), VbGet)
-            SaveSetting app.EXEName, fform.Name & ".FormPos", f(i), ff
+            SaveSetting App.EXEName, fform.Name & ".FormPos", f(i), ff
         Else
             def = CallByName(fform, f(i), VbGet)
-            ff = GetSetting(app.EXEName, fform.Name & ".FormPos", f(i), def)
+            ff = GetSetting(App.EXEName, fform.Name & ".FormPos", f(i), def)
             CallByName fform, f(i), VbLet, ff
         End If
     Next
@@ -294,11 +316,11 @@ Sub FormPos(fform As Form, Optional andSize As Boolean = False, Optional save_mo
 End Sub
 
 Sub SaveMySetting(key, Value)
-    SaveSetting app.EXEName, "Settings", key, Value
+    SaveSetting App.EXEName, "Settings", key, Value
 End Sub
 
 Function GetMySetting(key, Optional defaultval = "")
-    GetMySetting = GetSetting(app.EXEName, "Settings", key, defaultval)
+    GetMySetting = GetSetting(App.EXEName, "Settings", key, defaultval)
 End Function
 
 
@@ -485,21 +507,48 @@ oops: buildPath = False
 End Function
 
 
-Function ReadFile(filename)
+'Function ReadFile(filename)
+'  f = FreeFile
+'  Temp = ""
+'   Open filename For Binary As #f        ' Open file.(can be text or image)
+'     Temp = Input(FileLen(filename), #f) ' Get entire Files data
+'   Close #f
+'   ReadFile = Temp
+'End Function
+
+Function ReadFile(filename) As String 'this one should be binary safe...
+  On Error GoTo hell
   f = FreeFile
-  Temp = ""
-   Open filename For Binary As #f        ' Open file.(can be text or image)
-     Temp = Input(FileLen(filename), #f) ' Get entire Files data
-   Close #f
-   ReadFile = Temp
+  Dim b() As Byte
+  Open filename For Binary As #f
+  ReDim b(LOF(f) - 1)
+  Get f, , b()
+  Close #f
+  ReadFile = StrConv(b(), vbUnicode, LANG_US)
+  Exit Function
+hell:   ReadFile = ""
 End Function
 
-Sub writeFile(path, it)
+'Sub writeFile(path, it)
+'    f = FreeFile
+'    Open path For Output As #f
+'    Print #f, it
+'    Close f
+'End Sub
+
+Function writeFile(path, it) As Boolean 'this one should be binary safe...
+    On Error GoTo hell
+    Dim b() As Byte
+    If FileExists(path) Then Kill path
     f = FreeFile
-    Open path For Output As #f
-    Print #f, it
+    b() = StrConv(it, vbFromUnicode, LANG_US)
+    Open path For Binary As #f
+    Put f, , b()
     Close f
-End Sub
+    writeFile = True
+    Exit Function
+hell: writeFile = False
+End Function
 
 Sub AppendFile(path, it)
     f = FreeFile

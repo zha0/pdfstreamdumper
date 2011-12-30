@@ -22,17 +22,40 @@ Begin VB.Form Form1
    ScaleHeight     =   9105
    ScaleWidth      =   13950
    StartUpPosition =   3  'Windows Default
+   Begin RichTextLib.RichTextBox txtDetails 
+      Height          =   3435
+      Left            =   3600
+      TabIndex        =   18
+      Top             =   2040
+      Visible         =   0   'False
+      Width           =   8775
+      _ExtentX        =   15478
+      _ExtentY        =   6059
+      _Version        =   393217
+      Enabled         =   -1  'True
+      ScrollBars      =   2
+      TextRTF         =   $"Form1.frx":1142
+      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+         Name            =   "Courier New"
+         Size            =   12
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+   End
    Begin VB.Frame fraLower 
       BorderStyle     =   0  'None
       Height          =   1860
       Left            =   2115
-      TabIndex        =   14
+      TabIndex        =   13
       Top             =   6525
       Width           =   11625
       Begin MSComctlLib.ListView lvDebug 
          Height          =   1455
          Left            =   1200
-         TabIndex        =   15
+         TabIndex        =   14
          Top             =   0
          Visible         =   0   'False
          Width           =   10275
@@ -65,7 +88,7 @@ Begin VB.Form Form1
       Begin MSComctlLib.ListView lvSearch 
          Height          =   1455
          Left            =   360
-         TabIndex        =   16
+         TabIndex        =   15
          Top             =   0
          Visible         =   0   'False
          Width           =   11175
@@ -98,7 +121,7 @@ Begin VB.Form Form1
       Begin MSComctlLib.ListView lv2 
          Height          =   1455
          Left            =   0
-         TabIndex        =   17
+         TabIndex        =   16
          Top             =   0
          Width           =   11415
          _ExtentX        =   20135
@@ -130,7 +153,7 @@ Begin VB.Form Form1
       Begin MSComctlLib.TabStrip TabStrip1 
          Height          =   1815
          Left            =   30
-         TabIndex        =   18
+         TabIndex        =   17
          Top             =   0
          Width           =   11535
          _ExtentX        =   20346
@@ -169,7 +192,7 @@ Begin VB.Form Form1
       BorderStyle     =   0  'None
       Height          =   465
       Left            =   45
-      TabIndex        =   7
+      TabIndex        =   6
       Top             =   8370
       Width           =   14055
       Begin VB.TextBox txtPDFPath 
@@ -185,7 +208,7 @@ Begin VB.Form Form1
          Height          =   315
          Left            =   2040
          OLEDropMode     =   1  'Manual
-         TabIndex        =   12
+         TabIndex        =   11
          Text            =   "Drag and drop pdf file here"
          Top             =   90
          Width           =   8535
@@ -203,7 +226,7 @@ Begin VB.Form Form1
          EndProperty
          Height          =   375
          Left            =   11250
-         TabIndex        =   11
+         TabIndex        =   10
          Top             =   45
          Width           =   1335
       End
@@ -220,7 +243,7 @@ Begin VB.Form Form1
          EndProperty
          Height          =   375
          Left            =   10665
-         TabIndex        =   10
+         TabIndex        =   9
          Top             =   45
          Width           =   615
       End
@@ -229,7 +252,7 @@ Begin VB.Form Form1
          Enabled         =   0   'False
          Height          =   375
          Left            =   0
-         TabIndex        =   9
+         TabIndex        =   8
          Top             =   0
          Width           =   855
       End
@@ -237,7 +260,7 @@ Begin VB.Form Form1
          Caption         =   "Abort"
          Height          =   375
          Left            =   12600
-         TabIndex        =   8
+         TabIndex        =   7
          Top             =   45
          Width           =   1005
       End
@@ -255,7 +278,7 @@ Begin VB.Form Form1
          EndProperty
          Height          =   255
          Left            =   840
-         TabIndex        =   13
+         TabIndex        =   12
          Top             =   120
          Width           =   1095
       End
@@ -263,7 +286,7 @@ Begin VB.Form Form1
    Begin MSComctlLib.ProgressBar pb 
       Height          =   285
       Left            =   5805
-      TabIndex        =   6
+      TabIndex        =   5
       Top             =   6165
       Width           =   7710
       _ExtentX        =   13600
@@ -289,7 +312,7 @@ Begin VB.Form Form1
       Align           =   2  'Align Bottom
       Height          =   255
       Left            =   0
-      TabIndex        =   5
+      TabIndex        =   4
       Top             =   8850
       Width           =   13950
       _ExtentX        =   24606
@@ -319,27 +342,6 @@ Begin VB.Form Form1
          EndProperty
       EndProperty
    End
-   Begin VB.TextBox txtDetails 
-      BeginProperty Font 
-         Name            =   "Courier"
-         Size            =   9.75
-         Charset         =   0
-         Weight          =   700
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   3615
-      HideSelection   =   0   'False
-      Left            =   4005
-      MultiLine       =   -1  'True
-      ScrollBars      =   2  'Vertical
-      TabIndex        =   3
-      Text            =   "Form1.frx":1142
-      Top             =   1980
-      Visible         =   0   'False
-      Width           =   9135
-   End
    Begin RichTextLib.RichTextBox txtUncompressed 
       Height          =   4095
       Left            =   3120
@@ -351,7 +353,7 @@ Begin VB.Form Form1
       _Version        =   393217
       HideSelection   =   0   'False
       ScrollBars      =   2
-      TextRTF         =   $"Form1.frx":114F
+      TextRTF         =   $"Form1.frx":11C4
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "Courier New"
          Size            =   12
@@ -365,7 +367,7 @@ Begin VB.Form Form1
    Begin RichTextLib.RichTextBox he 
       Height          =   5895
       Left            =   2160
-      TabIndex        =   4
+      TabIndex        =   3
       Top             =   120
       Width           =   11295
       _ExtentX        =   19923
@@ -373,7 +375,7 @@ Begin VB.Form Form1
       _Version        =   393217
       HideSelection   =   0   'False
       ScrollBars      =   2
-      TextRTF         =   $"Form1.frx":11D1
+      TextRTF         =   $"Form1.frx":1246
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "Courier New"
          Size            =   12
@@ -844,6 +846,7 @@ Dim unspFilterCount As Long
 Dim ActionCount As Long
 Dim PRCCount As Long
 Dim surpressHideWarnings As Boolean
+Dim defaultLCID As Long
 
 Sub LoadPlugins()
     
@@ -1227,6 +1230,11 @@ Private Sub Form_Resize()
     lvSearch.Width = he.Width
     lvDebug.Width = he.Width
     pb.Width = Me.Width - pb.Left - 200
+    
+    lv2.ColumnHeaders(1).Width = lv2.Width - 75
+    lvSearch.ColumnHeaders(1).Width = lv2.ColumnHeaders(1).Width
+    lvDebug.ColumnHeaders(1).Width = lv2.ColumnHeaders(1).Width
+    
 End Sub
 
 Private Sub lv_KeyDown(KeyCode As Integer, Shift As Integer)
@@ -2042,6 +2050,8 @@ Private Sub Form_Unload(Cancel As Integer)
     Dim f As Form
     On Error Resume Next
     
+    If defaultLCID <> LANG_US And defaultLCID <> 0 Then SetLocale defaultLCID
+    
     parser.abort = True
     SaveSetting App.EXEName, "Settings", "LastFile", txtPDFPath
     
@@ -2763,6 +2773,25 @@ Private Sub Form_Load()
     Me.Visible = True
     DoEvents
     Me.Refresh
+    
+    'we cant set this, machine needs a reboot to apply...
+    defaultLCID = GetLocale(UserMode)
+    If defaultLCID <> LANG_US And defaultLCID <> 0 Then
+        lvDebug.ListItems.Add , , "ERROR WARNING: Language Version for non-unicode programs must be set to United States English for me to work properly."
+        lvDebug.ListItems.Add , , "    Control panel -> Regional and Language Options -> Advanced Tab -> top select box -> Apply (System will Reboot)"
+        TabStrip1.Tabs(3).Selected = True
+    End If
+    
+'    If defaultLCID <> LANG_US And defaultLCID <> 0 Then
+'        If GetMySetting("defaultLCID_warning", 0) = 0 Then
+'            MsgBox "I have to set your default language ID to English to work properly." & vbCrLf & _
+'                   "I will restore it to default on exit. " & vbCrLf & _
+'                   "I will not bother you again with this message", vbInformation
+'            SaveMySetting "defaultLCID_warning", 1
+'        End If
+'        lvDebug.ListItems.Add , , "Default Locale is: " & defaultLCID & " setting to English, will restore on normal exit.."
+'        SetLocale LANG_US
+'    End If
     
     If Len(command) > 0 Then
         If InStr(1, command, ".js", vbTextCompare) > 0 Or InStr(1, command, ".vbs", vbTextCompare) > 0 Then

@@ -1,4 +1,9 @@
 Attribute VB_Name = "modEscapes"
+'pretty much nothing in this module is unicode safe when it comes to machines
+'that are set to extended character set languages such as chinese. this is especially
+'true if the setting on the advanced tab of language options control panel is not US English.
+'i dont really understand all the complexties of this, but its more than I am going to fix at this
+'point...
 
 Function ExtractValidHex(x, Optional assumeUnicode As Boolean = False)
     On Error Resume Next
