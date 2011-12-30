@@ -36,26 +36,26 @@ Private Declare Sub SetWindowPos Lib "user32" (ByVal hwnd As Long, ByVal _
     As Long, ByVal cy As Long, ByVal wFlags As Long)
 
 Private Declare Function GetShortPathName Lib "kernel32" Alias "GetShortPathNameA" (ByVal lpszLongPath As String, ByVal lpszShortPath As String, ByVal cchBuffer As Long) As Long
-Private Declare Function NtQueryDefaultLocale Lib "ntdll" (ByVal UserProfile As Integer, ByRef lcid As Long) As Long
-Private Declare Function NtSetDefaultLocale Lib "ntdll" (ByVal UserProfile As Integer, ByVal lcid As Long) As Long
+'Private Declare Function NtQueryDefaultLocale Lib "ntdll" (ByVal UserProfile As Integer, ByRef lcid As Long) As Long
+'Private Declare Function NtSetDefaultLocale Lib "ntdll" (ByVal UserProfile As Integer, ByVal lcid As Long) As Long
 
 Private Const HWND_TOPMOST = -1
 Private Const HWND_NOTOPMOST = -2
 
-Public Enum LCIDMode
-    UserMode = 0
-    kernelmode = 1
-End Enum
-
-Public Function GetLocale(Optional mode As LCIDMode = kernelmode) As Long
-    Dim lcid As Long
-    NtQueryDefaultLocale CInt(mode), lcid
-    GetLocale = (lcid And &HFFFF)
-End Function
-
-Public Sub SetLocale(lcid As Long, Optional mode As LCIDMode = kernelmode)
-    NtSetDefaultLocale CInt(mode), lcid
-End Sub
+'Public Enum LCIDMode
+'    UserMode = 0
+'    kernelmode = 1
+'End Enum
+'
+'Public Function GetLocale(Optional mode As LCIDMode = kernelmode) As Long
+'    Dim lcid As Long
+'    NtQueryDefaultLocale CInt(mode), lcid
+'    GetLocale = (lcid And &HFFFF)
+'End Function
+'
+'Public Sub SetLocale(lcid As Long, Optional mode As LCIDMode = kernelmode)
+'    NtSetDefaultLocale CInt(mode), lcid
+'End Sub
 
 
 
@@ -189,52 +189,6 @@ Function ContainsExploit(Data, ByVal sig, Optional offset As Long) As Boolean
         End If
 End Function
 
-'Function Decrypt(infile As String, retString As String, Optional startMsg As String = "PDF is encrypted try to decrypt it?") As Boolean
-'
-'    On Error Resume Next
-'    Dim outfile As String
-'    Dim wsh As New WshShell
-'    Dim ts As TextStream
-'    Dim ret As String
-'
-'    outfile = fso.GetParentFolder(infile) & "\" & fso.GetBaseName(infile) & ".decrypted.pdf"
-'
-'    decryptor = App.path & "\pdf_decryptor\pdf_decryptor.exe"
-'
-'    If Not fso.FileExists(decryptor) Then
-'            MsgBox "Pdf is encrypted and pdf decryptor was not found.", vbInformation
-'            Exit Function
-'    ElseIf Not csharp.DetectDotNet() Then
-'            MsgBox "Decrypter function requires .NET v2 or above", vbInformation
-'            Exit Function
-'    Else
-'           If Len(startMsg) > 0 Then If MsgBox(startMsg, vbYesNo) = vbNo Then Exit Function
-'
-'           If fso.FileExists(outfile) Then Kill outfile
-'
-'           ret = decryptor & " """ & infile & """ """ & outfile & """"
-'           Set ts = wsh.Exec(ret).StdOut
-'           ret = ts.ReadAll()
-'
-'           If fso.FileExists(outfile) Then
-'
-'                If FileLen(outfile) = 0 Then
-'                    retString = "Decryption failed file probably has user password set?"
-'                    Kill outfile
-'                    Exit Function
-'                End If
-'
-'                Decrypt = True
-'                retString = outfile
-'
-'           Else
-'                retString = ret
-'           End If
-'
-'    End If
-'
-'End Function
-'
 
 Function HexDump(ByVal str, Optional hexOnly = 0) As String
     Dim s() As String, chars As String, tmp As String
@@ -506,16 +460,6 @@ Function buildPath(folderpath) As Boolean
 oops: buildPath = False
 End Function
 
-
-'Function ReadFile(filename)
-'  f = FreeFile
-'  Temp = ""
-'   Open filename For Binary As #f        ' Open file.(can be text or image)
-'     Temp = Input(FileLen(filename), #f) ' Get entire Files data
-'   Close #f
-'   ReadFile = Temp
-'End Function
-
 Function ReadFile(filename) As String 'this one should be binary safe...
   On Error GoTo hell
   f = FreeFile
@@ -528,13 +472,6 @@ Function ReadFile(filename) As String 'this one should be binary safe...
   Exit Function
 hell:   ReadFile = ""
 End Function
-
-'Sub writeFile(path, it)
-'    f = FreeFile
-'    Open path For Output As #f
-'    Print #f, it
-'    Close f
-'End Sub
 
 Function writeFile(path, it) As Boolean 'this one should be binary safe...
     On Error GoTo hell
@@ -550,7 +487,7 @@ Function writeFile(path, it) As Boolean 'this one should be binary safe...
 hell: writeFile = False
 End Function
 
-Sub AppendFile(path, it)
+Sub AppendFile(path, it) 'not binary safe
     f = FreeFile
     Open path For Append As #f
     Print #f, it

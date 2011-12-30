@@ -2,32 +2,43 @@ Attribute VB_Name = "modEscapes"
 'just had major rework done in escapes to try to support correct results on non US systems...
 '--> still a couple more to go
 
+'Public Function cHex(v, Optional ByRef eCount As Long) As String
+'    On Error Resume Next
+'    cHex = Chr(CLng("&h" & v))
+'    If Err.Number <> 0 Then
+'        eCount = eCount + 1
+'        cHex = v
+'    End If
+'    Err.Clear
+'End Function
+
 Function ExtractValidHex(x, Optional assumeUnicode As Boolean = False)
-    'NOT unicode safe yet
     
     On Error Resume Next
     Dim b() As Byte
-    Dim ret As String
+    Dim r() As Byte
     
     b() = StrConv(x, vbFromUnicode, LANG_US)
+    
     For i = 0 To UBound(b)
-        If IsNumeric(Chr(b(i))) Then
-            ret = ret & Chr(b(i))
+       
+        If b(i) >= &H30 And b(i) <= &H39 Then 'isnumeric
+            bpush r(), b(i)
         Else
             If b(i) >= Asc("a") And b(i) <= Asc("f") Then
-                ret = ret & Chr(b(i))
+                bpush r(), b(i)
             ElseIf b(i) >= Asc("A") And b(i) <= Asc("F") Then
-                 ret = ret & Chr(b(i))
+                 bpush r(), b(i)
             End If
             
             If assumeUnicode = True Then
-                If b(i) = Asc("U") Or b(i) = Asc("u") Then ret = ret & "%u"  'sure we will assume it was meant to be this..
+                If b(i) = Asc("U") Or b(i) = Asc("u") Then s_bpush r(), "%u"  'sure we will assume it was meant to be this..
             End If
             
         End If
     Next
     
-    ExtractValidHex = ret
+    ExtractValidHex = StrConv(r(), vbUnicode, LANG_US)
         
 End Function
 
@@ -292,14 +303,15 @@ Function nl_unescape(ByVal x)
 End Function
 
 Public Function HexStringUnescape(str, Optional stripWhite As Boolean = False, Optional noNulls As Boolean = False, Optional bailOnManyErrors As Boolean = False)
-    'NOT unicode safe yet...
-    
+
     Dim ret As String
     Dim x As String
     Dim errCount As Long
+    Dim r() As Byte
+    Dim b As Byte
     
     On Error Resume Next
-    
+
     If stripWhite Then
         str = Replace(str, " ", Empty)
         str = Replace(str, vbCrLf, Empty)
@@ -308,49 +320,27 @@ Public Function HexStringUnescape(str, Optional stripWhite As Boolean = False, O
         str = Replace(str, vbTab, Empty)
         str = Replace(str, Chr(0), Empty)
     End If
-    
+
     For i = 1 To Len(str) Step 2 'this is to agressive for headers...
-        x = Empty
         x = Mid(str, i, 2)
-        x = cHex(x, errCount)
-        ret = ret & x
-    Next
-    
-    If noNulls Then
-        HexStringUnescape = Replace(ret, Chr(0), Empty)
-    Else
-        If bailOnManyErrors And (errCount > 5) Then
-            HexStringUnescape = str
+        If isHexChar(x, b) Then
+            bpush r(), b
         Else
-            HexStringUnescape = ret
+            errCount = errCount + 1
+            s_bpush r(), x
         End If
+    Next
+
+    ret = StrConv(r(), vbUnicode, LANG_US)
+    
+    If noNulls Then ret = Replace(ret, Chr(0), Empty)
+    
+    If bailOnManyErrors And (errCount > 5) Then
+        HexStringUnescape = str
+    Else
+        HexStringUnescape = ret
     End If
     
-        
-End Function
-
-Public Function cHex(v, Optional ByRef eCount As Long) As String
-    On Error Resume Next
-    cHex = Chr(CLng("&h" & v))
-    If Err.Number <> 0 Then
-        eCount = eCount + 1
-        cHex = v
-    End If
-    Err.Clear
-End Function
-
-Public Function isHex(v) As Boolean
-    On Error Resume Next
-    x = Chr(CLng("&h" & v))
-    If Err.Number = 0 Then isHex = True
-    Err.Clear
-End Function
-
-Public Function isHexNum(v) As Boolean
-    On Error Resume Next
-    x = CLng("&h" & v)
-    If Err.Number = 0 Then isHexNum = True
-    Err.Clear
 End Function
 
 Function ExtractFromParanthesisPageEncapsulation(Data)
@@ -525,30 +515,41 @@ Private Function AryIsEmpty(ary) As Boolean
 oops: AryIsEmpty = True
 End Function
 
-Private Sub s_bpush(bary() As Byte, sValue As String)
+Private Sub s_bpush(bAry() As Byte, sValue As String)
     Dim tmp() As Byte
     Dim i As Long
     tmp() = StrConv(sValue, vbFromUnicode, LANG_US)
     For i = 0 To UBound(tmp)
-        bpush bary, tmp(i)
+        bpush bAry, tmp(i)
     Next
 End Sub
 
-Private Sub bpush(bary() As Byte, b As Byte) 'this modifies parent ary object
+Private Sub bpush(bAry() As Byte, b As Byte) 'this modifies parent ary object
     On Error GoTo init
     Dim x As Long
     
-    x = UBound(bary) '<-throws Error If Not initalized
-    ReDim Preserve bary(UBound(bary) + 1)
-    bary(UBound(bary)) = b
+    x = UBound(bAry) '<-throws Error If Not initalized
+    ReDim Preserve bAry(UBound(bAry) + 1)
+    bAry(UBound(bAry)) = b
     
     Exit Sub
 
 init:
-    ReDim bary(0)
-    bary(0) = b
+    ReDim bAry(0)
+    bAry(0) = b
     
 End Sub
+
+'Public Function isHex(v) As Boolean
+'    isHex = isHexChar(CStr(v))
+'End Function
+
+Public Function isHexNum(v) As Boolean
+    On Error Resume Next
+    x = CLng("&h" & v)
+    If Err.Number = 0 Then isHexNum = True
+    Err.Clear
+End Function
 
 Public Function isHexChar(hexValue As String, Optional b As Byte) As Boolean
     On Error Resume Next
@@ -572,11 +573,11 @@ nope:
     isHexChar = False
 End Function
 
-Private Function hex_bpush(bary() As Byte, hexValue As String) As Boolean   'this modifies parent ary object
+Private Function hex_bpush(bAry() As Byte, hexValue As String) As Boolean   'this modifies parent ary object
     On Error Resume Next
     Dim b As Byte
     If Not isHexChar(hexValue, b) Then Exit Function
-    bpush bary, b
+    bpush bAry, b
     hex_bpush = True
 End Function
 

@@ -32,6 +32,7 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -350,7 +351,6 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -373,7 +373,6 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1246
@@ -847,7 +846,7 @@ Dim unspFilterCount As Long
 Dim ActionCount As Long
 Dim PRCCount As Long
 Dim surpressHideWarnings As Boolean
-Dim defaultLCID As Long
+'Dim defaultLCID As Long
 
 Sub LoadPlugins()
     
@@ -2051,7 +2050,7 @@ Private Sub Form_Unload(Cancel As Integer)
     Dim f As Form
     On Error Resume Next
     
-    If defaultLCID <> LANG_US And defaultLCID <> 0 Then SetLocale defaultLCID
+    'If defaultLCID <> LANG_US And defaultLCID <> 0 Then SetLocale defaultLCID
     
     parser.abort = True
     SaveSetting App.EXEName, "Settings", "LastFile", txtPDFPath
@@ -2788,24 +2787,12 @@ Private Sub Form_Load()
     DoEvents
     Me.Refresh
     
-    'we cant set this, machine needs a reboot to apply...
-    defaultLCID = GetLocale(UserMode)
-    If defaultLCID <> LANG_US And defaultLCID <> 0 Then
-        lvDebug.ListItems.Add , , "ERROR WARNING: Language Version for non-unicode programs must be set to United States English for me to work properly."
-        lvDebug.ListItems.Add , , "    Control panel -> Regional and Language Options -> Advanced Tab -> top select box -> Apply (System will Reboot)"
-        TabStrip1.Tabs(3).Selected = True
-    End If
-    
-'    If defaultLCID <> LANG_US And defaultLCID <> 0 Then
-'        If GetMySetting("defaultLCID_warning", 0) = 0 Then
-'            MsgBox "I have to set your default language ID to English to work properly." & vbCrLf & _
-'                   "I will restore it to default on exit. " & vbCrLf & _
-'                   "I will not bother you again with this message", vbInformation
-'            SaveMySetting "defaultLCID_warning", 1
-'        End If
-'        lvDebug.ListItems.Add , , "Default Locale is: " & defaultLCID & " setting to English, will restore on normal exit.."
-'        SetLocale LANG_US
-'    End If
+    'we cant set this, machine needs a reboot to apply...but i think this issue is fixed now?
+    'defaultLCID = GetLocale(UserMode)
+    'If defaultLCID <> LANG_US And defaultLCID <> 0 Then
+    '    'lvDebug.ListItems.Add , , "If unescape error set Language Version for non-unicode programs to United States English"
+    '    TabStrip1.Tabs(3).Selected = True
+    'End If
     
     If Len(command) > 0 Then
         If InStr(1, command, ".js", vbTextCompare) > 0 Or InStr(1, command, ".vbs", vbTextCompare) > 0 Then
