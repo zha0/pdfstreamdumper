@@ -581,3 +581,46 @@ Private Function hex_bpush(bAry() As Byte, hexValue As String) As Boolean   'thi
     hex_bpush = True
 End Function
 
+
+'this is kind of BS but so are AV detections for shellcode...
+Function QuickEncode(ByVal hexstring) As String
+    
+    Dim b() As Byte
+    Dim s As String
+    
+    s = HexStringUnescape(hexstring)
+    b() = StrConv(s, vbFromUnicode, LANG_US)
+    For i = 0 To UBound(b)
+        b(i) = b(i) Xor 59
+        If b(i) = 255 Then
+            b(i) = 0
+        Else
+            b(i) = b(i) + 1
+        End If
+    Next
+    s = StrConv(b(), vbUnicode, LANG_US)
+    QuickEncode = HexDump(s, 1)
+    
+End Function
+
+Function QuickDecode(ByVal hexstring) As String
+    
+    Dim b() As Byte
+    Dim s As String
+    
+    s = HexStringUnescape(hexstring)
+    b() = StrConv(s, vbFromUnicode, LANG_US)
+    For i = 0 To UBound(b)
+        If b(i) = 0 Then
+            b(i) = 255
+        Else
+            b(i) = b(i) - 1
+        End If
+        b(i) = b(i) Xor 59
+    Next
+    s = StrConv(b(), vbUnicode, LANG_US)
+    QuickDecode = HexDump(s, 1)
+    
+End Function
+
+

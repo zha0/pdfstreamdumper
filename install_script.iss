@@ -9,12 +9,6 @@ OutputBaseFilename=PDFStreamDumper_Setup
 
 
 [Dirs]
-Name: {app}\filter_samples
-Name: {app}\filter_samples\CCITTFaxDecode
-Name: {app}\filter_samples\complex
-Name: {app}\filter_samples\DCTDecode
-Name: {app}\filter_samples\JBIG2Decode
-Name: {app}\filter_samples\jpxdecode
 Name: {app}\iTextDecode
 Name: {app}\iTextDecode\lzw_test
 Name: {app}\iTextDecode\lzw_test\Properties
