@@ -584,3 +584,10 @@ Function AnyofTheseInstr(Data, match, Optional compare As VbCompareMethod = vbTe
         End If
     Next
 End Function
+
+Function GetCount(str, what) 'as long
+    On Error Resume Next
+    GetCount = UBound(Split(str, what)) + 1
+    If Len(GetCount) = 0 Then GetCount = 0
+End Function
+

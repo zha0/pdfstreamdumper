@@ -63,20 +63,52 @@ Private Function FindHeaderEnd(ByVal hstart) As Long
     On Error Resume Next
     Dim hend As Long
     Dim tmp As String
+    Dim nested As Long
+    Dim level As Long
+    Dim c As Long
     
-    'If Index = 13 Then Stop
+    'If Index = 112 Then Stop
+    
+    'this is some ugly ass logic...just retooled it some 1.3.12
+    'but its still really bad...seems to work though
     
     hstart = hstart + 2
     
     Do While 1
+    
+tryAgain:
         hend = InStr(hstart, RawObject, ">>")
+        
         If hend < 1 Then Exit Do
+         
+        If hend - hstart = 0 Then 'there was a >>>>
+            hstart = hend + 2
+            If nested = 0 Then
+                Exit Do
+            Else
+                nested = nested - 1
+            End If
+            GoTo tryAgain
+        End If
+        
         tmp = Mid(RawObject, hstart, hend - hstart)
+        
+        If Len(tmp) = 0 Then Exit Do
+        If Err.Number <> 0 Then Exit Do
+        
         If InStr(1, tmp, "<<") > 1 Then 'a nested tag was found
+            c = GetCount(tmp, "<<")  'maybe multiple...
+            If c > 2 Then nested = nested + c - 2
             hstart = hend + 2
         Else
-            Exit Do 'no more nested tags found were at end
+            If nested = 0 Then
+                Exit Do  'no more nested tags found were at end
+            Else
+                nested = nested - 1
+                hstart = hend + 2
+            End If
         End If
+        
     Loop
     
     FindHeaderEnd = hend
@@ -123,6 +155,8 @@ Function ParseSelf()
     sStart = InStr(IIf(hend > 0, hend, 1), RawObject, "stream", vbTextCompare)
     sEnd = InStr(IIf(sStart > 0, sStart, 1), RawObject, "endstream", vbTextCompare)
     
+    
+    
     If hstart > 0 And hend > hstart Then
         Header = Mid(RawObject, hstart, hend - hstart + Len(">>"))
         'Header = Replace(Header, Chr(0), "_Chr(0)_")
@@ -132,7 +166,20 @@ Function ParseSelf()
         
         escapedHeader = EscapeHeader(Header)
         StreamDecompressor.DetermineFilters Me, escapedHeader
-        
+    Else
+    
+        'need to handle stuff like: obj[/ICCBased 119 0 R]
+        If Len(RawObject) > 4 Then
+            If sStart > 0 Then hend = sStart Else hend = Len(RawObject)
+            If hend > 0 Then
+                Header = Mid(RawObject, 4, hend)
+                Header = Replace(Header, Chr(0), Empty)
+                Header = Replace(Header, "þÿ", Empty)
+                HeaderCRC = CRC32(Header)
+                escapedHeader = EscapeHeader(Header)
+            End If
+        End If
+    
     End If
     
     If sStart > 0 And sEnd > sStart Then

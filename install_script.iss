@@ -9,10 +9,6 @@ OutputBaseFilename=PDFStreamDumper_Setup
 
 
 [Dirs]
-Name: {app}\iTextDecode
-Name: {app}\iTextDecode\lzw_test
-Name: {app}\iTextDecode\lzw_test\Properties
-Name: {app}\iTextDecode\lzw_test\zlib
 Name: {app}\iTextFilters
 Name: {app}\iTextFilters\iText_Filters
 Name: {app}\iTextFilters\iText_Filters\Properties
@@ -80,28 +76,12 @@ Source: ./\dependancies\msscript.ocx; DestDir: {win}; Flags: regserver uninsneve
 Source: ./\dependancies\richtx32.ocx; DestDir: {win}; Flags: regserver uninsneveruninstall
 Source: ./\dependancies\SCIVBX.ocx; DestDir: {app}; Flags: regserver
 Source: ./\dependancies\SciLexer.dll; DestDir: {app}
-Source: iTextDecode\lzw_test\Properties\AssemblyInfo.cs; DestDir: {app}\iTextDecode\lzw_test\Properties
-Source: iTextDecode\lzw_test\zlib\Adler32.cs; DestDir: {app}\iTextDecode\lzw_test\zlib
-Source: iTextDecode\lzw_test\zlib\Deflate.cs; DestDir: {app}\iTextDecode\lzw_test\zlib
-Source: iTextDecode\lzw_test\zlib\InfBlocks.cs; DestDir: {app}\iTextDecode\lzw_test\zlib
-Source: iTextDecode\lzw_test\zlib\InfCodes.cs; DestDir: {app}\iTextDecode\lzw_test\zlib
-Source: iTextDecode\lzw_test\zlib\Inflate.cs; DestDir: {app}\iTextDecode\lzw_test\zlib
-Source: iTextDecode\lzw_test\zlib\InfTree.cs; DestDir: {app}\iTextDecode\lzw_test\zlib
-Source: iTextDecode\lzw_test\zlib\JZlib.cs; DestDir: {app}\iTextDecode\lzw_test\zlib
-Source: iTextDecode\lzw_test\zlib\StaticTree.cs; DestDir: {app}\iTextDecode\lzw_test\zlib
-Source: iTextDecode\lzw_test\zlib\Tree.cs; DestDir: {app}\iTextDecode\lzw_test\zlib
-Source: iTextDecode\lzw_test\zlib\ZDeflaterOutputStream.cs; DestDir: {app}\iTextDecode\lzw_test\zlib
-Source: iTextDecode\lzw_test\zlib\ZInflaterInputStream.cs; DestDir: {app}\iTextDecode\lzw_test\zlib
-Source: iTextDecode\lzw_test\zlib\ZStream.cs; DestDir: {app}\iTextDecode\lzw_test\zlib
-Source: iTextDecode\lzw_test\app.config; DestDir: {app}\iTextDecode\lzw_test
-Source: iTextDecode\lzw_test\Decoder.cs; DestDir: {app}\iTextDecode\lzw_test
-Source: iTextDecode\lzw_test\LZWDecoder.cs; DestDir: {app}\iTextDecode\lzw_test
-Source: iTextDecode\lzw_test\lzw_test.csproj; DestDir: {app}\iTextDecode\lzw_test
-Source: iTextDecode\lzw_test\lzw_test.csproj.user; DestDir: {app}\iTextDecode\lzw_test
-Source: iTextDecode\lzw_test\Program.cs; DestDir: {app}\iTextDecode\lzw_test
-Source: iTextDecode\iTextDecode.exe; DestDir: {app}\iTextDecode\
-Source: iTextDecode\iTextDecode.sln; DestDir: {app}\iTextDecode\
 Source: CSharpFilters.cls; DestDir: {app}
+Source: frmScTest.frm; DestDir: {app}
+Source: husk.exe; DestDir: {app}
+Source: simple_husk.dat; DestDir: {app}
+Source: frmBruteZLib.frm; DestDir: {app}
+Source: frmBruteZLib.frx; DestDir: {app}
 Source: iTextFilters\iText_Filters\Properties\AssemblyInfo.cs; DestDir: {app}\iTextFilters\iText_Filters\Properties
 Source: iTextFilters\iText_Filters\app.config; DestDir: {app}\iTextFilters\iText_Filters
 Source: iTextFilters\iText_Filters\Filters.cs; DestDir: {app}\iTextFilters\iText_Filters
@@ -129,11 +109,6 @@ Source: scripts\filter_chains.vbs; DestDir: {app}\scripts\
 Source: scripts\obsfuscated_headers.vbs; DestDir: {app}\scripts\
 Source: scripts\README.txt; DestDir: {app}\scripts\
 Source: scripts\pdfbox_extract_text_page_by_page.vbs; DestDir: {app}\scripts\
-Source: frmScTest.frm; DestDir: {app}
-Source: husk.exe; DestDir: {app}
-Source: simple_husk.dat; DestDir: {app}
-Source: frmBruteZLib.frm; DestDir: {app}
-Source: frmBruteZLib.frx; DestDir: {app}
 Source: sclog\bin\sclog.exe; DestDir: {app}\sclog\bin
 Source: sclog\hooker\asmserv.c; DestDir: {app}\sclog\hooker
 Source: sclog\hooker\assembl.c; DestDir: {app}\sclog\hooker
@@ -208,7 +183,6 @@ Name: {group}\Source\PdfStreamDumper.vbp; Filename: {app}\Project1.vbp
 Name: {group}\Readme.txt; Filename: {app}\Readme.txt
 Name: {group}\Uninstall; Filename: {app}\unins000.exe
 Name: {userdesktop}\PdfStreamDumper.exe; Filename: {app}\PDFStreamDumper.exe; IconIndex: 0
-Name: {group}\Source\iTextDecoder.sln; Filename: {app}\iTextDecode\iTextDecode.sln
 Name: {group}\Source\iTextFilters.sln; Filename: {app}\iTextFilters\iText_Filters.sln
 Name: {group}\Source\sclog.dsw; Filename: {app}\sclog\sclog.dsw
 Name: {group}\Source\husk.dsw; Filename: {app}\husk\husk.dsw

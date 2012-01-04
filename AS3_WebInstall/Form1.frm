@@ -14,7 +14,7 @@ Begin VB.Form Form1
    ScaleWidth      =   7920
    StartUpPosition =   2  'CenterScreen
    Begin VB.CommandButton Command2 
-      Caption         =   "Cancel and Exit"
+      Caption         =   "No Thanks - Exit "
       Height          =   495
       Left            =   120
       TabIndex        =   3
@@ -32,12 +32,12 @@ Begin VB.Form Form1
       _ExtentY        =   450
    End
    Begin VB.CommandButton Command1 
-      Caption         =   "Download and Install"
+      Caption         =   "Yes - Download and Install"
       Height          =   495
-      Left            =   5880
+      Left            =   5700
       TabIndex        =   1
       Top             =   3000
-      Width           =   1935
+      Width           =   2115
    End
    Begin MSComctlLib.ProgressBar pb 
       Height          =   255
@@ -267,28 +267,28 @@ Private Sub Label5_Click()
     On Error Resume Next
     Dim dlg As New clsCmnDlg
     Dim p As String
-    p = dlg.OpenDialog(exeFiles, , "Manually Specify AS3 Sorcerer Executable Path", Me.hwnd)
+    p = dlg.OpenDialog(exeFiles, , "Manually Specify AS3 Sorcerer Executable Path", Me.hWnd)
     'If Len(p) = 0 Or Dir(p) = "" Then Exit Sub 'I want to be able to reset it to empty with this too..
     SaveSetting "PDFStreamDumper", "3rdParty", "AS3Sorcerer", p
     MsgBox "Installation path manually set!", vbInformation
     End
 End Sub
 
-Private Sub ucAsyncDownload1_DownloadComplete(fpath As String)
+Private Sub ucAsyncDownload1_DownloadComplete(fPath As String)
 
     On Error Resume Next
     
-    Name fpath As fpath & ".exe"
+    Name fPath As fPath & ".exe"
     
     If Err.Number <> 0 Then
-        MsgBox "Error renaming temp file to exe extension" & vbCrLf & vbCrLf & "Installer: " & fpath, vbInformation
+        MsgBox "Error renaming temp file to exe extension" & vbCrLf & vbCrLf & "Installer: " & fPath, vbInformation
         Exit Sub
     End If
     
-    Shell fpath & ".exe", vbNormalFocus
+    Shell fPath & ".exe", vbNormalFocus
     
     If Err.Number <> 0 Then
-        MsgBox "Error executing installer?" & vbCrLf & vbCrLf & "Installer: " & fpath & ".exe", vbInformation
+        MsgBox "Error executing installer?" & vbCrLf & vbCrLf & "Installer: " & fPath & ".exe", vbInformation
         Exit Sub
     End If
     

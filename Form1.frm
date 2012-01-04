@@ -32,7 +32,6 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
-      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -351,6 +350,7 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -373,6 +373,7 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1246
@@ -1721,12 +1722,6 @@ Function looksEscaped(Header) 'as boolean
 
 End Function
 
-Function GetCount(str, what) 'as long
-    On Error Resume Next
-    GetCount = UBound(Split(str, what)) + 1
-    If Len(GetCount) = 0 Then GetCount = 0
-End Function
-
 Private Sub mnuSearchFilter_Click(Index As Integer)
     
     On Error Resume Next
@@ -2748,6 +2743,7 @@ Private Sub Form_Load()
                       "Shellcode> scdbg Trainer 1 - General Use; http://www.youtube.com/watch?v=jFkegwFasIw", _
                       "      scdbg trainer 2 - Asm and Debug; http://www.youtube.com/watch?v=qkDPUF3bf6E", _
                       "      sclog gui; http://www.youtube.com/watch?v=XBcmC4jYiRI", _
+                      "      shellcode 2 exe (14min); http://youtu.be/FTDZyYt7Fqk", _
                       "Misc> Adobe Api Support(10min);http://sandsprite.com/CodeStuff/Adobe_Api_Support.wmv", _
                       "      Sample Database Search Plugin (11min);http://sandsprite.com/CodeStuff/database_search_plugin.wmv", _
                       "      plugin developers and script writers (17min);http://sandsprite.com/CodeStuff/PDFStreamDumper_automation.wmv" _
