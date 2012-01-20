@@ -176,6 +176,7 @@ Source: AS3_WebInstall\Form1.frx; DestDir: {app}\AS3_WebInstall\
 Source: AS3_WebInstall\Project1.vbp; DestDir: {app}\AS3_WebInstall\
 Source: AS3_WebInstall\Project1.vbw; DestDir: {app}\AS3_WebInstall\
 Source: AS3_WebInstall\ucAsyncDownload.ctl; DestDir: {app}\AS3_WebInstall\
+Source: VS_LIBEMU.url; DestDir: {app}\
 
 [Icons]
 Name: {group}\PdfStreamDumper.exe; Filename: {app}\PDFStreamDumper.exe
@@ -188,6 +189,7 @@ Name: {group}\Source\sclog.dsw; Filename: {app}\sclog\sclog.dsw
 Name: {group}\Source\husk.dsw; Filename: {app}\husk\husk.dsw
 Name: {group}\Source\BuildDb_Plugin.vbp; Filename: {app}\plugins\build_db\Project1.vbp
 Name: {group}\Source\ObjBrowser_Plugin.vbp; Filename: {app}\plugins\objbrowser\Project1.vbp
+Name: {group}\Source\scDbg Source; Filename: {app}\VS_LIBEMU.url
 
 [Run]
 Filename: {app}\Readme.txt; StatusMsg: View ReadMe; Flags: postinstall shellexec runmaximized

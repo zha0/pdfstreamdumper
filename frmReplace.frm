@@ -394,8 +394,8 @@ End Sub
 
 Private Sub Form_Load()
     Me.Icon = Form1.Icon
-    SetWindowPos Me.hwnd, HWND_TOPMOST, Me.Left / 15, Me.Top / 15, Me.Width / 15, Me.Height / 15, SWP_SHOWWINDOW
     FormPos Me, False
+    SetWindowPos Me.hwnd, HWND_TOPMOST, Me.Left / 15, Me.Top / 15, Me.Width / 15, Me.Height / 15, SWP_SHOWWINDOW
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
