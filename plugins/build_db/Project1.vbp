@@ -6,6 +6,7 @@ Class=plugin; plugin.cls
 Form=Form1.frm
 Module=fso; simple-fso.bas
 Class=MD5Hash; MD5Hash.cls
+Module=modLVSort; modLVSort.bas
 Startup="(None)"
 HelpFile=""
 Title="vbplugin"

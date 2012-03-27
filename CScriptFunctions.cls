@@ -25,6 +25,11 @@ Dim alertCycles As Long
 
 Dim oBrowser As Object
 
+Function GetListviewData(index As Long)
+    On Error Resume Next
+    GetListviewData = lv.ListItems(index).tag
+End Function
+
 Function ResetAlertCount()
     alertCount = 0
     alertCycles = 0
@@ -104,11 +109,11 @@ Function GetAnnotCountForPage(page)
     GetAnnotCountForPage = oBrowser.GetAnnotCountForPage(page)
 End Function
 
-Function GetSubjectForAnnot(page, Index)
+Function GetSubjectForAnnot(page, index)
     'MsgBox "GetSubjectForAnnot(" & page & " , " & index & ")"
     'GetSubjectForAnnot = "page: " & page & " index: " & Index
     On Error Resume Next
-    GetSubjectForAnnot = oBrowser.GetAnnot(page, Index)
+    GetSubjectForAnnot = oBrowser.GetAnnot(page, index)
 End Function
 
 Function GetViewerVersion()
@@ -122,14 +127,14 @@ Public Function CRC(s)
     CRC = CRC32(CStr(s))
 End Function
 
-Public Function GetStream(Index)
+Public Function GetStream(index)
         
         On Error Resume Next
         Dim s As CPDFStream
         Dim li As ListItem
         For Each li In Form1.lv.ListItems
             Set s = li.tag
-            If s.Index = Index Then
+            If s.index = index Then
                 If s.isCompressed Then
                     GetStream = s.DecompressedData
                 Else

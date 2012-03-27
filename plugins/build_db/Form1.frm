@@ -111,6 +111,7 @@ Begin VB.Form Form1
          FullRowSelect   =   -1  'True
          GridLines       =   -1  'True
          _Version        =   393217
+         ColHdrIcons     =   "ImgSorted"
          ForeColor       =   -2147483640
          BackColor       =   -2147483643
          BorderStyle     =   1
@@ -186,13 +187,39 @@ Begin VB.Form Form1
       TabIndex        =   1
       Top             =   405
       Width           =   11265
+      Begin VB.CheckBox chkMoveEncrypted 
+         Caption         =   "Move Encrypted"
+         Height          =   255
+         Left            =   8940
+         TabIndex        =   55
+         Top             =   210
+         Width           =   1575
+      End
+      Begin VB.CheckBox Check2 
+         Caption         =   "Disable Decryption Support"
+         Enabled         =   0   'False
+         Height          =   195
+         Left            =   6900
+         TabIndex        =   54
+         Top             =   510
+         Value           =   1  'Checked
+         Width           =   2235
+      End
+      Begin VB.CheckBox chkKillDups 
+         Caption         =   "Kill Duplicate Files"
+         Height          =   195
+         Left            =   5700
+         TabIndex        =   53
+         Top             =   240
+         Width           =   1695
+      End
       Begin VB.CheckBox chkStatsOnly 
          Caption         =   "File Stats Only"
          Height          =   195
-         Left            =   3780
+         Left            =   3840
          TabIndex        =   52
          Top             =   240
-         Width           =   2715
+         Width           =   1515
       End
       Begin VB.CheckBox Check1 
          Caption         =   "OverRide DB Connection String"
@@ -205,9 +232,9 @@ Begin VB.Form Form1
       Begin VB.CheckBox chkScanSubFolders 
          Caption         =   "Recursive"
          Height          =   285
-         Left            =   7800
+         Left            =   7560
          TabIndex        =   26
-         Top             =   420
+         Top             =   180
          Width           =   1170
       End
       Begin VB.TextBox txtBatch 
@@ -221,9 +248,9 @@ Begin VB.Form Form1
       Begin VB.CommandButton cmdClearDB 
          Caption         =   "ClearDB"
          Height          =   285
-         Left            =   9945
+         Left            =   9960
          TabIndex        =   15
-         Top             =   450
+         Top             =   480
          Width           =   1095
       End
       Begin VB.ListBox List1 
@@ -642,6 +669,28 @@ Begin VB.Form Form1
          EndProperty
       EndProperty
    End
+   Begin MSComctlLib.ImageList ImgSorted 
+      Left            =   12030
+      Top             =   30
+      _ExtentX        =   1005
+      _ExtentY        =   1005
+      BackColor       =   -2147483643
+      ImageWidth      =   16
+      ImageHeight     =   16
+      MaskColor       =   12632256
+      _Version        =   393216
+      BeginProperty Images {2C247F25-8591-11D1-B16A-00C0F0283628} 
+         NumListImages   =   2
+         BeginProperty ListImage1 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+            Picture         =   "Form1.frx":0000
+            Key             =   "up"
+         EndProperty
+         BeginProperty ListImage2 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+            Picture         =   "Form1.frx":059A
+            Key             =   "down"
+         EndProperty
+      EndProperty
+   End
    Begin VB.Menu mnuPopup 
       Caption         =   "mnuPopup"
       Visible         =   0   'False
@@ -738,6 +787,16 @@ Begin VB.Form Form1
          Caption         =   "Copy All entries"
       End
    End
+   Begin VB.Menu mnuBatchPopup 
+      Caption         =   "mnuBatchPopup"
+      Visible         =   0   'False
+      Begin VB.Menu mnuChangeBatchIDForSelectedBatch 
+         Caption         =   "Change Batch ID for Selected"
+      End
+      Begin VB.Menu mnuRemoveSelectedFromDBBatch 
+         Caption         =   "Remove Selected from DB"
+      End
+   End
 End
 Attribute VB_Name = "Form1"
 Attribute VB_GlobalNameSpace = False
@@ -754,6 +813,7 @@ Dim lastSQL As String
 Dim isLoaded As Boolean
 Dim defConstr As String
 Dim AbortScan As Boolean
+
 
 Private Sub cbo2_Click()
     On Error Resume Next
@@ -946,6 +1006,15 @@ Private Sub cmdScan_Click()
         
         'fpath = txtDir & "\" & f(i)
         fpath = f(i)
+        
+        If InStr(fpath, "'") > 0 Then
+            List1.AddItem "Found single quote in file name, renaming..."
+            fn = fso.FileNameFromPath(fpath)
+            nfn = Replace(fn, "'", "")
+            Rename fpath, nfn
+            fpath = fso.GetParentFolder(fpath) & "\" & nfn
+        End If
+        
         List1.AddItem "Processing " & fpath
         
         hash = md5.HashFile(fpath)
@@ -956,7 +1025,13 @@ Private Sub cmdScan_Click()
 2       If rs.BOF And rs.EOF Then
             DoEvents 'not found
         Else
-            List1.AddItem "Hash: " & hash & " already found skipping"
+            If chkKillDups.value = 1 Then
+                List1.AddItem "Hash: " & hash & " already found deleting."
+                fso.DeleteFile fpath
+            Else
+                List1.AddItem "Hash: " & hash & " already found skipping"
+            End If
+            
             GoTo nextOne
         End If
         
@@ -980,6 +1055,15 @@ Private Sub cmdScan_Click()
             DoEvents
       Wend
         
+        If frmMain.isEncrypted Then
+            If chkMoveEncrypted.value = 1 Then
+                newdir = txtDir & "\_encrypted"
+                If Not fso.FolderExists(newdir) Then MkDir newdir
+                fso.Move fpath, newdir
+                List1.AddItem "Moving Encrypted file to " & newdir
+            End If
+        End If
+            
 4       pid = cn.Execute("Select autoid from tblFiles where md5='" & hash & "'")!autoid
         
 5        cn.Execute "Update tblFiles set LoadTime=" & frmMain.LoadTime & " where autoid=" & pid
@@ -1203,6 +1287,7 @@ Private Sub Form_Load()
     mnuFields_Click 0
     orgZlibSetting = frmMain.mnuAlwaysUseZlib.Checked
     frmMain.mnuAlwaysUseZlib.Checked = True
+    frmMain.mnuDisableDecryption.Checked = True
     
     db = App.path & "\build_db.mdb"
     If Not fso.FileExists(db) Then
@@ -1284,9 +1369,8 @@ Private Sub Form_Unload(Cancel As Integer)
     On Error Resume Next
     frmMain.mnuAlwaysUseZlib.Checked = orgZlibSetting
     SaveMySetting "SearchFields", txtSearchFields.Text
+    frmMain.mnuDisableDecryption.Checked = False
 End Sub
-
- 
 
 Private Sub Label8_Click()
     MsgBox "Allows you to override the default ODBC connection string used to specify database. " & _
@@ -1362,8 +1446,37 @@ Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
     
 End Sub
 
-Private Sub lv_MouseUp(Button As Integer, Shift As Integer, x As Single, Y As Single)
+Private Sub lv_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
     If Button = 2 Then PopupMenu mnuPopup
+End Sub
+
+Private Sub lvBatchFiles_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
+    'file,size,streams
+    Call ClearHeaderIcons(lvBatchFiles, ColumnHeader.Index)
+    Select Case ColumnHeader.Index
+        Case 1 'file path, no sort specified...
+        Case 2, 3
+            Select Case ColumnHeader.Icon
+                Case "down"
+                    ColumnHeader.Icon = "up"
+                    Call SortColumn(lvBatchFiles, ColumnHeader.Index, sortDescending, sortNumeric)
+                Case "up"
+                    ColumnHeader.Icon = "down"
+                    Call SortColumn(lvBatchFiles, ColumnHeader.Index, sortAscending, sortNumeric)
+                Case Else
+                    ColumnHeader.Icon = "down"
+                    Call SortColumn(lvBatchFiles, ColumnHeader.Index, sortAscending, sortNumeric)
+            End Select
+    End Select
+End Sub
+
+Private Sub ClearHeaderIcons(lv As ListView, CurrentHeader As Integer)
+    Dim i As Integer
+    For i = 1 To lv.ColumnHeaders.Count
+        If lv.ColumnHeaders(i).Index <> CurrentHeader Then
+            lv.ColumnHeaders(i).Icon = Empty
+        End If
+    Next
 End Sub
 
 Private Sub lvBatchFiles_ItemClick(ByVal Item As MSComctlLib.ListItem)
@@ -1386,8 +1499,36 @@ Private Sub lvBatchFiles_ItemClick(ByVal Item As MSComctlLib.ListItem)
     cn.Close
 End Sub
 
-Private Sub lvStreams_MouseUp(Button As Integer, Shift As Integer, x As Single, Y As Single)
+Private Sub lvBatchFiles_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+    If Button = 2 Then PopupMenu mnuBatchPopup
+End Sub
+
+Private Sub lvStreams_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
     If Button = 2 Then PopupMenu mnuPopup4
+End Sub
+
+Private Sub mnuChangeBatchIDForSelectedBatch_Click()
+    On Error Resume Next
+      
+    Dim li As ListItem
+    Dim rs As Recordset
+    
+    bid = InputBox("Enter the new batchid for these samples")
+    bid = Replace(bid, "'", Empty)
+    If Len(bid) = 0 Then Exit Sub
+    
+    cn.Open
+        
+    For Each li In lvBatchFiles.ListItems
+        If li.Selected Then
+            pid = cn.Execute("Select pid from tblHeaders where autoid=" & li.Tag)!pid
+            cn.Execute "Update tblFiles set batch='" & bid & "' where autoid=" & pid
+        End If
+    Next
+    
+    cn.Close
+    TabStrip1_Click 'reload batch id cbo
+    
 End Sub
 
 Private Sub mnuChangeBatchID_Click()
@@ -1480,6 +1621,31 @@ Private Sub mnuCopyPDF_Click()
             MsgBox "File has moved since it was added to db: " & fpath
         End If
     End If
+    
+End Sub
+
+Private Sub mnuRemoveSelectedFromDBBatch_Click()
+    On Error Resume Next
+    If MsgBox("Are you sure you want to remove these entries from the database?", vbYesNo) = vbNo Then Exit Sub
+    
+    Dim li As ListItem
+    Dim rs As Recordset
+    
+    cn.Open
+        
+    For Each li In lvBatchFiles.ListItems
+        If li.Selected Then
+            cn.Execute "Delete from tblFiles where autoid=" & li.Tag
+            cn.Execute "Delete from tblHeaders where pid=" & li.Tag
+        End If
+    Next
+        
+    For i = lvBatchFiles.ListItems.Count To 1 Step -1
+        If lvBatchFiles.ListItems(i).Selected = True Then lvBatchFiles.ListItems.Remove i
+    Next
+    
+    cn.Close
+    ShowStats
     
 End Sub
 

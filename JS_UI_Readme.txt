@@ -23,7 +23,7 @@ txtOut.Text = txtOut.Text & str  //directly add txt 2 lower output textbox
 GetPageNumWords(Optional page = 0) As Long
 GetPageNthWord(Optional page = 0, Optional word = 0, Optional strip = 0)
 Property Get pageNum() - set in main ui
-
+Function GetListviewData(index As Long) - get the data stored in the left hand listview clipboard.
 
 
 You can also use txtOut.Text to retrieve a variable in your script 
