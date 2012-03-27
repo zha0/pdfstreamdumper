@@ -113,9 +113,8 @@ Begin VB.Form frmScTest
          Top             =   180
          Width           =   1635
       End
-      Begin VB.CheckBox chkAdjustOffsets 
-         Caption         =   "Show File based offsets"
-         Enabled         =   0   'False
+      Begin VB.CheckBox chkApiTable 
+         Caption         =   "Scan for Api table"
          Height          =   195
          Left            =   1920
          TabIndex        =   9
@@ -481,7 +480,7 @@ Private Sub Command1_Click()
     cmdline = GetShortName(sctest)
     libemu = GetShortName(App.path & "\libemu")
     
-    If chkAdjustOffsets.Value = 1 Then cmdline = cmdline & " -a"
+    If chkApiTable.Value = 1 Then cmdline = cmdline & " -api"
     If chkInteractiveHooks.Value = 1 Then cmdline = cmdline & " -i"
     If chkCreateDump.Value = 1 Then cmdline = cmdline & " -d"
     If chkReport.Value = 1 Then cmdline = cmdline & " -r"

@@ -50,6 +50,8 @@ Function ParseFile(fpath As String) As String
     Dim fSize As Long
     Dim starttick As Long
     
+    Form1.isEncrypted = False
+    
     If Not fso.FileExists(fpath) Then
         MsgBox "File not found: " & fpath, vbInformation
         Exit Function
@@ -62,14 +64,17 @@ Function ParseFile(fpath As String) As String
     RaiseEvent SetObjectCount(GetCount("endobj", sStr))
     
     If InStr(sStr, "/Encrypt") > 0 Then
-        If csharp.Decrypt(fpath, dFile) Then
-            sStr = LoadFile(dFile)
-            Form1.txtPDFPath = dFile
-        Else
-            If Len(dFile) > 0 Then MsgBox "Decrypt failed output: " & dFile, vbInformation
+        Form1.isEncrypted = True
+        If Form1.mnuDisableDecryption.Checked = False Then 'this modal dialog sucks for automation runs...
+            If csharp.Decrypt(fpath, dFile) Then
+                sStr = LoadFile(dFile)
+                Form1.txtPDFPath = dFile
+            Else
+                If Len(dFile) > 0 Then MsgBox "Decrypt failed output: " & dFile, vbInformation
+            End If
         End If
     End If
-    
+     
     Dim parts()  As String
     Dim defragLevel As Long
     

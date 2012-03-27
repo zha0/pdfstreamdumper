@@ -141,6 +141,7 @@ Source: plugins\build_db\plugin.cls; DestDir: {app}\plugins\build_db
 Source: plugins\build_db\Project1.vbp; DestDir: {app}\plugins\build_db
 Source: plugins\build_db\Project1.vbw; DestDir: {app}\plugins\build_db
 Source: plugins\build_db\simple-fso.bas; DestDir: {app}\plugins\build_db
+Source: plugins\build_db\modLVSort.bas; DestDir: {app}\plugins\build_db
 Source: plugins\blank_build_db.mdb; DestDir: {app}\plugins\
 Source: plugins\README.txt; DestDir: {app}\plugins\
 Source: plugins\build_db.dll; DestDir: {app}\plugins\; Flags: regserver

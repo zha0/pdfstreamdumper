@@ -32,6 +32,7 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -350,7 +351,6 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -373,7 +373,6 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1246
@@ -666,6 +665,9 @@ Begin VB.Form Form1
          Begin VB.Menu mnuOpenLastAtStart 
             Caption         =   "Open Last PDF on Startup"
          End
+         Begin VB.Menu mnuDisableDecryption 
+            Caption         =   "Disable Decryption Support"
+         End
       End
       Begin VB.Menu mnuAbout 
          Caption         =   "About"
@@ -809,9 +811,6 @@ Attribute VB_Exposed = False
 '          - header _CHR(0)_ replaced with empty now (seems only to cause bug) also replaced py in header with empty
 '          - added progress bar and doevents me.refresh to keep ui from freezing on big files
 
-
-
-
 Private Declare Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" (ByVal hwnd As Long, ByVal lpszOp As String, ByVal lpszFile As String, ByVal lpszParams As String, ByVal LpszDir As String, ByVal FsShowCmd As Long) As Long
 Private Declare Function GetTickCount Lib "kernel32" () As Long
 
@@ -832,6 +831,7 @@ Public dlg As New clsCmnDlg
 Public AutomatationRun As Boolean
 Public Status As statss
 Public LoadTime As Long
+Public isEncrypted As Boolean
 
 Dim exploits()
 Dim help_vids()
@@ -856,8 +856,14 @@ Sub LoadPlugins()
     
     On Error Resume Next
     
+    If Not fso.FolderExists(App.path & "\plugins") Then
+        lvDebug.ListItems.Add "Plugins folder not found"
+        Exit Sub
+    End If
     
     tmp() = fso.GetFolderFiles(App.path & "\plugins", "*dll")
+    
+    If AryIsEmpty(tmp) Then Exit Sub
     
    'for the demo, we will just let the user register this way if they want
     'If MsgBox("Did you register all of the dlls & the wsc file with regsvr32 already?", vbYesNo) = vbNo Then
@@ -933,6 +939,10 @@ Private Sub mnub64Encode_Click()
     If fso.FileExists(b) Then
         MsgBox "Complete 0x" & Hex(FileLen(b)) & " bytes decompressed saved as: " & vbCrLf & vbCrLf & b
     End If
+End Sub
+
+Private Sub mnuBrowserUnescape_Click()
+    
 End Sub
 
 Private Sub mnuDecompileFlash_Click()
@@ -1111,6 +1121,10 @@ Private Sub mnuDecompressSWC_Click()
     MsgBox "Deompressed Data saved as " & vbCrLf & vbCrLf & outFile
     
     
+End Sub
+
+Private Sub mnuDisableDecryption_Click()
+    mnuDisableDecryption.Checked = Not mnuDisableDecryption.Checked
 End Sub
 
 Private Sub mnuHelp_Click(Index As Integer)
@@ -2070,6 +2084,8 @@ Private Sub Form_Unload(Cancel As Integer)
          Unload f
     Next
      
+    End
+    
 End Sub
 
 Private Sub lv_MouseDown(Button As Integer, Shift As Integer, x As Single, Y As Single)

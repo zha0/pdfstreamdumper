@@ -186,6 +186,14 @@ Begin VB.Form Form1
       TabIndex        =   1
       Top             =   405
       Width           =   11265
+      Begin VB.CheckBox chkStatsOnly 
+         Caption         =   "File Stats Only"
+         Height          =   195
+         Left            =   3780
+         TabIndex        =   52
+         Top             =   240
+         Width           =   2715
+      End
       Begin VB.CheckBox Check1 
          Caption         =   "OverRide DB Connection String"
          Height          =   255
@@ -228,7 +236,7 @@ Begin VB.Form Form1
       Begin VB.CommandButton cmdScan 
          Caption         =   "Scan"
          Height          =   285
-         Left            =   9990
+         Left            =   9960
          TabIndex        =   5
          Top             =   810
          Width           =   1095
@@ -745,6 +753,7 @@ Dim abortSearch As Boolean
 Dim lastSQL As String
 Dim isLoaded As Boolean
 Dim defConstr As String
+Dim AbortScan As Boolean
 
 Private Sub cbo2_Click()
     On Error Resume Next
@@ -897,6 +906,14 @@ Private Sub cmdScan_Click()
     Me.Visible = True
     Me.Refresh
     DoEvents
+    AbortScan = False
+    
+    If cmdScan.Caption = "Abort" Then
+        AbortScan = True
+        Exit Sub
+    End If
+    
+    cmdScan.Caption = "Abort"
     
     If Not fso.FolderExists(txtDir) Then
         MsgBox "Directory to scan is not valid", vbInformation
@@ -921,6 +938,8 @@ Private Sub cmdScan_Click()
     'cn.Execute "Delete from tblHeaders"
     
     For i = 0 To UBound(f)
+        
+        If AbortScan Then Exit For
         
         Me.Refresh
         DoEvents
@@ -951,6 +970,8 @@ Private Sub cmdScan_Click()
         
 3     cn.Execute sql
         
+      If chkStatsOnly.value = 1 Then GoTo nextOne
+      
       frmMain.txtPdfPath = fpath
       frmMain.cmdDecode_Click
         
@@ -987,6 +1008,7 @@ nextOne:
         
     Next
         
+    cmdScan.Caption = "Scan"
     MsgBox "Complete! " & UBound(f) & " files scanned", vbInformation
     
     cn.Close
