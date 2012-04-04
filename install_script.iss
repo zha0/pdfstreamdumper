@@ -24,6 +24,7 @@ Name: {app}\husk
 Name: {app}\plugins
 Name: {app}\plugins\build_db
 Name: {app}\plugins\objbrowser
+Name: {app}\plugins\VirusTotal
 Name: {app}\highlighters
 Name: {app}\libemu\scSigs
 Name: {app}\xor_bruteforcer
@@ -178,6 +179,13 @@ Source: AS3_WebInstall\Project1.vbp; DestDir: {app}\AS3_WebInstall\
 Source: AS3_WebInstall\Project1.vbw; DestDir: {app}\AS3_WebInstall\
 Source: AS3_WebInstall\ucAsyncDownload.ctl; DestDir: {app}\AS3_WebInstall\
 Source: VS_LIBEMU.url; DestDir: {app}\
+Source: plugins\VirusTotal\MD5Hash.cls; DestDir: {app}\plugins\VirusTotal\
+Source: plugins\VirusTotal\plugin.cls; DestDir: {app}\plugins\VirusTotal\
+Source: plugins\VirusTotal\Project1.vbp; DestDir: {app}\plugins\VirusTotal\
+Source: plugins\VirusTotal\Project1.vbw; DestDir: {app}\plugins\VirusTotal\
+Source: plugins\VirusTotal\Form1.frm; DestDir: {app}\plugins\VirusTotal\
+Source: plugins\VirusTotal\JSON.bas; DestDir: {app}\plugins\VirusTotal\
+Source: plugins\VirusTotal\cStringBuilder.cls; DestDir: {app}\plugins\VirusTotal\
 
 [Icons]
 Name: {group}\PdfStreamDumper.exe; Filename: {app}\PDFStreamDumper.exe
