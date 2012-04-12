@@ -1,6 +1,6 @@
 
 
-           PdfStream Dumper v.9.275
+           PdfStream Dumper v.9.3xx
 
 Developer: David Zimmer <dzzie@yahoo.com>
 Homepage:  http://sandsprite.com/blogs/index.php?uid=7&pid=57
@@ -67,6 +67,18 @@ Notes:
 	If you find a pdf which pdfstreamdumper cant deal with, feel free to mail
 	it in a password protected zip file to me at dzzie@yahoo.com
 
+
+Command line options:
+--------------------------------------------
+	PdfStreamDumper currently only supports one command line option which is /extract
+
+	usage: pdfstreamdumper "c:\blah blah\bad.pdf" /extract "c:\some folder"
+
+        When run in this mode, it will load the pdf file (interface visible) extract all of
+        of the streams it could process without error to the folder specified and then exit.
+
+	The folder need not exist, it will build the path to it if it can. The files will be 
+	named stream_x.ext where ext is the relevant file type extension if it can be determined.
 
 
 Hot Keys and other Behaviors:

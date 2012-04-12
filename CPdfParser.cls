@@ -20,6 +20,7 @@ Event SetObjectCount(cnt As Long)
 Event Complete()
 
 Public abort As Boolean
+Public BreakAtStream As Long
 
 Private Declare Function GetTickCount Lib "kernel32" () As Long
 
@@ -124,7 +125,9 @@ retry:
         stream.ObjectEndOffset = globalOffset + objEnd + Len("endobj") - 2
         stream.Index = GetStreamIndex(sStr, objStart)
         stream.RawObject = Mid(sStr, objStart, objEnd - objStart)
-        'If stream.Index = 112 Then Stop
+        
+        If BreakAtStream > 0 And stream.Index = BreakAtStream Then Stop
+        
         stream.ParseSelf
         
         RaiseEvent NewStream(stream)

@@ -58,7 +58,14 @@ Private Const HWND_NOTOPMOST = -2
 'End Sub
 
 
-
+Public Function isIde() As Boolean
+    On Error GoTo hell
+    Debug.Print 1 / 0
+    isIde = False
+    Exit Function
+hell:
+    isIde = True
+End Function
 
 
 Public Function GetShortName(sFile As String) As String

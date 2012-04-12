@@ -3,6 +3,7 @@ Object = "{0E59F1D2-1FBE-11D0-8FF2-00A0D10038BC}#1.0#0"; "msscript.ocx"
 Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Begin VB.Form Form1 
+   BackColor       =   &H80000005&
    Caption         =   "PDF Stream Dumper - http://sandsprite.com"
    ClientHeight    =   9105
    ClientLeft      =   165
@@ -32,7 +33,6 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
-      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -351,6 +351,7 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -373,6 +374,7 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1246
@@ -585,6 +587,10 @@ Begin VB.Form Form1
          Caption         =   "PRC Files"
          Index           =   6
       End
+      Begin VB.Menu mnuSearchFilter 
+         Caption         =   "XML Streams"
+         Index           =   7
+      End
    End
    Begin VB.Menu mnuFindReplace 
       Caption         =   "Find/Replace"
@@ -674,6 +680,9 @@ Begin VB.Form Form1
       End
       Begin VB.Menu mnuAboutLvColors 
          Caption         =   "About Listview Colors"
+      End
+      Begin VB.Menu mnuDebugBreakAtStream 
+         Caption         =   "Debug> Break At Stream"
       End
    End
    Begin VB.Menu mnuPopup 
@@ -849,6 +858,11 @@ Dim PRCCount As Long
 Dim surpressHideWarnings As Boolean
 'Dim defaultLCID As Long
 
+'COMMAND LINE OPTIONS:
+Dim ExtractToFolder As String 'command line ex: pdfstreamdumper "c:\file.pdf" /extract "c:\folder" (extracts objects only (flash, fonts, prc, u3d))
+
+
+
 Sub LoadPlugins()
     
     Dim tmp() As String, i As Integer, progid As String
@@ -943,6 +957,15 @@ End Sub
 
 Private Sub mnuBrowserUnescape_Click()
     
+End Sub
+
+Private Sub mnuDebugBreakAtStream_Click()
+    Dim x As Long
+    On Error GoTo hell
+    Err.Clear
+    parser.BreakAtStream = CLng(InputBox("Enter stream index to break at"))
+hell:
+    If Err.Number <> 0 Then parser.BreakAtStream = 0
 End Sub
 
 Private Sub mnuDecompileFlash_Click()
@@ -1299,7 +1322,8 @@ Private Sub mnuAboutLvColors_Click()
                 "Green: Headers with /Launch or /Action or /OpenAction or /AA\n" & _
                 "Purple: Headers with /EmbeddedFiles\n" & _
                 "Orange: Unsupported Filters\n" & _
-                "Yellow: TTF Fonts"
+                "Yellow: TTF Fonts\n" & _
+                "Pink: XML Data"
                 
     MsgBox Replace(msg, "\n", vbCrLf), vbInformation
     
@@ -1765,6 +1789,7 @@ Private Sub mnuSearchFilter_Click(Index As Integer)
             Case 4:   If li.ForeColor = vbGreen Then match = True
             Case 5:   If looksEscaped(s.Header) Then match = True
             Case 6:   If s.ContentType = prc Then match = True
+            Case 7:   If s.ContentType = xml Then match = True
         End Select
                 
         If match Then
@@ -2013,6 +2038,9 @@ Private Sub parser_NewStream(stream As CPDFStream)
                 If stream.ContentType = TTFFont Then
                     li.ForeColor = &HFFFF&     'yellow
                     li.ToolTipText = "TTF Font"
+                ElseIf stream.ContentType = xml Then
+                    li.ForeColor = &HFF80FF
+                    li.ToolTipText = "XML Data"
                 Else
                     li.ForeColor = vbBlue ' &H400000    'blue
                     li.ToolTipText = "Data Stream"
@@ -2277,7 +2305,44 @@ end_of_func:
     Set oBrowser = GetObject("", "obj_Browser.plugin") 'not much of a plugin is it! more of a lib at this point :P
     oBrowser.initasLib Me
     
+    If Len(ExtractToFolder) > 0 Then ExtractTo ExtractToFolder
+        
+            
+        
+        
 End Sub
+
+Function ExtractTo(folder As String)
+    Dim li As ListItem
+    Dim s As CPDFStream
+    Dim d As String
+    Dim pth As String
+    
+    If Not fso.FolderExists(folder) Then
+            If Not fso.buildPath(folder) Then Exit Function
+    End If
+    
+    For Each li In lv.ListItems
+        Set s = li.tag
+        d = Empty
+        If s.ContainsStream And Not s.UsesUnsupportedFilter Then
+            'If s.ContentType <> Unknown Then
+                If s.isCompressed Then
+                    d = s.DecompressedData
+                Else
+                    d = s.OriginalData
+                End If
+            'End If
+        End If
+        If Len(d) > 0 Then
+            pth = folder & "\stream_" & Hex(s.Index) & s.FileExtension
+            fso.writeFile pth, d
+        End If
+    Next
+            
+    End
+    
+End Function
 
 Function AryIsEmpty(ary) As Boolean
     On Error GoTo hell
@@ -2774,6 +2839,7 @@ Private Sub Form_Load()
         mnuHelp(i).tag = Trim(vid(1))
     Next
     
+    mnuDebugBreakAtStream.Visible = isIde()
     mnuAutoEscapeHeaders.Checked = IIf(GetMySetting("EscapeHeaders", 1) = 1, True, False)
     mnuVisualFormatHeaders.Checked = IIf(GetMySetting("FormatHeaders", 1) = 1, True, False)
     mnuHideDups.Checked = IIf(GetMySetting("HideDups", 0) = 1, True, False)
@@ -2822,7 +2888,14 @@ Private Sub Form_Load()
             End If
         Else
             'assume its a pdf file for analysis.
-            txtPDFPath = Replace(command, """", Empty)
+            Dim tmp() As String
+            If InStr(command, "/extract") Then
+                tmp = Split(command, "/extract")
+                txtPDFPath = Replace(Trim(tmp(0)), """", Empty)
+                ExtractToFolder = Replace(Trim(tmp(1)), """", Empty)
+            Else
+                txtPDFPath = Replace(command, """", Empty)
+            End If
             cmdDecode_Click
         End If
     Else

@@ -22,6 +22,7 @@ Public Enum ObjType
     U3d = 2
     TTFFont = 3
     prc = 4
+    xml = 5
 End Enum
     
 Public Index As Long
@@ -53,6 +54,7 @@ Public HeaderCRC As String
 Public ContentType As ObjType
 Public UsesUnsupportedFilter As Boolean
 Public Message As String
+Public FileExtension As String
 
 Public StreamDecompressor As New CApplyFilters
 
@@ -223,16 +225,25 @@ Private Sub SetContentType(ad)
     
     If VBA.Left(ad, 3) = "CWS" Then
         ContentType = Flash
+        FileExtension = ".swf"
     ElseIf VBA.Left(ad, 3) = "FWS" Then
         ContentType = Flash
+        FileExtension = ".swf"
     ElseIf VBA.Left(ad, 3) = "U3D" Then
         ContentType = U3d
+        FileExtension = ".u3d"
     ElseIf VBA.Left(ad, 3) = "PRC" Then
         ContentType = prc
+        FileExtension = ".prc"
     ElseIf InStr(1, ad, "maxp", vbTextCompare) > 0 Then
         ContentType = TTFFont
+        FileExtension = ".ttf"
     ElseIf InStr(1, ad, "glyf", vbTextCompare) > 0 Then
         ContentType = TTFFont
+        FileExtension = ".ttf"
+    ElseIf InStr(1, ad, "xmlns:", vbTextCompare) > 0 Then
+        ContentType = xml
+        FileExtension = ".xml"
     End If
     
 End Sub
@@ -321,6 +332,8 @@ Function GetDetailsReport()
     
     End If
     
+    push r, lpad("Detected Type:", sz) & FileExtension
+    
     If Len(Message) > 0 Then push r, lpad("Message: ", sz) & Message
      
     push r, lpad("HeaderCRC: ", sz) & Hex(Me.HeaderCRC)
@@ -329,3 +342,7 @@ Function GetDetailsReport()
     GetDetailsReport = Join(r, vbCrLf)
     
 End Function
+
+Private Sub Class_Initialize()
+    FileExtension = ".unk"
+End Sub
