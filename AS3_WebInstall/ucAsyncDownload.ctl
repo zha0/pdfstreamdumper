@@ -21,6 +21,8 @@ Event DownloadComplete(fPath As String)
 Event Progress(current As Long, total As Long)
 Event Error(code As Long, msg As String)
 
+Public LastURL As String
+
 Sub AbortDownload()
     On Error Resume Next
     UserControl.CancelAsyncRead "temp"
@@ -28,6 +30,7 @@ End Sub
 
 Sub StartDownload(url As String, Optional opt As AsyncReadConstants)
     On Error GoTo hell
+    LastURL = url
     UserControl.AsyncRead url, vbAsyncTypeFile, "temp", opt
     Exit Sub
 hell:

@@ -23,6 +23,16 @@ Begin VB.Form Form1
    ScaleHeight     =   9105
    ScaleWidth      =   13950
    StartUpPosition =   3  'Windows Default
+   Begin PDFStreamDumper.ucAsyncDownload ucAsyncDownload1 
+      Height          =   615
+      Left            =   12870
+      TabIndex        =   19
+      Top             =   810
+      Visible         =   0   'False
+      Width           =   795
+      _ExtentX        =   1402
+      _ExtentY        =   1085
+   End
    Begin RichTextLib.RichTextBox txtDetails 
       Height          =   3435
       Left            =   3600
@@ -33,6 +43,7 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -351,7 +362,6 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -374,7 +384,6 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1246
@@ -629,6 +638,9 @@ Begin VB.Form Form1
       End
       Begin VB.Menu mnuSpacer77 
          Caption         =   "-"
+      End
+      Begin VB.Menu mnuSecureDownload 
+         Caption         =   "Download URL"
       End
       Begin VB.Menu mnuFilters 
          Caption         =   "Manual_Filters"
@@ -924,7 +936,10 @@ Function RegisterPlugin(intMenu As Integer, strMenuName As String, intStartupArg
 End Function
 
 Private Sub cmdAbortProcessing_Click()
+    On Error Resume Next
     parser.abort = True
+    ucAsyncDownload1.AbortDownload
+    pb.Value = 0
 End Sub
 
 Private Sub mnuAlwaysUseZlib_Click()
@@ -1540,6 +1555,13 @@ Private Sub mnuMarkStream_Click()
     
     selli.ForeColor = &H808080
     
+End Sub
+
+Private Sub mnuSecureDownload_Click()
+    Dim x As String
+    x = InputBox("Enter the URL you wish to download...")
+    If Len(x) = 0 Then Exit Sub
+    ucAsyncDownload1.StartDownload x, vbAsyncReadForceUpdate
 End Sub
 
 Private Sub mnuShowRawHeader_Click()
@@ -3000,14 +3022,14 @@ End Sub
 
 
 Private Sub sc_Error()
-    MsgBox "Script Error: " & sc.error.Description & "  " & sc.error.Text
+    MsgBox "Script Error: " & sc.Error.Description & "  " & sc.Error.Text
 End Sub
 
 Private Sub scAuto_Error()
-     MsgBox "Automation Script Error: " & scAuto.error.Description & vbCrLf & _
-            "Line: " & scAuto.error.Line & vbCrLf & _
-            "Source: " & scAuto.error.Source & vbCrLf & _
-            "Text: " & scAuto.error.Text
+     MsgBox "Automation Script Error: " & scAuto.Error.Description & vbCrLf & _
+            "Line: " & scAuto.Error.Line & vbCrLf & _
+            "Source: " & scAuto.Error.Source & vbCrLf & _
+            "Text: " & scAuto.Error.Text
 End Sub
 
 Private Sub TabStrip1_Click()
@@ -3146,4 +3168,43 @@ End Function
 '    cnt = cnt + 1
 '
 'Loop
+'
+Private Sub ucAsyncDownload1_DownloadComplete(fPath As String)
+    Dim f As String
+    Dim a As Long
+    
+    On Error GoTo hell
+    
+    f = fso.WebFileNameFromPath(ucAsyncDownload1.LastURL)
+    a = InStr(f, "?")
+    If a > 2 Then f = Mid(f, 1, a - 1)
+    
+    f = dlg.SaveDialog(AllFiles, "", "Save file as...", , Me.hwnd, f)
+    If Len(f) = 0 Then
+        Kill fPath
+        Exit Sub
+    End If
+    Name fPath As f
+    Exit Sub
+hell:
+    MsgBox "Async DownloadComplete Error: " & Err.Description
+    
+End Sub
+
+Private Sub ucAsyncDownload1_Error(code As Long, msg As String)
+    Const NotFound = &H80070006
+    If code = &H80070006 Then
+        MsgBox "The URL specified was not found.", vbInformation
+    Else
+        MsgBox "Error downloading file! " & vbCrLf & vbCrLf & _
+               "Code: " & code & vbCrLf & _
+               "Message: " & msg, vbInformation
+    End If
+End Sub
+
+Private Sub ucAsyncDownload1_Progress(current As Long, total As Long)
+    On Error Resume Next 'bug if total > pb.max capability? (single)
+    pb.Max = total + 1
+    pb.Value = current
+End Sub
 '
