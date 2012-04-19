@@ -23,12 +23,18 @@ Public frmMain As Object
 Sub SetHost(newref As Object)
     Set frmMain = newref
     frmMain.RegisterPlugin 0, "Virus Total", 0
+    frmMain.RegisterPlugin 0, "Virus Total - Bulk Hash Lookup", 1
 End Sub
 
 Sub StartUp(intArg As Integer)
     On Error Resume Next
-    Set Form1.frmMain = frmMain
-    Form1.Show '1
+    If intArg = 0 Then
+        Set Form1.frmMain = frmMain
+        Form1.Show '1
+    Else
+        Set Form2.frmMain = frmMain
+        Form2.Show '1
+    End If
 End Sub
 
  

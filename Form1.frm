@@ -3,7 +3,6 @@ Object = "{0E59F1D2-1FBE-11D0-8FF2-00A0D10038BC}#1.0#0"; "msscript.ocx"
 Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Begin VB.Form Form1 
-   BackColor       =   &H80000005&
    Caption         =   "PDF Stream Dumper - http://sandsprite.com"
    ClientHeight    =   9105
    ClientLeft      =   165
@@ -648,6 +647,9 @@ Begin VB.Form Form1
       Begin VB.Menu mnuHexEditor 
          Caption         =   "View PDF in Hexeditor"
       End
+      Begin VB.Menu mnuExtractURI 
+         Caption         =   "Extract URLs"
+      End
       Begin VB.Menu mnuSpacer4 
          Caption         =   "-"
       End
@@ -1163,6 +1165,41 @@ End Sub
 
 Private Sub mnuDisableDecryption_Click()
     mnuDisableDecryption.Checked = Not mnuDisableDecryption.Checked
+End Sub
+
+Private Sub mnuExtractURI_Click()
+    On Error Resume Next
+    Dim r As String
+    Dim s As CPDFStream
+    Dim li As ListItem
+    Dim tmp
+    Dim start As Long
+    Dim e As Long
+    
+    For Each li In lv.ListItems
+        Set s = li.tag
+        start = InStr(1, s.escapedHeader, "URI", vbTextCompare)
+        If start > 0 Then
+            e = InStr(start, s.escapedHeader, ")")
+            start = InStr(start, s.escapedHeader, "(") + 1
+            If start > 1 And e > 0 And e > start Then
+                r = r & Mid(s.escapedHeader, start, e - start) & vbCrLf
+            End If
+        End If
+    Next
+    
+    If Len(r) > 0 Then
+        txtUncompressed = r
+         
+    Else
+        MsgBox "No results found", vbInformation
+    End If
+    
+    
+    'Clipboard.Clear
+    'Clipboard.SetText r
+    'MsgBox Len(r) & " characters copied to clipboard.", vbInformation
+    
 End Sub
 
 Private Sub mnuHelp_Click(Index As Integer)
@@ -3022,14 +3059,14 @@ End Sub
 
 
 Private Sub sc_Error()
-    MsgBox "Script Error: " & sc.Error.Description & "  " & sc.Error.Text
+    MsgBox "Script Error: " & sc.error.Description & "  " & sc.error.Text
 End Sub
 
 Private Sub scAuto_Error()
-     MsgBox "Automation Script Error: " & scAuto.Error.Description & vbCrLf & _
-            "Line: " & scAuto.Error.Line & vbCrLf & _
-            "Source: " & scAuto.Error.Source & vbCrLf & _
-            "Text: " & scAuto.Error.Text
+     MsgBox "Automation Script Error: " & scAuto.error.Description & vbCrLf & _
+            "Line: " & scAuto.error.Line & vbCrLf & _
+            "Source: " & scAuto.error.Source & vbCrLf & _
+            "Text: " & scAuto.error.Text
 End Sub
 
 Private Sub TabStrip1_Click()
@@ -3169,7 +3206,7 @@ End Function
 '
 'Loop
 '
-Private Sub ucAsyncDownload1_DownloadComplete(fPath As String)
+Private Sub ucAsyncDownload1_DownloadComplete(fpath As String)
     Dim f As String
     Dim a As Long
     
@@ -3181,10 +3218,10 @@ Private Sub ucAsyncDownload1_DownloadComplete(fPath As String)
     
     f = dlg.SaveDialog(AllFiles, "", "Save file as...", , Me.hwnd, f)
     If Len(f) = 0 Then
-        Kill fPath
+        Kill fpath
         Exit Sub
     End If
-    Name fPath As f
+    Name fpath As f
     Exit Sub
 hell:
     MsgBox "Async DownloadComplete Error: " & Err.Description

@@ -186,6 +186,8 @@ Source: plugins\VirusTotal\Project1.vbw; DestDir: {app}\plugins\VirusTotal\
 Source: plugins\VirusTotal\Form1.frm; DestDir: {app}\plugins\VirusTotal\
 Source: plugins\VirusTotal\JSON.bas; DestDir: {app}\plugins\VirusTotal\
 Source: plugins\VirusTotal\cStringBuilder.cls; DestDir: {app}\plugins\VirusTotal\
+Source: plugins\VirusTotal\CVirusTotal.cls; DestDir: {app}\plugins\VirusTotal\
+Source: plugins\VirusTotal\Form2.frm; DestDir: {app}\plugins\VirusTotal\
 Source: plugins\virustotal.dll; DestDir: {app}\plugins\; Flags: regserver
 
 [Icons]
