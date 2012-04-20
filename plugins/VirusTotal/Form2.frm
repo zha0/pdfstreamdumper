@@ -10,6 +10,14 @@ Begin VB.Form Form2
    ScaleHeight     =   7770
    ScaleWidth      =   9210
    StartUpPosition =   2  'CenterScreen
+   Begin VB.CommandButton Command1 
+      Caption         =   "Load Files Embedded in PDF"
+      Height          =   405
+      Left            =   3270
+      TabIndex        =   7
+      Top             =   60
+      Width           =   2655
+   End
    Begin VB.Timer tmrDelay 
       Enabled         =   0   'False
       Interval        =   4500
@@ -20,17 +28,9 @@ Begin VB.Form Form2
       Caption         =   "Abort"
       Height          =   405
       Left            =   7650
-      TabIndex        =   7
-      Top             =   60
-      Width           =   1455
-   End
-   Begin VB.CommandButton cmdClear 
-      Caption         =   "Clear List"
-      Height          =   405
-      Left            =   3570
       TabIndex        =   6
       Top             =   60
-      Width           =   1905
+      Width           =   1455
    End
    Begin MSComctlLib.ProgressBar pb 
       Height          =   285
@@ -46,10 +46,10 @@ Begin VB.Form Form2
    Begin VB.CommandButton cmdQuery 
       Caption         =   "Begin Query"
       Height          =   405
-      Left            =   5550
+      Left            =   6000
       TabIndex        =   4
       Top             =   60
-      Width           =   2055
+      Width           =   1605
    End
    Begin VB.TextBox Text2 
       BeginProperty Font 
@@ -75,7 +75,7 @@ Begin VB.Form Form2
       Left            =   60
       TabIndex        =   2
       Top             =   60
-      Width           =   3435
+      Width           =   3165
    End
    Begin MSComctlLib.ListView lv 
       Height          =   2445
@@ -97,14 +97,19 @@ Begin VB.Form Form2
       BackColor       =   -2147483643
       BorderStyle     =   1
       Appearance      =   1
-      NumItems        =   2
+      NumItems        =   3
       BeginProperty ColumnHeader(1) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
          Text            =   "hash"
-         Object.Width           =   10583
+         Object.Width           =   7056
       EndProperty
       BeginProperty ColumnHeader(2) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
          SubItemIndex    =   1
          Text            =   "detections"
+         Object.Width           =   2540
+      EndProperty
+      BeginProperty ColumnHeader(3) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         SubItemIndex    =   2
+         Text            =   "Description"
          Object.Width           =   2540
       EndProperty
    End
@@ -136,8 +141,20 @@ Begin VB.Form Form2
       Begin VB.Menu mnuCopyAll 
          Caption         =   "Copy All Results"
       End
+      Begin VB.Menu mnuDivider 
+         Caption         =   "-"
+      End
       Begin VB.Menu mnuRemoveSelected 
          Caption         =   "Remove Selected"
+      End
+      Begin VB.Menu mnuClearList 
+         Caption         =   "Remove All"
+      End
+      Begin VB.Menu mnuDivider2 
+         Caption         =   "-"
+      End
+      Begin VB.Menu mnuAddStream 
+         Caption         =   "Manuallly Add PDF Stream"
       End
    End
 End
@@ -268,10 +285,62 @@ Private Sub cmdLoadHashs_Click()
     Next
 End Sub
 
+Private Sub Command1_Click()
+
+    On Error Resume Next
+    
+    Dim lvMain As ListView
+    Dim li As ListItem
+    Dim li2 As ListItem
+    Dim stream As Object 'CPdfStream
+    Dim data As String
+    Dim hash As String
+    
+    Set lvMain = frmMain.lv
+    
+    cmdClear_Click
+    
+    If lvMain Is Nothing Then
+        MsgBox "Could not get a reference to the main form listview?"
+        Exit Sub
+    End If
+    
+    If lvMain.ListItems.Count = 0 Then
+        MsgBox "No pdf was loaded or no streams found"
+        Exit Sub
+    End If
+    
+    'GetActiveData(Item As ListItem, Optional load_ui As Boolean = False, Optional ret_Stream As CPDFStream) As String
+    For Each li In lvMain.ListItems
+        data = frmMain.GetActiveData(li, False, stream)
+        If Not stream Is Nothing And Len(data) > 0 Then
+            ext = stream.FileExtension
+            If Len(ext) > 0 And ext <> ".xml" And ext <> ".unk" Then
+                hash = md5.HashString(data)
+                Set li2 = lv.ListItems.Add(, , hash)
+                i = stream.index
+                ft = stream.FileType
+                li2.SubItems(2) = "Stream: " & i & " - " & ft
+            End If
+        End If
+    Next
+            
+    If lv.ListItems.Count = 0 Then
+        MsgBox "No embedded file types found such as swf, prc, u3d, ttf etc..", vbInformation
+    Else
+        MsgBox lv.ListItems.Count & " stream objects found!", vbInformation
+    End If
+        
+End Sub
+
+
+
+
 Private Sub Form_Load()
     
     Set vt.List1 = List1
- 
+    lv.ColumnHeaders(3).Width = lv.Width - lv.ColumnHeaders(3).Left - 150
+    
 End Sub
 
 
@@ -282,6 +351,70 @@ End Sub
 
 Private Sub lv_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
     If Button = 2 Then PopupMenu mnuPopup
+End Sub
+
+Private Sub mnuAddStream_Click()
+    
+    On Error Resume Next
+    
+    Dim lvMain As ListView
+    Dim li As ListItem
+    Dim li2 As ListItem
+    Dim stream As Object 'CPdfStream
+    Dim data As String
+    Dim hash As String
+    
+    Set lvMain = frmMain.lv
+     
+    If lvMain Is Nothing Then
+        MsgBox "Could not get a reference to the main form listview?"
+        Exit Sub
+    End If
+    
+    If lvMain.ListItems.Count = 0 Then
+        MsgBox "No pdf was loaded or no streams found"
+        Exit Sub
+    End If
+    
+    'GetActiveData(Item As ListItem, Optional load_ui As Boolean = False, Optional ret_Stream As CPDFStream) As String
+    
+    index = InputBox("Enter the streams index you want to load the hash for.")
+    If Len(index) = 0 Then Exit Sub
+    
+    index = CLng(index)
+    If index = 0 Then
+        MsgBox "Invalid number entered"
+        Exit Sub
+    End If
+    
+    For Each li In lvMain.ListItems
+        data = frmMain.GetActiveData(li, False, stream)
+        If stream Is Nothing Then GoTo nextone
+        
+        If stream.index = index Then
+            If Len(data) = 0 Then
+                MsgBox "Specified index did not contain a stream?"
+                Exit Sub
+            End If
+            
+            ext = stream.FileExtension
+            hash = md5.HashString(data)
+            Set li2 = lv.ListItems.Add(, , hash)
+            i = stream.index
+            ft = " - " & stream.FileType
+            If Len(ft) = 3 Then ft = ""
+            li2.SubItems(2) = "Stream: " & i & ft & " - Manual Load"
+            
+            Exit Sub
+        End If
+        
+nextone:
+    Next
+    
+End Sub
+
+Private Sub mnuClearList_Click()
+    cmdClear_Click
 End Sub
 
 Private Sub mnuCopyAll_Click()

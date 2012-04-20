@@ -21,7 +21,7 @@ Const URL_URL_REPORT = "url/report"
 Const URL_MAKE_COMMENT = "comments/put"
 Const API_KEY = "a949ea9c64e7145a065b0e562673a66216a132712e958168c8c00ee5f451485b"
 
-Const report_cache_dir = "D:\pdfxray_files\pdfxray_malware\reports\"
+Const report_cache_dir = ""
 
 Public List1 As ListBox 'for logging...
 

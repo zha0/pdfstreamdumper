@@ -55,6 +55,7 @@ Public ContentType As ObjType
 Public UsesUnsupportedFilter As Boolean
 Public Message As String
 Public FileExtension As String
+Public FileType As String
 
 Public StreamDecompressor As New CApplyFilters
 
@@ -226,24 +227,31 @@ Private Sub SetContentType(ad)
     If VBA.Left(ad, 3) = "CWS" Then
         ContentType = Flash
         FileExtension = ".swf"
+        FileType = "Flash File"
     ElseIf VBA.Left(ad, 3) = "FWS" Then
         ContentType = Flash
         FileExtension = ".swf"
+        FileType = "Flash File"
     ElseIf VBA.Left(ad, 3) = "U3D" Then
         ContentType = U3d
         FileExtension = ".u3d"
+        FileType = "U3d File"
     ElseIf VBA.Left(ad, 3) = "PRC" Then
         ContentType = prc
         FileExtension = ".prc"
+        FileType = "PRC File"
     ElseIf InStr(1, ad, "maxp", vbTextCompare) > 0 Then
         ContentType = TTFFont
         FileExtension = ".ttf"
+        FileType = "Font File"
     ElseIf InStr(1, ad, "glyf", vbTextCompare) > 0 Then
         ContentType = TTFFont
         FileExtension = ".ttf"
+        FileType = "Font File"
     ElseIf InStr(1, ad, "xmlns:", vbTextCompare) > 0 Then
         ContentType = xml
         FileExtension = ".xml"
+        FileType = "Xml Data"
     End If
     
 End Sub

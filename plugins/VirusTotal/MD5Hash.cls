@@ -138,7 +138,7 @@ End Sub
 
 '----- Public Methods -----
 
-Public Function HashFile(ByVal FileName As String) As String
+Public Function HashFile(ByVal filename As String) As String
     Const CHUNK As Long = 16384
     Dim intFile As Integer
     Dim lngWholeChunks As Long
@@ -147,11 +147,11 @@ Public Function HashFile(ByVal FileName As String) As String
     Dim bytBlock() As Byte
     
     On Error Resume Next 'Does file exist?
-    GetAttr FileName
+    GetAttr filename
     If Err.Number = 0 Then
         On Error GoTo 0
         intFile = FreeFile(0)
-        Open FileName For Binary Access Read As #intFile
+        Open filename For Binary Access Read As #intFile
         lngWholeChunks = LOF(intFile) \ CHUNK
         intRemainder = LOF(intFile) - (CHUNK * lngWholeChunks)
         NewHash
@@ -178,6 +178,15 @@ Public Function HashBytes(ByRef Block() As Byte) As String
     NewHash
     HashBlock Block
     HashBytes = HashValue()
+End Function
+
+Function ToBytes(s As String) As Byte()
+    Const LANG_US = &H409
+    ToBytes = StrConv(s, vbFromUnicode, LANG_US)
+End Function
+
+Public Function HashString(s As String) As String
+    HashString = HashBytes(ToBytes(s))
 End Function
 
 '----- Class Event Handlers -----
