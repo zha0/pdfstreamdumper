@@ -42,7 +42,6 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
-      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -361,6 +360,7 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -383,6 +383,7 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1246
@@ -599,6 +600,9 @@ Begin VB.Form Form1
          Caption         =   "XML Streams"
          Index           =   7
       End
+      Begin VB.Menu mnuExtractURI 
+         Caption         =   "Extract URLs"
+      End
    End
    Begin VB.Menu mnuFindReplace 
       Caption         =   "Find/Replace"
@@ -646,9 +650,6 @@ Begin VB.Form Form1
       End
       Begin VB.Menu mnuHexEditor 
          Caption         =   "View PDF in Hexeditor"
-      End
-      Begin VB.Menu mnuExtractURI 
-         Caption         =   "Extract URLs"
       End
       Begin VB.Menu mnuSpacer4 
          Caption         =   "-"
@@ -872,6 +873,7 @@ Dim PRCCount As Long
 Dim surpressHideWarnings As Boolean
 'Dim defaultLCID As Long
 
+Dim DownloadPath As String
 'COMMAND LINE OPTIONS:
 Dim ExtractToFolder As String 'command line ex: pdfstreamdumper "c:\file.pdf" /extract "c:\folder" (extracts objects only (flash, fonts, prc, u3d))
 
@@ -1595,10 +1597,28 @@ Private Sub mnuMarkStream_Click()
 End Sub
 
 Private Sub mnuSecureDownload_Click()
-    Dim x As String
-    x = InputBox("Enter the URL you wish to download...")
-    If Len(x) = 0 Then Exit Sub
-    ucAsyncDownload1.StartDownload x, vbAsyncReadForceUpdate
+    Dim url As String
+    Dim f As String
+    Dim a As Long
+    
+    url = InputBox("Enter the URL you wish to download...")
+    If Len(url) = 0 Then Exit Sub
+    
+    f = fso.WebFileNameFromPath(url)
+    a = InStr(f, "?")
+    If a > 2 Then f = Mid(f, 1, a - 1)
+    
+    f = dlg.SaveDialog(AllFiles, "", "Save file as...", False, Me.hwnd, f)
+    If Len(f) = 0 Then Exit Sub
+    
+    If fso.FileExists(f) Then
+        If MsgBox("This file already exists, Are you sure you want to overwrite it?", vbYesNo) = vbNo Then Exit Sub
+        Kill f
+    End If
+    
+    DownloadPath = f
+    ucAsyncDownload1.StartDownload url, vbAsyncReadForceUpdate
+    
 End Sub
 
 Private Sub mnuShowRawHeader_Click()
@@ -3212,19 +3232,12 @@ Private Sub ucAsyncDownload1_DownloadComplete(fpath As String)
     
     On Error GoTo hell
     
-    f = fso.WebFileNameFromPath(ucAsyncDownload1.LastURL)
-    a = InStr(f, "?")
-    If a > 2 Then f = Mid(f, 1, a - 1)
+    pb.Value = 0
+    Name fpath As DownloadPath
     
-    f = dlg.SaveDialog(AllFiles, "", "Save file as...", , Me.hwnd, f)
-    If Len(f) = 0 Then
-        Kill fpath
-        Exit Sub
-    End If
-    Name fpath As f
     Exit Sub
 hell:
-    MsgBox "Async DownloadComplete Error: " & Err.Description
+    MsgBox "DownloadComplete Error: " & Err.Description
     
 End Sub
 
