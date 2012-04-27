@@ -310,21 +310,11 @@ Private Sub Command1_Click()
         Exit Sub
     End If
     
-    'GetActiveData(Item As ListItem, Optional load_ui As Boolean = False, Optional ret_Stream As CPDFStream) As String
-    For Each li In lvMain.ListItems
-        data = frmMain.GetActiveData(li, False, stream)
-        If Not stream Is Nothing And Len(data) > 0 Then
-            ext = stream.FileExtension
-            If Len(ext) > 0 And ext <> ".xml" And ext <> ".unk" Then
-                hash = md5.HashString(data)
-                Set li2 = lv.ListItems.Add(, , hash)
-                i = stream.index
-                ft = stream.FileType
-                li2.SubItems(2) = "Stream: " & i & " - " & ft
-            End If
-        End If
-    Next
-            
+    Dim scanIt As Boolean
+    
+    scanLV lvMain
+    scanLV frmMain.lv2
+   
     If lv.ListItems.Count = 0 Then
         MsgBox "No embedded file types found such as swf, prc, u3d, ttf etc..", vbInformation
     Else
@@ -333,7 +323,45 @@ Private Sub Command1_Click()
         
 End Sub
 
+Private Sub scanLV(lvMain As ListView)
+    
+    On Error Resume Next
+    
+    Dim li As ListItem
+    Dim li2 As ListItem
+    Dim stream As Object 'CPdfStream
+    Dim data As String
+    Dim hash As String
+    Dim scanIt As Boolean
+    Dim filters As String
+    Dim fileType As String
 
+     'GetActiveData(Item As ListItem, Optional load_ui As Boolean = False, Optional ret_Stream As CPDFStream) As String
+    For Each li In lvMain.ListItems
+        data = frmMain.GetActiveData(li, False, stream)
+        If Not stream Is Nothing And Len(data) > 0 Then
+            ext = stream.FileExtension
+            filters = stream.StreamDecompressor.GetActiveFiltersAsString()
+            fileType = stream.fileType
+            
+            scanIt = False
+            If Len(ext) > 0 And ext <> ".xml" And ext <> ".unk" Then scanIt = True
+            If InStr(1, filters, "JBIG2Decode", vbTextCompare) > 0 Then
+                scanIt = True
+                fileType = " JBIG2Stream"
+            End If
+            
+            If scanIt Then
+                hash = md5.HashString(data)
+                Set li2 = lv.ListItems.Add(, , hash)
+                i = stream.index
+                li2.SubItems(2) = "Stream: " & i & " - " & fileType
+            End If
+            
+        End If
+    Next
+    
+End Sub
 
 
 Private Sub Form_Load()
@@ -401,7 +429,7 @@ Private Sub mnuAddStream_Click()
             hash = md5.HashString(data)
             Set li2 = lv.ListItems.Add(, , hash)
             i = stream.index
-            ft = " - " & stream.FileType
+            ft = " - " & stream.fileType
             If Len(ft) = 3 Then ft = ""
             li2.SubItems(2) = "Stream: " & i & ft & " - Manual Load"
             

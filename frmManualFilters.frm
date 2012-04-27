@@ -2,20 +2,28 @@ VERSION 5.00
 Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Begin VB.Form frmManualFilters 
    Caption         =   "Form3"
-   ClientHeight    =   6945
+   ClientHeight    =   7035
    ClientLeft      =   60
    ClientTop       =   345
    ClientWidth     =   14715
    LinkTopic       =   "Form3"
-   ScaleHeight     =   6945
+   ScaleHeight     =   7035
    ScaleWidth      =   14715
    StartUpPosition =   3  'Windows Default
+   Begin VB.CommandButton cmdSaveCurBuffer 
+      Caption         =   "Save Cur buffer to Disk"
+      Height          =   285
+      Left            =   120
+      TabIndex        =   21
+      Top             =   900
+      Width           =   1845
+   End
    Begin VB.CommandButton cmdZlibDeflate 
       Caption         =   "Zlib Deflate"
       Height          =   285
       Left            =   135
       TabIndex        =   20
-      Top             =   2745
+      Top             =   3015
       Width           =   1770
    End
    Begin VB.CommandButton cmdDecode 
@@ -24,7 +32,7 @@ Begin VB.Form frmManualFilters
       Index           =   9
       Left            =   135
       TabIndex        =   19
-      Top             =   6345
+      Top             =   6615
       Width           =   1815
    End
    Begin VB.CheckBox chkDebug 
@@ -32,7 +40,7 @@ Begin VB.Form frmManualFilters
       Height          =   255
       Left            =   120
       TabIndex        =   18
-      Top             =   2400
+      Top             =   2670
       Width           =   1815
    End
    Begin VB.TextBox txtHeader 
@@ -50,7 +58,7 @@ Begin VB.Form frmManualFilters
       Height          =   255
       Left            =   120
       TabIndex        =   14
-      Top             =   1680
+      Top             =   1950
       Width           =   1815
    End
    Begin VB.CheckBox chkHexdump 
@@ -58,7 +66,7 @@ Begin VB.Form frmManualFilters
       Height          =   255
       Left            =   120
       TabIndex        =   12
-      Top             =   2040
+      Top             =   2310
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
@@ -67,7 +75,7 @@ Begin VB.Form frmManualFilters
       Index           =   8
       Left            =   120
       TabIndex        =   10
-      Top             =   6000
+      Top             =   6270
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
@@ -76,7 +84,7 @@ Begin VB.Form frmManualFilters
       Index           =   7
       Left            =   120
       TabIndex        =   9
-      Top             =   5640
+      Top             =   5910
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
@@ -85,7 +93,7 @@ Begin VB.Form frmManualFilters
       Index           =   6
       Left            =   120
       TabIndex        =   8
-      Top             =   5280
+      Top             =   5550
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
@@ -94,7 +102,7 @@ Begin VB.Form frmManualFilters
       Index           =   5
       Left            =   120
       TabIndex        =   7
-      Top             =   4920
+      Top             =   5190
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
@@ -103,7 +111,7 @@ Begin VB.Form frmManualFilters
       Index           =   4
       Left            =   120
       TabIndex        =   6
-      Top             =   4560
+      Top             =   4830
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
@@ -112,7 +120,7 @@ Begin VB.Form frmManualFilters
       Index           =   3
       Left            =   120
       TabIndex        =   5
-      Top             =   4200
+      Top             =   4470
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
@@ -121,7 +129,7 @@ Begin VB.Form frmManualFilters
       Index           =   2
       Left            =   120
       TabIndex        =   4
-      Top             =   3840
+      Top             =   4110
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
@@ -130,7 +138,7 @@ Begin VB.Form frmManualFilters
       Index           =   1
       Left            =   120
       TabIndex        =   3
-      Top             =   3480
+      Top             =   3750
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
@@ -139,7 +147,7 @@ Begin VB.Form frmManualFilters
       Index           =   0
       Left            =   120
       TabIndex        =   2
-      Top             =   3120
+      Top             =   3390
       Width           =   1815
    End
    Begin VB.CommandButton Command2 
@@ -147,7 +155,7 @@ Begin VB.Form frmManualFilters
       Height          =   255
       Left            =   120
       TabIndex        =   1
-      Top             =   1320
+      Top             =   1590
       Width           =   1815
    End
    Begin VB.CommandButton Command1 
@@ -155,7 +163,7 @@ Begin VB.Form frmManualFilters
       Height          =   255
       Left            =   120
       TabIndex        =   0
-      Top             =   960
+      Top             =   1260
       Width           =   1815
    End
    Begin RichTextLib.RichTextBox txtUncompressed 
@@ -167,6 +175,7 @@ Begin VB.Form frmManualFilters
       _ExtentX        =   22251
       _ExtentY        =   9340
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"frmManualFilters.frx":0000
@@ -222,7 +231,33 @@ Attribute VB_Exposed = False
 Dim buf As String
 Dim org As String
 
-
+Private Sub cmdSaveCurBuffer_Click()
+    
+    On Error GoTo hell
+    
+    If Len(buf) = 0 Then
+        MsgBox "Current buffer is empty nothing to save!"
+        Exit Sub
+    End If
+    
+    f = Form1.dlg.SaveDialog(AllFiles, , , , Me.hwnd, "buffer.bin")
+    If Len(f) = 0 Then Exit Sub
+    If fso.FileExists(f) Then fso.DeleteFile f
+    
+    Dim b() As Byte
+    Dim fh As Long
+    fh = FreeFile
+    b() = StrConv(buf, vbFromUnicode, LANG_US)
+    
+    Open f For Binary As fh
+    Put fh, , b()
+    Close fh
+    
+    Exit Sub
+hell:
+    MsgBox Err.Description
+    
+End Sub
 
 Private Sub chkHexdump_Click()
     DisplayData
@@ -274,8 +309,10 @@ Private Sub cmdDecode_Click(Index As Integer)
             End If
         ElseIf Index = ASCIIHexDecode Then
             'buf = unescape("%" & Replace(buf, " ", "%"))
-            buf = HexStringUnescape(buf, True)
-            DisplayData
+            If AsciiHexPreScreen(buf) Then
+                buf = HexStringUnescape(buf, True)
+                DisplayData
+            End If
         Else
             MsgBox "This filter requires .NET 2.0 or greater installed"
         End If
@@ -285,12 +322,47 @@ Private Sub cmdDecode_Click(Index As Integer)
 hell:     MsgBox Err.Description
 End Sub
 
+Private Function AsciiHexPreScreen(ByVal buf As String) As Boolean
+    
+    On Error GoTo hell
+    Dim isOk As Boolean
+    
+    buf = LCase(buf)
+    For i = 1 To Len(buf)
+        isOk = False
+        c = Mid(buf, i, 1)
+        If Asc(c) >= Asc("a") And Asc(c) <= Asc("f") Then isOk = True
+        If Not isOk Then
+            If Asc(c) >= Asc("0") And Asc(c) <= Asc("9") Then isOk = True
+        End If
+        If Not isOk Then
+            MsgBox "Invalid input character for asciihexdecode at index " & i & " character: " & c
+            txtUncompressed.SelStart = i
+            txtUncompressed.SelLength = 1
+            Exit Function
+        End If
+    Next
+    
+    AsciiHexPreScreen = True
+    Exit Function
+hell:
+    AsciiHexPreScreen = False
+End Function
+
 Private Function DisplayData() As String
+    On Error Resume Next
+    
     If chkHexdump.Value = 1 Then
         txtUncompressed.Text = HexDump(buf)
     Else
-        txtUncompressed.Text = buf
+        txtUncompressed.Text = buf 'this can throw out of memory error sometimes on binary data? weird..
     End If
+    
+    If Err.Number <> 0 And chkHexdump.Value = 0 Then
+        chkHexdump.Value = 1
+        txtUncompressed.Text = HexDump(buf)
+    End If
+    
     lblBufLen.Caption = "BufLen: 0x" & Hex(Len(buf))
 End Function
 
@@ -310,6 +382,8 @@ Private Function NativeFlateDecompress(ByVal s As String) As Boolean
 End Function
 
  
+
+
 
 Private Sub cmdZlibDeflate_Click()
         On Error GoTo hell

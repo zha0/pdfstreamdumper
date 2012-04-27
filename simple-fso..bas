@@ -171,7 +171,7 @@ Function VisualFormatHeader(ByVal h) As String
 End Function
 
 
-Function ContainsExploit(Data, ByVal sig, Optional offset As Long) As Boolean
+Function ContainsExploit(Data, ByVal sig, Optional offset As Long, Optional stream As CPDFStream) As Boolean
         Dim tmp() As String
         On Error Resume Next
         
@@ -190,10 +190,23 @@ Function ContainsExploit(Data, ByVal sig, Optional offset As Long) As Boolean
                 ContainsExploit = True
                 offset = 1
             End If
+        ElseIf InStr(sig, "filteris:") > 0 Then
+            sig = Replace(sig, "filteris:", Empty)
+            If stream Is Nothing Then Exit Function
+            'For i = 0 To UBound(stream.StreamDecompressor.filters)
+            '    If stream.StreamDecompressor.filters(i) = JBIG2Decode Then
+            
+            filters = stream.StreamDecompressor.GetActiveFiltersAsString()
+            offset = InStr(1, filters, sig, vbTextCompare)
+            If offset > 0 Then 'filteris: requires exact match of only this filter..proper?
+                If Len(filters) = Len(sig) Then ContainsExploit = True
+            End If
+            
         Else
             offset = InStr(1, Data, sig, vbTextCompare)
             If offset > 0 Then ContainsExploit = True
         End If
+        
 End Function
 
 

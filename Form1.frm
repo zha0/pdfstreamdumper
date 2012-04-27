@@ -42,6 +42,7 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -360,7 +361,6 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -383,7 +383,6 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1246
@@ -858,6 +857,7 @@ Public LoadTime As Long
 Public isEncrypted As Boolean
 
 Dim exploits()
+Dim flash_exploits()
 Dim help_vids()
 
 Dim streamCount As Long
@@ -2450,7 +2450,7 @@ Private Sub mnuExploitScan_Click()
         Data = GetActiveData(li, False, c)
         For i = 0 To UBound(exploits)
             p() = Split(exploits(i), "=")
-            If ContainsExploit(Data, p(1)) Then
+            If ContainsExploit(Data, p(1), , c) Then
                 push report, "Exploit " & p(0) & " - " & p(1) & " - found in stream: " & c.Index
             End If
         Next
@@ -2460,7 +2460,7 @@ Private Sub mnuExploitScan_Click()
         Data = GetActiveData(li, False, c)
         For i = 0 To UBound(exploits)
             p() = Split(exploits(i), "=")
-            If ContainsExploit(Data, p(1)) Then
+            If ContainsExploit(Data, p(1), , c) Then
                 push report, "Exploit " & p(0) & " found in stream " & c.Index
             End If
         Next
@@ -2474,6 +2474,10 @@ Private Sub mnuExploitScan_Click()
             End If
     Next
         
+    If InStr(Join(report, ""), "flash") > 0 Then
+        push report, vbCrLf & "Possible Flash CVE's: " & vbCrLf & String(50, "-") & vbCrLf & Join(flash_exploits, vbCrLf)
+    End If
+    
     push report, vbCrLf & "Note other exploits may be hidden with javascript obsfuscation"
     push report, "It is also possible these functions are being used in a non-exploit way."
 
@@ -2872,25 +2876,36 @@ Private Sub Form_Load()
     
     Set parser = New CPdfParser
     
-    exploits = Array("CVE-2007-5020 10.22.07 v8.1=mailto:%/..", _
-                     "CVE-2007-5659 5.6.08 v8.1.1=collectEmailInfo", _
-                     "CVE-2008-2992 11.4.08 v8.1.2=util.printf", _
-                     "CVE-2009-0927 3.18.09 v9.0=getIcon", _
-                     "CVE-2009-1492 5.12.09 v9.1=getAnnots", _
-                     "CVE-2009-1493 5.12.09 v9.1=customDictionaryOpen", _
-                     "CVE-2009-4324 12.15.09 v9.2=media.newPlayer", _
-                     "Contains U3D file - possible CVE-2009-4324(v9.1.3) or CVE-2011-2462(12.16.11 v9.4.6) =^U3D", _
-                     "Contains flash file - possible CVE-2010-1297(b4 10.1.53.64-newfunction), CVE-2010-2884(10.1.82.76), CVE-2010-3654(10.1.85.3)=^CWS", _
-                     "Contains flash file - possible CVE-2010-1297(b4 10.1.53.64-newfunction), CVE-2010-2884(10.1.82.76), CVE-2010-3654(10.1.85.3)=^FWS", _
-                     "Contains embedded image/tif, - possible CVE-2010-0188 2.32.10 v9.3=image/tif", _
-                     "Header contains a Launch Action - possible CVE-2010-1240 6.29.10 v9.3.2=*/Launch*/Action*", _
-                     "Header contains a Launch Action - possible CVE-2010-1240 6.29.10 v9.3.2=*/Action*/Launch*", _
-                     "CVE-2010-4091 11.4.10 v9.2 or v8.1.7=printSeps", _
-                     "CVE-2010-0188 2.32.10 v9.3=rawValue", _
-                     "Contains PRC file - possible CVE-2011-4369 (12.16.11 v9.4.6)=^PRC" _
+    exploits = Array("CVE-2007-5020 Date:10.22.07 v8.1=mailto:%/..", _
+                     "CVE-2007-5659 Date:5.6.08 v8.1.1=collectEmailInfo", _
+                     "CVE-2008-2992 Date:11.4.08 v8.1.2=util.printf", _
+                     "CVE-2009-0927 Date:3.18.09 v9.0=getIcon", _
+                     "CVE-2009-1492 Date:5.12.09 v9.1=getAnnots", _
+                     "CVE-2009-1493 Date:5.12.09 v9.1=customDictionaryOpen", _
+                     "CVE-2009-4324 Date:12.15.09 v9.2=media.newPlayer", _
+                     "Contains U3D file - possible CVE-2009-4324(v9.1.3) or CVE-2011-2462(Date:12.16.11 v9.4.6) =^U3D", _
+                     "Contains flash file=^CWS", _
+                     "Contains flash file=^FWS", _
+                     "Contains embedded image/tif, - possible CVE-2010-0188 Date:2.32.10 v9.3=image/tif", _
+                     "Header contains a Launch Action - possible CVE-2010-1240 Date:6.29.10 v9.3.2=*/Launch*/Action*", _
+                     "Header contains a Launch Action - possible CVE-2010-1240 Date:6.29.10 v9.3.2=*/Action*/Launch*", _
+                     "CVE-2010-4091 Date:11.4.10 v9.2 or v8.1.7=printSeps", _
+                     "CVE-2010-0188 Date:2.32.10 v9.3=rawValue", _
+                     "Contains PRC file - possible CVE-2011-4369 (Date:12.16.11 v9.4.6)=^PRC", _
+                     "Contains JBIG2Decode Stream Filter possible CVE-2009-0658 (Date:3.10.09 ver<9.1)=filteris:JBIG2Decode" _
                      )
                      
-                     
+                     'is just using the JBIG2 Filter to generic to detect on?
+
+
+    flash_exploits = Array("CVE-2010-1297 Fixed in ver:10.1.53.64 Desc: newfunction", _
+                           "CVE-2010-2884 VulnVer: 10.1.82.76", _
+                           "CVE-2010-3654 VulnVer: 10.1.85.3", _
+                           "CVE-2011-0609 VulnVer: 10.2.152.32", _
+                           "CVE-2011-611 VulnVer: 10.2.153.1", _
+                           "CVE-2011-627 VulnVer: 10.2.159.1", _
+                           "CVE-2011-2110 VulnVer: 10.3.181.14" _
+                     )
                      
     help_vids = Array("Readme file;[readme]", _
                       "Note on help videos;[video_help]", _
@@ -3063,6 +3078,7 @@ Private Sub mnuViewExploitDetections_Click()
     
     report = Join(exploits, vbCrLf)
     report = Replace(report, "=", vbTab)
+    report = report & vbCrLf & vbCrLf & "Flash CVE's: " & vbCrLf & String(50, "-") & vbCrLf & Join(flash_exploits, vbCrLf)
     
     tmp = fso.GetFreeFileName(Environ("temp"))
     fso.writeFile tmp, report
@@ -3234,6 +3250,7 @@ Private Sub ucAsyncDownload1_DownloadComplete(fpath As String)
     
     pb.Value = 0
     Name fpath As DownloadPath
+    If fso.FileExists(fpath) Then Kill fpath
     
     Exit Sub
 hell:
