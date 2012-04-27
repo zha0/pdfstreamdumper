@@ -30,6 +30,10 @@ Name: {app}\libemu\scSigs
 Name: {app}\xor_bruteforcer
 Name: {app}\sc_samples
 Name: {app}\AS3_WebInstall
+Name: {app}\mupdf
+Name: {app}\mupdf\jbig2dec
+Name: {app}\mupdf\sample_data
+Name: {app}\mupdf\VB_TEST
 
 [Files]
 Source: ./\highlighters\CPP.Bin; DestDir: {app}\highlighters
@@ -189,6 +193,62 @@ Source: plugins\VirusTotal\cStringBuilder.cls; DestDir: {app}\plugins\VirusTotal
 Source: plugins\VirusTotal\CVirusTotal.cls; DestDir: {app}\plugins\VirusTotal\
 Source: plugins\VirusTotal\Form2.frm; DestDir: {app}\plugins\VirusTotal\
 Source: plugins\virustotal.dll; DestDir: {app}\plugins\; Flags: regserver
+Source: mupdf.dll; DestDir: {app}
+Source: mupdf.bas; DestDir: {app}
+Source: mupdf\jbig2dec\CHANGES; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\config_win32.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\COPYING; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_arith.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_arith.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_arith_iaid.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_arith_iaid.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_arith_int.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_arith_int.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_generic.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_generic.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_halftone.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_halftone.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_huffman.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_huffman.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_hufftab.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_image.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_image.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_metadata.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_metadata.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_mmr.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_mmr.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_page.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_priv.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_refinement.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_segment.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_symbol_dict.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_symbol_dict.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_text.c; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\jbig2_text.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\LICENSE; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\os_types.h; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\jbig2dec\README; DestDir: {app}\mupdf\jbig2dec
+Source: mupdf\base_memory.cpp; DestDir: {app}\mupdf\
+Source: mupdf\CONTRIBUTORS; DestDir: {app}\mupdf\
+Source: mupdf\COPYING; DestDir: {app}\mupdf\
+Source: mupdf\decoder.cpp; DestDir: {app}\mupdf\
+Source: mupdf\exports.def; DestDir: {app}\mupdf\
+Source: mupdf\filt_basic.cpp; DestDir: {app}\mupdf\
+Source: mupdf\filt_faxd.cpp; DestDir: {app}\mupdf\
+Source: mupdf\filt_jbig2d.cpp; DestDir: {app}\mupdf\
+Source: mupdf\fitz-internal.h; DestDir: {app}\mupdf\
+Source: mupdf\fitz.h; DestDir: {app}\mupdf\
+Source: mupdf\mupdf_dll.opt; DestDir: {app}\mupdf\
+Source: mupdf\mupdf_dll.sln; DestDir: {app}\mupdf\
+Source: mupdf\mupdf_dll.suo; DestDir: {app}\mupdf\; Attribs: hidden
+Source: mupdf\mupdf_dll.vcproj; DestDir: {app}\mupdf\
+Source: mupdf\mupdf_dll.vcproj.DAVE_LAB.david.user; DestDir: {app}\mupdf\
+Source: mupdf\README; DestDir: {app}\mupdf\
+Source: mupdf\stm_buffer.cpp; DestDir: {app}\mupdf\
+Source: mupdf\stm_open.cpp; DestDir: {app}\mupdf\
+Source: mupdf\stm_read.cpp; DestDir: {app}\mupdf\
 
 [Icons]
 Name: {group}\PdfStreamDumper.exe; Filename: {app}\PDFStreamDumper.exe
@@ -202,6 +262,7 @@ Name: {group}\Source\husk.dsw; Filename: {app}\husk\husk.dsw
 Name: {group}\Source\BuildDb_Plugin.vbp; Filename: {app}\plugins\build_db\Project1.vbp
 Name: {group}\Source\ObjBrowser_Plugin.vbp; Filename: {app}\plugins\objbrowser\Project1.vbp
 Name: {group}\Source\scDbg Source; Filename: {app}\VS_LIBEMU.url
+Name: {group}\Source\mupdf.vcproj; Filename: {app}\mupdf\mupdf_dll.vcproj
 
 [Run]
 Filename: {app}\Readme.txt; StatusMsg: View ReadMe; Flags: postinstall shellexec runmaximized

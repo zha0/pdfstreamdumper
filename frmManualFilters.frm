@@ -2,14 +2,22 @@ VERSION 5.00
 Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Begin VB.Form frmManualFilters 
    Caption         =   "Form3"
-   ClientHeight    =   7035
+   ClientHeight    =   7290
    ClientLeft      =   60
    ClientTop       =   345
    ClientWidth     =   14715
    LinkTopic       =   "Form3"
-   ScaleHeight     =   7035
+   ScaleHeight     =   7290
    ScaleWidth      =   14715
    StartUpPosition =   3  'Windows Default
+   Begin VB.CommandButton Command3 
+      Caption         =   "Load Stream From Clip"
+      Height          =   285
+      Left            =   120
+      TabIndex        =   22
+      Top             =   1920
+      Width           =   1875
+   End
    Begin VB.CommandButton cmdSaveCurBuffer 
       Caption         =   "Save Cur buffer to Disk"
       Height          =   285
@@ -19,28 +27,28 @@ Begin VB.Form frmManualFilters
       Width           =   1845
    End
    Begin VB.CommandButton cmdZlibDeflate 
-      Caption         =   "Zlib Deflate"
+      Caption         =   "FlateDecode"
       Height          =   285
-      Left            =   135
+      Left            =   105
       TabIndex        =   20
-      Top             =   3015
+      Top             =   3315
       Width           =   1770
    End
    Begin VB.CommandButton cmdDecode 
       Caption         =   "Command3"
       Height          =   255
       Index           =   9
-      Left            =   135
+      Left            =   105
       TabIndex        =   19
-      Top             =   6615
+      Top             =   6915
       Width           =   1815
    End
    Begin VB.CheckBox chkDebug 
       Caption         =   "Debug iText.Decode"
       Height          =   255
-      Left            =   120
+      Left            =   90
       TabIndex        =   18
-      Top             =   2670
+      Top             =   2970
       Width           =   1815
    End
    Begin VB.TextBox txtHeader 
@@ -56,98 +64,98 @@ Begin VB.Form frmManualFilters
       Caption         =   "Original"
       Enabled         =   0   'False
       Height          =   255
-      Left            =   120
+      Left            =   90
       TabIndex        =   14
-      Top             =   1950
+      Top             =   2310
       Width           =   1815
    End
    Begin VB.CheckBox chkHexdump 
       Caption         =   "Display as Hexdump"
       Height          =   255
-      Left            =   120
+      Left            =   90
       TabIndex        =   12
-      Top             =   2310
+      Top             =   2610
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
       Caption         =   "Command3"
       Height          =   255
       Index           =   8
-      Left            =   120
+      Left            =   90
       TabIndex        =   10
-      Top             =   6270
+      Top             =   6570
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
       Caption         =   "Command3"
       Height          =   255
       Index           =   7
-      Left            =   120
+      Left            =   90
       TabIndex        =   9
-      Top             =   5910
+      Top             =   6210
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
       Caption         =   "Command3"
       Height          =   255
       Index           =   6
-      Left            =   120
+      Left            =   90
       TabIndex        =   8
-      Top             =   5550
+      Top             =   5850
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
       Caption         =   "Command3"
       Height          =   255
       Index           =   5
-      Left            =   120
+      Left            =   90
       TabIndex        =   7
-      Top             =   5190
+      Top             =   5490
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
       Caption         =   "Command3"
       Height          =   255
       Index           =   4
-      Left            =   120
+      Left            =   90
       TabIndex        =   6
-      Top             =   4830
+      Top             =   5130
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
       Caption         =   "Command3"
       Height          =   255
       Index           =   3
-      Left            =   120
+      Left            =   90
       TabIndex        =   5
-      Top             =   4470
+      Top             =   4770
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
       Caption         =   "Command3"
       Height          =   255
       Index           =   2
-      Left            =   120
+      Left            =   90
       TabIndex        =   4
-      Top             =   4110
+      Top             =   4410
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
       Caption         =   "Command3"
       Height          =   255
       Index           =   1
-      Left            =   120
+      Left            =   90
       TabIndex        =   3
-      Top             =   3750
+      Top             =   4050
       Width           =   1815
    End
    Begin VB.CommandButton cmdDecode 
       Caption         =   "Command3"
       Height          =   255
       Index           =   0
-      Left            =   120
+      Left            =   90
       TabIndex        =   2
-      Top             =   3390
+      Top             =   3690
       Width           =   1815
    End
    Begin VB.CommandButton Command2 
@@ -167,15 +175,14 @@ Begin VB.Form frmManualFilters
       Width           =   1815
    End
    Begin RichTextLib.RichTextBox txtUncompressed 
-      Height          =   5295
+      Height          =   5625
       Left            =   2040
       TabIndex        =   11
       Top             =   1560
       Width           =   12615
       _ExtentX        =   22251
-      _ExtentY        =   9340
+      _ExtentY        =   9922
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"frmManualFilters.frx":0000
@@ -290,7 +297,32 @@ Private Sub cmdDecode_Click(Index As Integer)
     
     If chkDebug.Value = 1 Then dbugMode = True
     
-    If csharp.Initilized Then
+    If Index = FlateDecode Then
+        If NativeFlateDecompress(buf) Then
+            DisplayData
+        Else
+            txtUncompressed.Text = "Zlib Flate Decode failed"
+        End If
+    ElseIf Index = AsciiHexDecode Then
+        buf = Replace(buf, " ", Empty)
+        buf = Replace(buf, vbCr, Empty)
+        buf = Replace(buf, vbLf, Empty)
+        buf = Replace(buf, vbTab, Empty)
+        DisplayData
+        If AsciiHexPreScreen(buf) Then
+            buf = HexStringUnescape(buf, True)
+            DisplayData
+        End If
+    ElseIf Index = JBIG2Decode Then
+        buf = mupdf.muJBIG2Decode(buf)
+        If Len(buf) = 0 Then
+            txtUncompressed = "Failed to decode JBIG2 Stream possibly malformed?"
+        Else
+            DisplayData
+        End If
+    ElseIf d = CCITTFaxDecode Then
+        MsgBox "Not implemented in the manual filters dialog yet...to many decode variables to manually enter"
+    ElseIf csharp.Initilized Then
         If Index = DecodePredictor Then
             If Not SetDecodePredictor() Then Exit Sub
         End If
@@ -301,21 +333,9 @@ Private Sub cmdDecode_Click(Index As Integer)
             txtUncompressed.Text = csharp.ErrorMessage
         End If
     Else
-        If Index = FlateDecode Then
-            If NativeFlateDecompress(buf) Then
-                DisplayData
-            Else
-                txtUncompressed.Text = "Zlib Flate Decode failed"
-            End If
-        ElseIf Index = ASCIIHexDecode Then
-            'buf = unescape("%" & Replace(buf, " ", "%"))
-            If AsciiHexPreScreen(buf) Then
-                buf = HexStringUnescape(buf, True)
-                DisplayData
-            End If
-        Else
-            MsgBox "This filter requires .NET 2.0 or greater installed"
-        End If
+        
+        MsgBox "This filter requires .NET 2.0 or greater installed"
+        
     End If
     
     Exit Sub
@@ -445,6 +465,21 @@ Private Sub Command2_Click()
     cmdOriginal.enabled = True
     DisplayData
     
+End Sub
+
+Private Sub Command3_Click()
+    On Error Resume Next
+    f = Clipboard.GetText
+    If Len(f) = 0 Then
+        MsgBox "No data found in clipboard."
+        Exit Sub
+    End If
+    
+    txtHeader.Text = "No PDF Header preview available when loading raw streams"
+    org = f
+    buf = org
+    cmdOriginal.enabled = True
+    DisplayData
 End Sub
 
 Private Sub Form_Load()

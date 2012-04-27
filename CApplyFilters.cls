@@ -16,7 +16,7 @@ Public DecompressionError As Boolean
 Public DecompErrorMessage As String
 
 Private parent As CPDFStream
-Private Const unsptFilters = "DCTDecode,CCITTFaxDecode,JBIG2Decode,JPXDecode"
+Private Const unsptFilters = "DCTDecode,JPXDecode"
 
 Private hasDecodeParams As Boolean
 Private predictor As Integer
@@ -50,10 +50,19 @@ Sub ApplyFilters()
     
         For Each x In filters
             d = x
+                    
             If csharp.Initilized And Form1.mnuDisableiText.Checked = False Then  'send everything through the iTextDecode
                 
                 If d = FlateDecode And Form1.mnuAlwaysUseZlib.Checked = True Then 'lets still use the zlib for this one...
                     buf = NativeDecompress(buf)   'something in the iText FlateDecode can crash occasionally...(only in long automated runs)
+                ElseIf d = JBIG2Decode Then
+                    buf = mupdf.muJBIG2Decode(buf)
+                    If Len(buf) = 0 Then
+                        DecompressionError = True
+                        DecompErrorMessage = "Failed to decode JBIG2 Stream possibly malformed?"
+                    End If
+                ElseIf d = CCITTFaxDecode Then
+                    buf = HandleFaxDecode(buf)
                 Else
                     If d = DecodePredictor Then ParsePredictor 'comment out this line to disable the predictor support..(added 3.26.11)
                     If Not csharp.decode(buf, d) Then
@@ -68,8 +77,16 @@ Sub ApplyFilters()
             Else
                 If d = FlateDecode Then
                     buf = NativeDecompress(buf)
-                ElseIf d = ASCIIHexDecode Then
+                ElseIf d = AsciiHexDecode Then
                     buf = HexStringUnescape(buf, True)
+                ElseIf d = JBIG2Decode Then
+                    buf = mupdf.muJBIG2Decode(buf)
+                    If Len(buf) = 0 Then
+                        DecompressionError = True
+                        DecompErrorMessage = "Failed to decode JBIG2 Stream possibly malformed?"
+                    End If
+                ElseIf d = CCITTFaxDecode Then
+                    buf = HandleFaxDecode(buf)
                 Else
                     DecompressionError = True
                     If csharp.DetectDotNet = True Then
@@ -124,6 +141,7 @@ Private Function ExtractNextValue(tag As String)
         If b > 0 Then
             a = a + Len(tag) + 1
             ExtractNextValue = Trim(Mid(es, a, b - a))
+            Exit Function
         End If
     End If
 End Function
@@ -136,6 +154,26 @@ Private Function lowest(ParamArray x())
         If x(i) < l And x(i) >= 1 Then l = x(i)
     Next
     lowest = l
+End Function
+
+Function HandleFaxDecode(buf As String)
+
+    On Error Resume Next
+    Dim k As Long, endofline As Long, encodedbytealign As Long, columns As Long, rows As Long, endofblock As Long, blackis1 As Long
+    
+    k = CLng(ExtractNextValue("K"))
+    endofline = CLng(ExtractNextValue("EndofLine"))
+    encodedbytealign = CLng(ExtractNextValue("EncodedByteAlign"))
+    columns = CLng(ExtractNextValue("Columns"))
+    rows = CLng(ExtractNextValue("Rows"))
+    endofblock = CLng(ExtractNextValue("EndOfBlock"))
+    blackis1 = CLng(ExtractNextValue("BlackIs1"))
+
+    If columns = 0 Then columns = 1728
+    If endofblock = 0 Then endofblock = 1
+    
+    HandleFaxDecode = mupdf.muCCITTFaxDecode(buf, columns, rows, k, endofline, encodedbytealign, endofblock, blackis1)
+
 End Function
 
 Sub ParsePredictor()
@@ -195,8 +233,8 @@ Sub DetermineFilters(pStream As CPDFStream, escapedHeader As String)
         'If InStr(x, "Flate") > 0 Then Stop
         
         Select Case Trim(LCase(x))
-            Case LCase("ASCIIHexDecode"): d = ASCIIHexDecode
-            Case LCase("AHx"): d = ASCIIHexDecode   'sample: 2e8a03fc6ca7e0f6016ce26d1197b5ab
+            Case LCase("ASCIIHexDecode"): d = AsciiHexDecode
+            Case LCase("AHx"): d = AsciiHexDecode   'sample: 2e8a03fc6ca7e0f6016ce26d1197b5ab
             
             Case LCase("LZWDecode"): d = LzwDecode
             Case LCase("LZW"): d = LzwDecode
@@ -247,7 +285,7 @@ Function GetActiveFiltersAsString() As String
     For Each x In filters
         d = x
         If d = ASCII85Decode Then push r, "ASCII85Decode"
-        If d = ASCIIHexDecode Then push r, "ASCIIHexDecode"
+        If d = AsciiHexDecode Then push r, "ASCIIHexDecode"
         If d = FlateDecode Then push r, "FlateDecode"
         If d = LzwDecode Then push r, "LzwDecode"
         If d = RunLengthDecode Then push r, "RunLengthDecode"
@@ -298,12 +336,12 @@ Private Sub push(ary, Value) 'this modifies parent ary object
 init: ReDim ary(0): ary(0) = Value
 End Sub
 
-Private Function AnyofTheseInstr(Data, match, Optional compare As VbCompareMethod = vbTextCompare) As Boolean
+Private Function AnyofTheseInstr(data, match, Optional compare As VbCompareMethod = vbTextCompare) As Boolean
     Dim tmp() As String
     Dim x
     tmp = Split(match, ",")
     For Each x In tmp
-        If InStr(1, Data, x, compare) > 0 Then
+        If InStr(1, data, x, compare) > 0 Then
             AnyofTheseInstr = True
             Exit Function
         End If

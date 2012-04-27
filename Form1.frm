@@ -42,7 +42,6 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
-      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -361,6 +360,7 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -383,6 +383,7 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1246
@@ -599,6 +600,10 @@ Begin VB.Form Form1
          Caption         =   "XML Streams"
          Index           =   7
       End
+      Begin VB.Menu mnuSearchFilter 
+         Caption         =   "Filter Chains"
+         Index           =   8
+      End
       Begin VB.Menu mnuExtractURI 
          Caption         =   "Extract URLs"
       End
@@ -785,12 +790,7 @@ Attribute VB_Exposed = False
 
 'from wikipedia - http://en.wikipedia.org/wiki/Portable_Document_Format
 's - DCTDecode a lossy filter based on the JPEG standard
-'s easy? - CCITTFaxDecode a lossless filter based on the CCITT fax compression standard
-'s big - JBIG2Decode a lossy or lossless filter based on the JBIG2 standard, introduced in PDF 1.4
 's - JPXDecode a lossy or lossless filter based on the JPEG 2000 standard, introduced in PDF 1.5
-
-'itext filters available: iTextSharp.text.pdf.codec
-'JBIG2Decode = Org.BouncyCastle.Apache.Bzip2
 
 'from PDFSHARP Notes
 '     /// (Required except for image masks and images that use the JPXDecode filter)
@@ -1869,6 +1869,7 @@ Private Sub mnuSearchFilter_Click(Index As Integer)
             Case 5:   If looksEscaped(s.Header) Then match = True
             Case 6:   If s.ContentType = prc Then match = True
             Case 7:   If s.ContentType = xml Then match = True
+            Case 8:   If s.StreamDecompressor.GetActiveFiltersCount > 1 Then match = True
         End Select
                 
         If match Then
@@ -2439,7 +2440,7 @@ Private Sub mnuExploitScan_Click()
     
     Dim li As ListItem
     Dim c As CPDFStream
-    Dim Data As String
+    Dim data As String
     Dim p() As String
     Dim report() As String
     Dim i As Long
@@ -2447,20 +2448,20 @@ Private Sub mnuExploitScan_Click()
     On Error Resume Next
     
     For Each li In lv.ListItems
-        Data = GetActiveData(li, False, c)
+        data = GetActiveData(li, False, c)
         For i = 0 To UBound(exploits)
             p() = Split(exploits(i), "=")
-            If ContainsExploit(Data, p(1), , c) Then
+            If ContainsExploit(data, p(1), , c) Then
                 push report, "Exploit " & p(0) & " - " & p(1) & " - found in stream: " & c.Index
             End If
         Next
     Next
     
     For Each li In lv2.ListItems
-        Data = GetActiveData(li, False, c)
+        data = GetActiveData(li, False, c)
         For i = 0 To UBound(exploits)
             p() = Split(exploits(i), "=")
-            If ContainsExploit(Data, p(1), , c) Then
+            If ContainsExploit(data, p(1), , c) Then
                 push report, "Exploit " & p(0) & " found in stream " & c.Index
             End If
         Next
@@ -2874,6 +2875,24 @@ Private Sub Form_Load()
     Dim f As String
     Dim x As String
     
+    Dim zlib As String
+    Dim mupdf As String
+    
+    zlib = App.path & "\zlib.dll" 'this way they are always found even when running in IDE..
+    mupdf = App.path & "\mupdf.dll"
+    
+    If fso.FileExists(zlib) Then
+        If LoadLibrary(zlib) = 0 Then lvDebug.ListItems.Add "zlib.dll failed to initilize"
+    Else
+        lvDebug.ListItems.Add "Could not find zlib.dll"
+    End If
+    
+    If fso.FileExists(mupdf) Then
+        If LoadLibrary(mupdf) = 0 Then lvDebug.ListItems.Add "mupdf.dll failed to initilize"
+    Else
+         lvDebug.ListItems.Add "Could not find mupdf.dll"
+    End If
+    
     Set parser = New CPdfParser
     
     exploits = Array("CVE-2007-5020 Date:10.22.07 v8.1=mailto:%/..", _
@@ -3143,10 +3162,10 @@ Private Sub ts_Click()
 End Sub
 
 
-Private Sub txtPDFPath_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, Y As Single)
+Private Sub txtPDFPath_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, Y As Single)
     On Error Resume Next
     AutomatationRun = False
-    txtPDFPath = Data.Files(1)
+    txtPDFPath = data.Files(1)
     cmdDecode_Click
 End Sub
 

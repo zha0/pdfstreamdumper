@@ -19,7 +19,7 @@ Global Const LANG_US = &H409
 Enum Decoders            'these align to the values used in the Csharp enum so we can pass directly
     RunLengthDecode = 0  'requires iTextFilters
     FlateDecode = 1      'native support
-    ASCIIHexDecode = 2   'native support
+    AsciiHexDecode = 2   'native support
     ASCII85Decode = 3    'requires iTextFilters
     LzwDecode = 4        'requires iTextFilters
     DecodePredictor = 5  'requires iTextFilters
@@ -38,6 +38,8 @@ Private Declare Sub SetWindowPos Lib "user32" (ByVal hwnd As Long, ByVal _
 Private Declare Function GetShortPathName Lib "kernel32" Alias "GetShortPathNameA" (ByVal lpszLongPath As String, ByVal lpszShortPath As String, ByVal cchBuffer As Long) As Long
 'Private Declare Function NtQueryDefaultLocale Lib "ntdll" (ByVal UserProfile As Integer, ByRef lcid As Long) As Long
 'Private Declare Function NtSetDefaultLocale Lib "ntdll" (ByVal UserProfile As Integer, ByVal lcid As Long) As Long
+
+Public Declare Function LoadLibrary Lib "kernel32" Alias "LoadLibraryA" (ByVal lpLibFileName As String) As Long
 
 Private Const HWND_TOPMOST = -1
 Private Const HWND_NOTOPMOST = -2
@@ -104,13 +106,13 @@ Function FilterNameFromIndex(d As Decoders, Optional enabled As Boolean) As Stri
     Select Case d
         Case RunLengthDecode: r = "RunLengthDecode": enabled = True
         Case FlateDecode: r = "FlateDecode":         enabled = True
-        Case ASCIIHexDecode: r = "ASCIIHexDecode":   enabled = True
+        Case AsciiHexDecode: r = "ASCIIHexDecode":   enabled = True
         Case ASCII85Decode: r = "ASCII85Decode":     enabled = True
         Case LzwDecode: r = "LzwDecode":             enabled = True
         Case DecodePredictor: r = "DecodePredictor": enabled = True
         Case DCTDecode: r = "DCTDecode":             enabled = False
-        Case CCITTFaxDecode: r = "CCITTFaxDecode":   enabled = False
-        Case JBIG2Decode: r = "JBIG2Decode":         enabled = False
+        Case CCITTFaxDecode: r = "CCITTFaxDecode":   enabled = True
+        Case JBIG2Decode: r = "JBIG2Decode":         enabled = True
         Case JPXDecode: r = "JPXDecode":             enabled = False
         Case JPXDecode: r = "JPXDecode":             enabled = False
     End Select
@@ -171,22 +173,22 @@ Function VisualFormatHeader(ByVal h) As String
 End Function
 
 
-Function ContainsExploit(Data, ByVal sig, Optional offset As Long, Optional stream As CPDFStream) As Boolean
+Function ContainsExploit(data, ByVal sig, Optional offset As Long, Optional stream As CPDFStream) As Boolean
         Dim tmp() As String
         On Error Resume Next
         
         If InStr(sig, "*") > 0 Then 'its a like expression
             
-            If Data Like sig Then
+            If data Like sig Then
                 tmp = Split(sig, "*")
                 sig = tmp(1) 'they should all start with * so 0=empty
-                offset = InStr(Data, sig)
+                offset = InStr(data, sig)
                 ContainsExploit = True
             End If
             
         ElseIf VBA.Left(sig, 1) = "^" Then
             sig = Mid(sig, 2)
-            If sig = VBA.Left(Data, Len(sig)) Then
+            If sig = VBA.Left(data, Len(sig)) Then
                 ContainsExploit = True
                 offset = 1
             End If
@@ -203,7 +205,7 @@ Function ContainsExploit(Data, ByVal sig, Optional offset As Long, Optional stre
             End If
             
         Else
-            offset = InStr(1, Data, sig, vbTextCompare)
+            offset = InStr(1, data, sig, vbTextCompare)
             If offset > 0 Then ContainsExploit = True
         End If
         
@@ -593,12 +595,12 @@ Function AddKey(t As String, c As Collection) As Boolean
 hell:
 End Function
 
-Function AnyofTheseInstr(Data, match, Optional compare As VbCompareMethod = vbTextCompare) As Boolean
+Function AnyofTheseInstr(data, match, Optional compare As VbCompareMethod = vbTextCompare) As Boolean
     Dim tmp() As String
     Dim x
     tmp = Split(match, ",")
     For Each x In tmp
-        If InStr(1, Data, x, compare) > 0 Then
+        If InStr(1, data, x, compare) > 0 Then
             AnyofTheseInstr = True
             Exit Function
         End If
