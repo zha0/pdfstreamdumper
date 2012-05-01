@@ -325,13 +325,14 @@ Function GetDetailsReport()
                 push r, lpad("Compressed CRC: 0x", sz) & Hex(CRC32(Me.OriginalData))
                 push r, lpad("DecompFilters: ", sz) & StreamDecompressor.GetActiveFiltersAsString()
                 push r, lpad("Unsupported Filters?: ", sz) & StreamDecompressor.UnsupportedFilter
-                push r, lpad("iText Decompressors?: ", sz) & csharp.Initilized
+                'push r, lpad("iText Decompressors?: ", sz) & csharp.Initilized
                 
                 If StreamDecompressor.DecompressionError = True Then
                     push r, lpad("Decompress Error: ", sz) & StreamDecompressor.DecompErrorMessage
                 Else
                     push r, lpad("DeCompressed Size: 0x", sz) & Hex(DecompressedSize) & " (" & DecompressedSize & ")"
                     push r, lpad("DeCompressed CRC: 0x", sz) & Hex(CRC32(Me.DecompressedData))
+                    push r, lpad("Expansion Ratio: ", sz) & Round((DecompressedSize / CompressedSize), 2) & "x  (" & DecompressedSize - CompressedSize & " bytes)"
                 End If
         Else
             push r, lpad("Raw Data Size: 0x", sz) & Hex(Me.CompressedSize)

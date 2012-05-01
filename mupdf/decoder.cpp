@@ -102,18 +102,27 @@ void hexdump(unsigned char* str, int len, int offset, bool hexonly){
 
 //returns a malloced unsigned char*  of *bufSz
 int __stdcall AsciiHexDecode(char* buf, unsigned char** bufOut){
-	
-   int l = strlen(buf);
-   int sz = 0;
 
-   *bufOut = (unsigned char*)malloc(l);
-   memset(*bufOut,0,l);
+	try{
+	   int l = strlen(buf);
+	   int sz = 0;
+		
+	   *bufOut = (unsigned char*)malloc(l);
+	   if((int)*bufOut==0) return 0;
 
-   fz_stream* s = fz_open_memory(0, (unsigned char*)buf, l);
-   fz_stream* s2 = fz_open_ahxd(s);
-   sz = read_ahxd(s2, *bufOut, l);
-   close_ahxd(0, s2->state);  
-   return sz;
+	   memset(*bufOut,0,l);
+	   fz_stream* s = fz_open_memory(0, (unsigned char*)buf, l);
+	   fz_stream* s2 = fz_open_ahxd(s);
+	   sz = read_ahxd(s2, *bufOut, l);
+	   close_ahxd(0, s2->state);  
+	   fz_close(s);
+	   fz_free(0,s);
+	   fz_free(0,s2);
+	   return sz;
+	}
+	catch(...){
+		return 0;
+	}
 
 }
 
@@ -123,15 +132,27 @@ void __stdcall FreeBuffer(unsigned char** bufOut){
 }
 
 //returns a malloced unsigned char*  of *bufSz
+//mem leak could exist based on where error was thrown..
 int __stdcall JBIG2Decode(unsigned char* buf, int sz, unsigned char** bufOut){
    //_asm int 3
-   fz_stream * s = fz_open_memory(0, (unsigned char*)buf, sz);
-   fz_stream * s2 = fz_open_jbig2d(s, NULL);
-   int bufsz = sz * 20; //should be big enough...
-   *bufOut = (unsigned char*)malloc(bufsz);
-   int r = read_jbig2d(s2, *bufOut, bufsz);
-   close_jbig2d(0, s2->state); 
-   return r;	
+
+	//try{ //i want to know if this crashs anywhere right now..seems stable in bulk testing so far..
+	   fz_stream * s = fz_open_memory(0, (unsigned char*)buf, sz);
+	   fz_stream * s2 = fz_open_jbig2d(s, NULL);
+	   int bufsz = sz * 20; //should be big enough...
+	   *bufOut = (unsigned char*)malloc(bufsz);
+	   if((int)*bufOut==0) return 0;
+	   int r = read_jbig2d(s2, *bufOut, bufsz);
+	   close_jbig2d(0, s2->state); 
+	   fz_close(s);
+	   fz_free(0,s);
+	   fz_free(0,s2);
+	   return r;	
+	/*}
+	catch(...){
+		return 0;
+	}*/
+
 }
 
 //returns a malloced unsigned char*  of *bufSz
@@ -140,21 +161,25 @@ int __stdcall FaxDecode(unsigned char* buf, int sz, unsigned char** bufOut,
 			  int cols=1728, int rows=0, int k=0, int end_of_line=0, int encoded_byte_align=0,
 			  int end_of_block=1, int black_is_1=0)
 {
+	try{
+	   int r = 0 ;
+	   fz_stream * s = fz_open_memory(0, (unsigned char*)buf, sz);
+	   fz_stream * s2 = fz_open_faxd(s, k, end_of_line, encoded_byte_align,
+									 cols, rows, end_of_block, black_is_1);
+	   int bufsz = sz * 20; //should be big enough...
+	   *bufOut = (unsigned char*)malloc(bufsz);
+	   if((int)*bufOut==0) return 0;
+	   r = read_faxd(s2,*bufOut, bufsz);  //can throw many errors on purpose...
+	   close_faxd(0, s2->state); 
+	   fz_close(s);
+	   fz_free(0,s);
+	   fz_free(0,s2);
+	   return r;	
+	 }
+	 catch(...){
+		  return 0;
+	 }
 
-   int r = 0 ;
-   fz_stream * s = fz_open_memory(0, (unsigned char*)buf, sz);
-   fz_stream * s2 = fz_open_faxd(s, k, end_of_line, encoded_byte_align,
-								 cols, rows, end_of_block, black_is_1);
-   int bufsz = sz * 20; //should be big enough...
-   *bufOut = (unsigned char*)malloc(bufsz);
-   try{
-	   //can throw many errors on purpose...
-	   r = read_faxd(s2,*bufOut, bufsz);
-   }catch(...){
-	   r = 0;
-   }
-   close_faxd(0, s2->state); 
-   return r;	
 }
 
 

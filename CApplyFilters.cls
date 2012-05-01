@@ -51,6 +51,8 @@ Sub ApplyFilters()
         For Each x In filters
             d = x
             
+            If DecompressionError = True Then Exit For
+            
             If d = FlateDecode Then
                 
                 buf = NativeDecompress(buf) 'always use native zlib...

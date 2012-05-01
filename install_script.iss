@@ -249,6 +249,7 @@ Source: mupdf\README; DestDir: {app}\mupdf\
 Source: mupdf\stm_buffer.cpp; DestDir: {app}\mupdf\
 Source: mupdf\stm_open.cpp; DestDir: {app}\mupdf\
 Source: mupdf\stm_read.cpp; DestDir: {app}\mupdf\
+Source: iTextFilters\iText_Filters\CCITTFaxDecoder.cs; DestDir: {app}\iTextFilters\iText_Filters\
 
 [Icons]
 Name: {group}\PdfStreamDumper.exe; Filename: {app}\PDFStreamDumper.exe

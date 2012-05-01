@@ -102,7 +102,7 @@ End Function
 Function SetPredictorParams(predictor As Integer, Optional columns = 1, Optional colors = 1, Optional bitspercomponent = 8)
     On Error GoTo hell
     If Not Initilized Then Exit Function
-    iTextFilters.SetPredictorParams CInt(predictor), CInt(columns), CInt(colorss), CInt(bitspercomponent)
+    iTextFilters.SetPredictorParams CInt(predictor), CInt(columns), CInt(colors), CInt(bitspercomponent)
 hell:
 End Function
 
@@ -118,6 +118,8 @@ Function decode(data As String, decoder As Decoders, Optional surpressErrorMsg A
     Dim b() As Byte
     Dim addr As Long
     Dim bufsize As Long
+    
+    If Len(data) = 0 Then Exit Function 'nothing to do
     
     b() = StrConv(data, vbFromUnicode, LANG_US)
     addr = VarPtr(b(0))
@@ -139,7 +141,7 @@ Function decode(data As String, decoder As Decoders, Optional surpressErrorMsg A
     
     Exit Function
     'hell is only for vb errors, .net errors get caught with output
-hell:   ErrorMessage = "Error in " & method & " : " & Err.Description
+hell:   ErrorMessage = "Error in csharp.decode(" & FilterNameFromIndex(decoder) & ") : " & Err.Description
         If Not surpressErrorMsg Then MsgBox ErrorMessage, vbInformation
 End Function
 

@@ -353,7 +353,6 @@ Begin VB.Form frmManualFilters
       _ExtentX        =   22251
       _ExtentY        =   9922
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"frmManualFilters.frx":0000
@@ -495,7 +494,7 @@ Private Sub cmdDecode_Click(Index As Integer)
         Else
             DisplayData
         End If
-    ElseIf d = CCITTFaxDecode Then
+    ElseIf Index = CCITTFaxDecode Then
         fraFaxDecode.Visible = True
     ElseIf csharp.Initilized Then
         If Index = DecodePredictor Then
@@ -680,13 +679,15 @@ Private Sub Command4_Click()
         DisplayData
     Else
         csharp.SetFaxDecodeParams columns, rows, k, endofline, encodedbytealign, endofblock, blackis1
-        If csharp.decode(buf, CCITTFaxDecode, True, False) Then
+        If Not csharp.decode(buf, CCITTFaxDecode, False, False) Then
             txtUncompressed = csharp.ErrorMessage
         Else
             buf = csharp.DecodedBuffer
             DisplayData
         End If
     End If
+
+    fraFaxDecode.Visible = False
 
 End Sub
 

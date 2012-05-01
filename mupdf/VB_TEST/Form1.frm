@@ -183,7 +183,12 @@ Private Sub Command2_Click()
     End If
     
     f = ReadFile(f)
-    Text1 = JBIG2Decode(f)
+    
+    For i = 0 To 1000
+        Me.Caption = i
+        Text1 = JBIG2Decode(f)
+        DoEvents
+    Next
     
     
 End Sub

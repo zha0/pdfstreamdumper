@@ -108,7 +108,7 @@ fz_open_ahxd(fz_stream *chain)
 	catch(...)
 	{
 		fz_close(chain);
-		//fz_rethrow(ctx);
+		throw(21);
 	}
 
 	return fz_new_stream(ctx, state, read_ahxd, close_ahxd);

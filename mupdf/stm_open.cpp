@@ -14,7 +14,7 @@ fz_new_stream(fz_context *ctx, void *state,
 	catch(...)
 	{
 		close(ctx, state);
-		//fz_rethrow(ctx);
+		throw(21);
 	}
 
 	stm->refs = 1;
@@ -117,7 +117,7 @@ fz_open_fd(fz_context *ctx, int fd)
 	catch(...)
 	{
 		fz_free(ctx, state);
-		//fz_rethrow(ctx);
+		throw(21);
 	}
 	stm->seek = seek_file;
 
