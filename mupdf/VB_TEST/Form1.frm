@@ -110,7 +110,7 @@ Function CCTIFaxDecode(data As String, Optional cols As Long = 1728, Optional ro
     
     If outSize = 0 Then Exit Function
    
-    ReDim b(outSize)
+    ReDim b(outSize - 1)
     CopyMemory b(0), pBufOut, outSize
     CCTIFaxDecode = StrConv(b(), vbUnicode, LANG_US)
     FreeBuffer pBufOut
@@ -135,8 +135,8 @@ Function JBIG2Decode(data As String) As String
     'MsgBox f
     If outSize = 0 Then Exit Function
    
-    ReDim b(outSize)
-    CopyMemory b(0), pBufOut, outSize
+    ReDim b(1 To outSize)
+    CopyMemory b(1), pBufOut, outSize
     JBIG2Decode = StrConv(b(), vbUnicode, LANG_US)
     FreeBuffer pBufOut
     
@@ -156,17 +156,19 @@ Private Sub Command1_Click()
     bin = StrConv(data, vbFromUnicode, LANG_US)
     outSize = AsciiHexDecode(bin(0), pBufOut)
     
-    f = "SizeIn: " & Hex(UBound(bin)) & vbCrLf & _
-           "OutSize: " & Hex(outSize) & vbCrLf & _
-           "*bufOut: " & Hex(pBufOut) & vbCrLf
+    f = "SizeIn: 0x" & Hex(UBound(bin)) & vbCrLf & _
+           "OutSize: 0x" & Hex(outSize) & vbCrLf & _
+           "*bufOut: 0x" & Hex(pBufOut) & vbCrLf
            
-    'MsgBox f
+    MsgBox f
     If outSize = 0 Then Exit Sub
    
-    ReDim b(outSize)
+    ReDim b(outSize - 1)
     CopyMemory b(0), pBufOut, outSize
     Text1 = StrConv(b(), vbUnicode, LANG_US)
     FreeBuffer pBufOut
+    
+    MsgBox HexDump(StrConv(b(), vbUnicode, LANG_US))
     
 End Sub
 

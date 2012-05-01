@@ -10,6 +10,176 @@ Begin VB.Form frmManualFilters
    ScaleHeight     =   7290
    ScaleWidth      =   14715
    StartUpPosition =   3  'Windows Default
+   Begin VB.Frame fraFaxDecode 
+      Caption         =   "Fax Decode Parameters"
+      Height          =   3075
+      Left            =   2940
+      TabIndex        =   23
+      Top             =   1800
+      Visible         =   0   'False
+      Width           =   5535
+      Begin VB.OptionButton optFaxCode 
+         Caption         =   "C# decoder"
+         Height          =   285
+         Index           =   1
+         Left            =   3030
+         TabIndex        =   41
+         Top             =   1320
+         Value           =   -1  'True
+         Width           =   1935
+      End
+      Begin VB.OptionButton optFaxCode 
+         Caption         =   "Native muPdf decoder"
+         Height          =   345
+         Index           =   0
+         Left            =   3030
+         TabIndex        =   40
+         Top             =   900
+         Width           =   2205
+      End
+      Begin VB.CommandButton cmdCloseFaxParams 
+         Caption         =   "Cancel"
+         Height          =   435
+         Left            =   3030
+         TabIndex        =   39
+         Top             =   2460
+         Width           =   2355
+      End
+      Begin VB.CommandButton Command4 
+         Caption         =   "Run Decoder"
+         Height          =   465
+         Left            =   3030
+         TabIndex        =   38
+         Top             =   1800
+         Width           =   2325
+      End
+      Begin VB.TextBox Text1 
+         Height          =   285
+         Index           =   6
+         Left            =   1710
+         TabIndex        =   37
+         Text            =   "0"
+         Top             =   2550
+         Width           =   1005
+      End
+      Begin VB.TextBox Text1 
+         Height          =   285
+         Index           =   5
+         Left            =   1710
+         TabIndex        =   35
+         Text            =   "1"
+         Top             =   2190
+         Width           =   1005
+      End
+      Begin VB.TextBox Text1 
+         Height          =   285
+         Index           =   4
+         Left            =   1710
+         TabIndex        =   33
+         Text            =   "0"
+         Top             =   1800
+         Width           =   1005
+      End
+      Begin VB.TextBox Text1 
+         Height          =   285
+         Index           =   3
+         Left            =   1710
+         TabIndex        =   31
+         Text            =   "0"
+         Top             =   1380
+         Width           =   1005
+      End
+      Begin VB.TextBox Text1 
+         Height          =   285
+         Index           =   2
+         Left            =   1710
+         TabIndex        =   29
+         Text            =   "0"
+         Top             =   990
+         Width           =   1005
+      End
+      Begin VB.TextBox Text1 
+         Height          =   285
+         Index           =   1
+         Left            =   1710
+         TabIndex        =   27
+         Text            =   "0"
+         Top             =   630
+         Width           =   1005
+      End
+      Begin VB.TextBox Text1 
+         Height          =   285
+         Index           =   0
+         Left            =   1710
+         TabIndex        =   25
+         Text            =   "1728"
+         Top             =   270
+         Width           =   1005
+      End
+      Begin VB.Label Label1 
+         Caption         =   "BlackIs1"
+         Height          =   255
+         Index           =   6
+         Left            =   180
+         TabIndex        =   36
+         Top             =   2580
+         Width           =   705
+      End
+      Begin VB.Label Label1 
+         Caption         =   "EndOfBlock"
+         Height          =   255
+         Index           =   5
+         Left            =   150
+         TabIndex        =   34
+         Top             =   2190
+         Width           =   1335
+      End
+      Begin VB.Label Label1 
+         Caption         =   "EncodedByteAlign"
+         Height          =   255
+         Index           =   4
+         Left            =   150
+         TabIndex        =   32
+         Top             =   1800
+         Width           =   1515
+      End
+      Begin VB.Label Label1 
+         Caption         =   "End Of Line"
+         Height          =   255
+         Index           =   3
+         Left            =   150
+         TabIndex        =   30
+         Top             =   1380
+         Width           =   1395
+      End
+      Begin VB.Label Label1 
+         Caption         =   "K"
+         Height          =   255
+         Index           =   2
+         Left            =   150
+         TabIndex        =   28
+         Top             =   990
+         Width           =   705
+      End
+      Begin VB.Label Label1 
+         Caption         =   "Rows"
+         Height          =   255
+         Index           =   1
+         Left            =   150
+         TabIndex        =   26
+         Top             =   630
+         Width           =   705
+      End
+      Begin VB.Label Label1 
+         Caption         =   "Columns"
+         Height          =   255
+         Index           =   0
+         Left            =   150
+         TabIndex        =   24
+         Top             =   270
+         Width           =   705
+      End
+   End
    Begin VB.CommandButton Command3 
       Caption         =   "Load Stream From Clip"
       Height          =   285
@@ -183,6 +353,7 @@ Begin VB.Form frmManualFilters
       _ExtentX        =   22251
       _ExtentY        =   9922
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"frmManualFilters.frx":0000
@@ -237,6 +408,10 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Dim buf As String
 Dim org As String
+
+Private Sub cmdCloseFaxParams_Click()
+    fraFaxDecode.Visible = False
+End Sub
 
 Private Sub cmdSaveCurBuffer_Click()
     
@@ -321,7 +496,7 @@ Private Sub cmdDecode_Click(Index As Integer)
             DisplayData
         End If
     ElseIf d = CCITTFaxDecode Then
-        MsgBox "Not implemented in the manual filters dialog yet...to many decode variables to manually enter"
+        fraFaxDecode.Visible = True
     ElseIf csharp.Initilized Then
         If Index = DecodePredictor Then
             If Not SetDecodePredictor() Then Exit Sub
@@ -482,9 +657,45 @@ Private Sub Command3_Click()
     DisplayData
 End Sub
 
+Private Sub Command4_Click()
+   On Error Resume Next
+    
+    Dim k As Long, endofline As Long, encodedbytealign As Long, columns As Long, rows As Long, endofblock As Long, blackis1 As Long
+    
+    columns = CLng(Text1(0))
+    rows = CLng(Text1(1))
+    k = CLng(Text1(2))
+    endofline = CLng(Text1(3))
+    encodedbytealign = CLng(Text1(4))
+    endofblock = CLng(Text1(5))
+    blackis1 = CLng(Text1(6))
+    
+    If Err.Number <> 0 Then
+        MsgBox "Error loading values from textboxes. All values must be numeric base 10 values", vbInformation
+        Exit Sub
+    End If
+    
+    If optFaxCode(0).Value = True Then
+        buf = mupdf.muCCITTFaxDecode(buf, columns, rows, k, endofline, encodedbytealign, endofblock, blackis1)
+        DisplayData
+    Else
+        csharp.SetFaxDecodeParams columns, rows, k, endofline, encodedbytealign, endofblock, blackis1
+        If csharp.decode(buf, CCITTFaxDecode, True, False) Then
+            txtUncompressed = csharp.ErrorMessage
+        Else
+            buf = csharp.DecodedBuffer
+            DisplayData
+        End If
+    End If
+
+End Sub
+
 Private Sub Form_Load()
     Me.Icon = Form1.Icon
     Dim enabled As Boolean, i As Long
+    
+    optFaxCode(1).enabled = csharp.Initilized
+    If Not csharp.Initilized Then optFaxCode(0).Value = True
     
     For i = 0 To cmdDecode.Count - 1
         cmdDecode(i).Caption = FilterNameFromIndex(i, enabled)
@@ -498,9 +709,9 @@ Private Sub Form_Load()
     
 End Sub
 
-Private Sub Label1_Click()
-    MsgBox "The parent buffer you are decoding gets updated each call so you can chain filters. "
-End Sub
+'Private Sub Label1_Click()
+'    MsgBox "The parent buffer you are decoding gets updated each call so you can chain filters. "
+'End Sub
 
 Private Sub lbliText_Click()
 

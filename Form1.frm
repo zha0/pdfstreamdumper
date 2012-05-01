@@ -22,6 +22,44 @@ Begin VB.Form Form1
    ScaleHeight     =   9105
    ScaleWidth      =   13950
    StartUpPosition =   3  'Windows Default
+   Begin VB.Frame fraPictViewer 
+      Caption         =   "Picture Viewer "
+      Height          =   2685
+      Left            =   8310
+      TabIndex        =   20
+      Top             =   2640
+      Visible         =   0   'False
+      Width           =   3915
+      Begin VB.PictureBox Picture1 
+         AutoRedraw      =   -1  'True
+         AutoSize        =   -1  'True
+         Height          =   1875
+         Left            =   150
+         ScaleHeight     =   1815
+         ScaleWidth      =   3585
+         TabIndex        =   21
+         Top             =   390
+         Width           =   3645
+      End
+      Begin VB.Label lblClosePictViewer 
+         Caption         =   "Close"
+         BeginProperty Font 
+            Name            =   "Courier New"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   400
+            Underline       =   -1  'True
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H00C00000&
+         Height          =   255
+         Left            =   4170
+         TabIndex        =   22
+         Top             =   60
+         Width           =   645
+      End
+   End
    Begin PDFStreamDumper.ucAsyncDownload ucAsyncDownload1 
       Height          =   615
       Left            =   12870
@@ -42,6 +80,7 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -360,7 +399,6 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -376,14 +414,13 @@ Begin VB.Form Form1
    End
    Begin RichTextLib.RichTextBox he 
       Height          =   5895
-      Left            =   2160
+      Left            =   2100
       TabIndex        =   3
-      Top             =   120
+      Top             =   60
       Width           =   11295
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1246
@@ -680,9 +717,11 @@ Begin VB.Form Form1
          End
          Begin VB.Menu mnuAlwaysUseZlib 
             Caption         =   "Always use Zlib for FlateDecode"
+            Visible         =   0   'False
          End
          Begin VB.Menu mnuDisableiText 
             Caption         =   "Disable iText Decompressors"
+            Visible         =   0   'False
          End
          Begin VB.Menu mnuDisableDecomp 
             Caption         =   "Disable All Decompressors"
@@ -692,6 +731,9 @@ Begin VB.Form Form1
          End
          Begin VB.Menu mnuDisableDecryption 
             Caption         =   "Disable Decryption Support"
+         End
+         Begin VB.Menu mnuEnableJBIG2 
+            Caption         =   "Enable JBIG2 Decoding Support"
          End
       End
       Begin VB.Menu mnuAbout 
@@ -731,6 +773,9 @@ Begin VB.Form Form1
       Begin VB.Menu mnuHideUnselected 
          Caption         =   "Hide Unselected Streams"
       End
+      Begin VB.Menu mnuLoadAsImage2 
+         Caption         =   "Load As Image"
+      End
       Begin VB.Menu mnuSpacer2 
          Caption         =   "-"
       End
@@ -759,6 +804,9 @@ Begin VB.Form Form1
       Begin VB.Menu mnuSHowRawObject2 
          Caption         =   "Show Raw Object"
       End
+      Begin VB.Menu mnuLoadAsImage 
+         Caption         =   "Load As Image"
+      End
    End
    Begin VB.Menu mnuHelpTop 
       Caption         =   "Help_Videos"
@@ -773,39 +821,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-'see about for credits
-'
 'you can download some malicous pdfs from here:
 'http://jsunpack.jeek.org/dec/go?report=03d8f2450f56a7bc8eb8b2b59ca53f7818126da6
-
-'todo: possibly support filters /JPXDecode /JBIG2Decode (havent needed them yet)
-'      investigate /ObjStm ?
-'      support more pdf encoding mechanisms?
-'         http://blog.didierstevens.com/2008/04/29/pdf-let-me-count-the-ways/
-'      figure out a way to show which page is which? and implement the getnword on page script cmd?
-'
-'      modify sclog to hook getfilesize() to see if its scanning for open file handles
-'      modify sclog to include -f option to have it open a file handle for the shellcode
-
-
-'from wikipedia - http://en.wikipedia.org/wiki/Portable_Document_Format
-'s - DCTDecode a lossy filter based on the JPEG standard
-'s - JPXDecode a lossy or lossless filter based on the JPEG 2000 standard, introduced in PDF 1.5
-
-'from PDFSHARP Notes
-'     /// (Required except for image masks and images that use the JPXDecode filter)
-'      /// The number of bits used to represent each color component. Only a single value may be specified;
-'      /// the number of bits is the same for all color components. Valid values are 1, 2, 4, 8, and
-'      /// (in PDF 1.5) 16. If ImageMask is true, this entry is optional, and if specified, its value
-'      /// must be 1.
-'      /// If the image stream uses a filter, the value of BitsPerComponent must be consistent with the
-'      /// size of the data samples that the filter delivers. In particular, a CCITTFaxDecode or JBIG2Decode
-'      /// filter always delivers 1-bit samples, a RunLengthDecode or DCTDecode filter delivers 8-bit samples,
-'      /// and an LZWDecode or FlateDecode filter delivers samples of a specified size if a predictor function
-'      /// is used.
-'      /// If the image stream uses the JPXDecode filter, this entry is optional and ignored if present.
-'      /// The bit depth is determined in the process of decoding the JPEG2000 image.
-
 
 'changelog
 ' 9-2-10
@@ -871,6 +888,7 @@ Dim unspFilterCount As Long
 Dim ActionCount As Long
 Dim PRCCount As Long
 Dim surpressHideWarnings As Boolean
+Dim startup_complete As Boolean
 'Dim defaultLCID As Long
 
 Dim DownloadPath As String
@@ -944,6 +962,10 @@ Private Sub cmdAbortProcessing_Click()
     parser.abort = True
     ucAsyncDownload1.AbortDownload
     pb.Value = 0
+End Sub
+
+Private Sub lblClosePictViewer_Click()
+    fraPictViewer.Visible = False
 End Sub
 
 Private Sub mnuAlwaysUseZlib_Click()
@@ -1169,6 +1191,22 @@ Private Sub mnuDisableDecryption_Click()
     mnuDisableDecryption.Checked = Not mnuDisableDecryption.Checked
 End Sub
 
+Private Sub mnuEnableJBIG2_Click()
+
+    If Not startup_complete Then Exit Sub
+    
+    If Not mnuEnableJBIG2.Checked Then
+        If MsgBox("This filter uses a complex native library which I have not audited." & vbCrLf & _
+                  "It may contain security vulnerabilities." & vbCrLf & vbCrLf & _
+                  "Are you sure you want to enable it?", vbYesNo + vbInformation) = vbNo Then
+            Exit Sub
+        End If
+    End If
+    
+    mnuEnableJBIG2.Checked = Not mnuEnableJBIG2.Checked
+    
+End Sub
+
 Private Sub mnuExtractURI_Click()
     On Error Resume Next
     Dim r As String
@@ -1227,6 +1265,36 @@ Private Sub mnuHelp_Click(Index As Integer)
     Else
         Shell "cmd /c start """ & mnuHelp(Index).tag & """", vbNormalFocus
     End If
+End Sub
+
+Private Sub mnuLoadAsImage_Click()
+
+    On Error Resume Next
+    Dim s As CPDFStream
+    Set s = selli.tag
+    Dim d As String, f As Long, b() As Byte
+    Dim t As String
+    
+    Picture1.Cls
+    
+    d = s.OriginalData
+    f = FreeFile
+    t = fso.GetFreeFileName(Environ("temp"), ".jpg")
+    b() = StrConv(d, vbFromUnicode, LANG_US)
+    Open t For Binary As f
+    Put f, , b()
+    Close f
+    
+    Picture1.Picture = LoadPicture(t)
+    fraPictViewer.Visible = True
+    
+    Kill t
+    If Err.Number <> 0 Then Picture1.Print "Error: " & Err.Description
+    
+End Sub
+
+Private Sub mnuLoadAsImage2_Click()
+    mnuLoadAsImage_Click
 End Sub
 
 Private Sub mnuLoadJSFile_Click()
@@ -1311,6 +1379,8 @@ Private Sub Form_Resize()
     he.Width = txtUncompressed.Width
     txtDetails.Width = he.Width
     fraLower.Width = he.Width
+    
+    fraPictViewer.Move he.Left, he.Top, he.Width, he.Height
     
     fraControls.Width = Me.Width
     cmdAbortProcessing.Left = fraControls.Width - fraControls.Left - cmdAbortProcessing.Width - 100
@@ -2181,6 +2251,7 @@ Private Sub Form_Unload(Cancel As Integer)
     SaveMySetting "DisableiText", IIf(mnuDisableiText.Checked, 1, 0)
     SaveMySetting "AlwaysUseZlib", IIf(mnuAlwaysUseZlib.Checked, 1, 0)
     SaveMySetting "OpenLastAtStart", IIf(mnuOpenLastAtStart.Checked, 1, 0)
+    SaveMySetting "EnableJBIG2", IIf(mnuEnableJBIG2.Checked, 1, 0)
        
     FormPos Me, True, True
     
@@ -2962,6 +3033,7 @@ Private Sub Form_Load()
     mnuDisableiText.Checked = IIf(GetMySetting("DisableiText", 0) = 1, True, False)
     mnuAlwaysUseZlib.Checked = IIf(GetMySetting("AlwaysUseZlib", 0) = 1, True, False)
     mnuOpenLastAtStart.Checked = IIf(GetMySetting("OpenLastAtStart", 0) = 1, True, False)
+    mnuEnableJBIG2.Checked = IIf(GetMySetting("EnableJBIG2", 0) = 1, True, False)
     
     lv2.ColumnHeaders(1).Width = lv2.Width - 100
     lv.ColumnHeaders(1).Width = lv.Width - 100
@@ -2977,6 +3049,7 @@ Private Sub Form_Load()
     Me.Visible = True
     DoEvents
     Me.Refresh
+    startup_complete = True
     
     'we cant set this, machine needs a reboot to apply...but i think this issue is fixed now?
     'defaultLCID = GetLocale(UserMode)
@@ -3069,21 +3142,26 @@ End Sub
 
 Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
     On Error Resume Next
+    If selli Is Item Then Exit Sub
     Call GetActiveData(Item, True)
     Set selli = Item
+    If fraPictViewer.Visible = True Then fraPictViewer.Visible = False
 End Sub
 
 Private Sub lv2_ItemClick(ByVal Item As MSComctlLib.ListItem)
     On Error Resume Next
+    If selli Is Item Then Exit Sub
     Call GetActiveData(Item, True)
     Set selli = Item
+    If fraPictViewer.Visible = True Then fraPictViewer.Visible = False
 End Sub
 
 Private Sub lvsearch_ItemClick(ByVal Item As MSComctlLib.ListItem)
     On Error Resume Next
-    Dim d As String
+    If selli Is Item Then Exit Sub
     Call GetActiveData(Item, True)
     Set selli = Item
+    If fraPictViewer.Visible = True Then fraPictViewer.Visible = False
 End Sub
 
 
@@ -3156,11 +3234,22 @@ Private Sub ts_Click()
         txtDetails.Visible = True
     End If
     
+    fraPictViewer.Visible = False
     mnuExtractHexDump.enabled = he.Visible
     mnuExtractHexFromParan.enabled = Not he.Visible
     
 End Sub
 
+
+Private Sub txtPDFPath_Click()
+    On Error Resume Next
+    txtPDFPath.SelStart = 0
+    txtPDFPath.SelLength = Len(txtPDFPath)
+End Sub
+
+Private Sub txtPDFPath_KeyDown(KeyCode As Integer, Shift As Integer)
+    If KeyCode = 13 Then cmdDecode_Click
+End Sub
 
 Private Sub txtPDFPath_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, Y As Single)
     On Error Resume Next

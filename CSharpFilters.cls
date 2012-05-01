@@ -88,7 +88,17 @@ End Function
 '        bool Decrypt(string infile, string outfile);
 '        void SetPredictorParams(int predictor, int columns, int colorss, int bitspercomponent);
 '}
+     
+Function SetFaxDecodeParams(Optional cols As Long = 1728, Optional rows As Long = 0, _
+    Optional k As Long = 0, Optional end_of_line As Long = 0, Optional encoded_byte_align As Long = 0, _
+    Optional end_of_block As Long = 1, Optional black_is1 As Long = 0)
     
+ On Error GoTo hell
+    If Not Initilized Then Exit Function
+    iTextFilters.SetFaxParams cols, rows, k, end_of_line, encoded_byte_align, end_of_block, black_is1
+hell:
+End Function
+
 Function SetPredictorParams(predictor As Integer, Optional columns = 1, Optional colors = 1, Optional bitspercomponent = 8)
     On Error GoTo hell
     If Not Initilized Then Exit Function
@@ -96,7 +106,7 @@ Function SetPredictorParams(predictor As Integer, Optional columns = 1, Optional
 hell:
 End Function
 
-Function decode(Data As String, decoder As Decoders, Optional surpressErrorMsg As Boolean = True, Optional dbugMode As Boolean = False) As Boolean
+Function decode(data As String, decoder As Decoders, Optional surpressErrorMsg As Boolean = True, Optional dbugMode As Boolean = False) As Boolean
     
     On Error GoTo hell
         
@@ -109,7 +119,7 @@ Function decode(Data As String, decoder As Decoders, Optional surpressErrorMsg A
     Dim addr As Long
     Dim bufsize As Long
     
-    b() = StrConv(Data, vbFromUnicode, LANG_US)
+    b() = StrConv(data, vbFromUnicode, LANG_US)
     addr = VarPtr(b(0))
     bufsize = UBound(b)
     

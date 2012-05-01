@@ -16,7 +16,8 @@ Capabilities
 	- view stream details such as file offsets, header, etc
 	- save raw and deflated data
 	- decompile Flash ActionScript 3 files with AS3 Sorcerer (Trial included) 
-	- supports filters: FlateDecode, RunLengthDecode, ASCIIHEXDecode, ASCII85Decode, LZWDecode
+	- supports filters: FlateDecode, RunLengthDecode, ASCIIHEXDecode, 
+                            ASCII85Decode, LZWDecode, FaxDecode, JBIG2Decode
         - supports filter chaining (ie multiple filters applied to same stream)
         - supports unescaping encoded pdf headers
 	- search streams for strings
@@ -167,6 +168,12 @@ Credits:
 	http://home.t-online.de/home/Ollydbg/
         http://sandsprite.com/CodeStuff/olly_dll.html
 	
+	MuPDF is released under GPL and Copyright 2006-2012 Artifex Software, Inc.
+	http://www.mupdf.com/
+
+        CCTIFaxDecoder copyright Sun MicroSystems and intarsys consulting GmbH.
+	http://java.net/projects/pdf-renderer/
+  
 	libemu written by Paul Baecher and Markus Koetter 2007.	
 	http://libemu.carnivore.it/about.html
 

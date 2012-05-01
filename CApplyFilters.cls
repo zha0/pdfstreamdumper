@@ -50,52 +50,50 @@ Sub ApplyFilters()
     
         For Each x In filters
             d = x
-                    
-            If csharp.Initilized And Form1.mnuDisableiText.Checked = False Then  'send everything through the iTextDecode
+            
+            If d = FlateDecode Then
                 
-                If d = FlateDecode And Form1.mnuAlwaysUseZlib.Checked = True Then 'lets still use the zlib for this one...
-                    buf = NativeDecompress(buf)   'something in the iText FlateDecode can crash occasionally...(only in long automated runs)
-                ElseIf d = JBIG2Decode Then
+                buf = NativeDecompress(buf) 'always use native zlib...
+                
+            ElseIf d = AsciiHexDecode Then
+                
+                buf = HexStringUnescape(buf, True) 'always use my vb implementation
+            
+            ElseIf d = JBIG2Decode Then
+                
+                If Form1.mnuEnableJBIG2.Checked Then
                     buf = mupdf.muJBIG2Decode(buf)
                     If Len(buf) = 0 Then
                         DecompressionError = True
                         DecompErrorMessage = "Failed to decode JBIG2 Stream possibly malformed?"
                     End If
-                ElseIf d = CCITTFaxDecode Then
-                    buf = HandleFaxDecode(buf)
                 Else
-                    If d = DecodePredictor Then ParsePredictor 'comment out this line to disable the predictor support..(added 3.26.11)
-                    If Not csharp.decode(buf, d) Then
-                        DecompressionError = True
-                        DecompErrorMessage = csharp.ErrorMessage
-                        Exit For
-                    Else
-                        buf = csharp.DecodedBuffer
-                    End If
+                    DecompressionError = True
+                    DecompErrorMessage = "Native JBIG2 Filter is not enabled in options."
+                End If
+                
+            'all the rest of the decoders are handled in C# code...
+            ElseIf csharp.Initilized Then 'And Form1.mnuDisableiText.Checked = False Then  'send everything through the iTextDecode
+                
+                If d = CCITTFaxDecode Then HandleFaxDecode Empty, False 'set decode parameters
+                If d = DecodePredictor Then ParsePredictor
+                
+                If Not csharp.decode(buf, d) Then
+                    DecompressionError = True
+                    DecompErrorMessage = csharp.ErrorMessage
+                    Exit For
+                Else
+                    buf = csharp.DecodedBuffer
                 End If
                 
             Else
-                If d = FlateDecode Then
-                    buf = NativeDecompress(buf)
-                ElseIf d = AsciiHexDecode Then
-                    buf = HexStringUnescape(buf, True)
-                ElseIf d = JBIG2Decode Then
-                    buf = mupdf.muJBIG2Decode(buf)
-                    If Len(buf) = 0 Then
-                        DecompressionError = True
-                        DecompErrorMessage = "Failed to decode JBIG2 Stream possibly malformed?"
-                    End If
-                ElseIf d = CCITTFaxDecode Then
-                    buf = HandleFaxDecode(buf)
+                DecompressionError = True
+                If csharp.DetectDotNet = True Then
+                    DecompErrorMessage = csharp.ErrorMessage
                 Else
-                    DecompressionError = True
-                    If csharp.DetectDotNet = True Then
-                        DecompErrorMessage = csharp.ErrorMessage
-                    Else
-                        DecompErrorMessage = "This filter requires .NET 2.0 or greater installed"
-                    End If
-                    Exit For
+                    DecompErrorMessage = "This filter requires .NET 2.0 or greater installed"
                 End If
+                Exit For
             End If
         Next
     
@@ -128,7 +126,7 @@ Private Function NativeDecompress(ByVal s As String)
                 
 End Function
 
-Private Function ExtractNextValue(tag As String)
+Private Function ExtractNextValue(tag As String, Optional defVal = "")
     On Error Resume Next
     Dim es As String
     es = LCase(parent.escapedHeader)
@@ -144,6 +142,7 @@ Private Function ExtractNextValue(tag As String)
             Exit Function
         End If
     End If
+    ExtractNextValue = defVal
 End Function
 
 Private Function lowest(ParamArray x())
@@ -156,23 +155,24 @@ Private Function lowest(ParamArray x())
     lowest = l
 End Function
 
-Function HandleFaxDecode(buf As String)
+Function HandleFaxDecode(buf As String, Optional use_MuPdf As Boolean = True)
 
     On Error Resume Next
     Dim k As Long, endofline As Long, encodedbytealign As Long, columns As Long, rows As Long, endofblock As Long, blackis1 As Long
     
-    k = CLng(ExtractNextValue("K"))
-    endofline = CLng(ExtractNextValue("EndofLine"))
-    encodedbytealign = CLng(ExtractNextValue("EncodedByteAlign"))
-    columns = CLng(ExtractNextValue("Columns"))
-    rows = CLng(ExtractNextValue("Rows"))
-    endofblock = CLng(ExtractNextValue("EndOfBlock"))
-    blackis1 = CLng(ExtractNextValue("BlackIs1"))
-
-    If columns = 0 Then columns = 1728
-    If endofblock = 0 Then endofblock = 1
+    k = CLng(ExtractNextValue("K", 0))
+    endofline = CLng(ExtractNextValue("EndofLine", 0))
+    encodedbytealign = CLng(ExtractNextValue("EncodedByteAlign", 0))
+    columns = CLng(ExtractNextValue("Columns", 1728))
+    rows = CLng(ExtractNextValue("Rows", 0))
+    endofblock = CLng(ExtractNextValue("EndOfBlock", 1))
+    blackis1 = CLng(ExtractNextValue("BlackIs1", 0))
     
-    HandleFaxDecode = mupdf.muCCITTFaxDecode(buf, columns, rows, k, endofline, encodedbytealign, endofblock, blackis1)
+    If use_MuPdf Then
+        HandleFaxDecode = mupdf.muCCITTFaxDecode(buf, columns, rows, k, endofline, encodedbytealign, endofblock, blackis1)
+    Else
+        csharp.SetFaxDecodeParams columns, rows, k, endofline, encodedbytealign, endofblock, blackis1
+    End If
 
 End Function
 
@@ -181,15 +181,15 @@ Sub ParsePredictor()
     Dim es As String
     Err.Clear
     
-    predictor = ExtractNextValue("Predictor")
-    columns = ExtractNextValue("Columns")
-    colors = ExtractNextValue("Colors")
-    bitspercomponent = ExtractNextValue("BitsPerComponent")
-    If bitspercomponent = 0 Then bitspercomponent = ExtractNextValue("BPC")
+    predictor = ExtractNextValue("Predictor", 0)
+    columns = ExtractNextValue("Columns", 1)
+    colors = ExtractNextValue("Colors", 1)
+    bitspercomponent = ExtractNextValue("BitsPerComponent", 0)
+    If bitspercomponent = 0 Then bitspercomponent = ExtractNextValue("BPC", 8)
     
-    If columns = 0 Then columns = 1
-    If colors = 0 Then colors = 1
-    If bitspercomponent = 0 Then bitspercomponent = 8
+    'If columns = 0 Then columns = 1
+    'If colors = 0 Then colors = 1
+    'If bitspercomponent = 0 Then bitspercomponent = 8
     
     csharp.SetPredictorParams predictor, columns, colors, bitspercomponent
     

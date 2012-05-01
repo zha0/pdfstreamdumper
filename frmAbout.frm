@@ -37,6 +37,7 @@ Begin VB.Form frmAbout
       _ExtentX        =   19711
       _ExtentY        =   10821
       _Version        =   393217
+      Enabled         =   -1  'True
       ReadOnly        =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"frmAbout.frx":4B1E
@@ -77,6 +78,8 @@ Private Sub Form_Load()
 
     Const m2 = "MuPDF is released under GPL and Copyright 2006-2012 Artifex Software, Inc.\n" & _
                 "http://www.mupdf.com/\n\n" & _
+                "CCTIFaxDecoder copyright Sun MicroSystems and intarsys consulting GmbH.\n" & _
+                "http://java.net/projects/pdf-renderer/\n\n" & _
                 "libemu and sctest written by Paul Baecher and Markus Koetter in 2007.\n" & _
                 "http://libemu.carnivore.it/about.html\n\n" & _
                 "scdbg (libemu/sctest mod) developer dzzie@yahoo.com\n" & _

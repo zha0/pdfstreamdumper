@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CCITTFaxDecoder.cs" />
     <Compile Include="Filters.cs" />
     <Compile Include="LZWDecoder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

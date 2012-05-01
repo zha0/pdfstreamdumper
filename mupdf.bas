@@ -39,7 +39,7 @@ Function muCCITTFaxDecode(data As String, Optional cols As Long = 1728, Optional
     
     If outSize = 0 Then Exit Function
    
-    ReDim b(outSize)
+    ReDim b(outSize - 1) 'zero based
     CopyMemory b(0), pBufOut, outSize
     muCCITTFaxDecode = StrConv(b(), vbUnicode, LANG_US)
     FreeBuffer pBufOut
@@ -64,7 +64,7 @@ Function muJBIG2Decode(data As String) As String
     'MsgBox f
     If outSize = 0 Then Exit Function
    
-    ReDim b(outSize)
+    ReDim b(outSize - 1)
     CopyMemory b(0), pBufOut, outSize
     muJBIG2Decode = StrConv(b(), vbUnicode, LANG_US)
     FreeBuffer pBufOut
@@ -89,7 +89,7 @@ Function muAsciiHexDecode(data As String) As String
     'MsgBox f
     If outSize = 0 Then Exit Function
    
-    ReDim b(outSize)
+    ReDim b(outSize - 1)
     CopyMemory b(0), pBufOut, outSize
     muAsciiHexDecode = StrConv(b(), vbUnicode, LANG_US)
     FreeBuffer pBufOut

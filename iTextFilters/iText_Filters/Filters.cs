@@ -6,8 +6,10 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.util.zlib;
 using iTextSharp.text.pdf;
-using iTextSharp.text.factories;  
+using iTextSharp.text.factories;
+using com.sun.pdfview.CCITTFaxDecoder;  //Copyright (c) 2001 Sun Microsystems, Copyright (c) 2007, intarsys consulting GmbH
 
+//todo implement SetFaxParams, and add CCITTFaxDecoder enum and handler...main decoder block already ported and debugged
 
 namespace iTextFilters
 {
@@ -18,7 +20,11 @@ namespace iTextFilters
         ASCIIHexDecode = 2,
         ASCII85Decode = 3,
         LzwDecode = 4,
-        DecodePredictor = 5
+        DecodePredictor = 5,
+        DCTDecode = 6,        /*unsupported*/
+        CCITTFaxDecode = 7,
+        JBIG2Decode = 8,      /*uses native mupdf code*/
+        JPXDecode = 9        /*unsupported*/
     }
 
     public interface ICDecoder
@@ -43,12 +49,31 @@ namespace iTextFilters
             private int mcolors = 1;
             private int mbitspercomponent = 8;
 
+            //private int mcolumns = 1728;
+            private int mrows = 0 ;
+            private int mk = 0;
+            private int mend_of_line = 0;        
+            private int mencoded_byte_align = 0;
+            private int mend_of_block = 1;
+            private int mblack_is1 = 0;
+
             public void SetPredictorParams(int predictor, int columns, int colors, int bitspercomponent)
             {
                 mpredictor = predictor;
                 if (columns > 0) mcolumns = columns;
                 if (colors > 0) mcolors = colors;
                 if (bitspercomponent > 0) mbitspercomponent = bitspercomponent;
+            }
+
+            public void SetFaxParams(int columns,int rows, int k ,int end_of_line, int encoded_byte_align, int end_of_block, int black_is1)
+            {
+                 mcolumns = columns;
+                 mrows = rows ;
+                 mk = k;
+                 mend_of_line = end_of_line;
+                 mencoded_byte_align = encoded_byte_align;
+                 mend_of_block = end_of_block;
+                 mblack_is1 = black_is1;
             }
 
             public string ErrorMessage { get { return mErrorMessage; } }
@@ -84,6 +109,7 @@ namespace iTextFilters
                             case mDecoders.LzwDecode:       buf = ByteDecoder.LzwDecode(bufIn); break;
                             case mDecoders.RunLengthDecode: buf = ByteDecoder.RunLengthDecode(bufIn); break;
                             case mDecoders.DecodePredictor: buf = ByteDecoder.DecodePredictor(bufIn, mpredictor, mcolumns, mcolors, mbitspercomponent); break;
+                            case mDecoders.CCITTFaxDecode:  buf = ByteDecoder.FaxDecode(bufIn, mcolumns, mrows, mk, mencoded_byte_align, mblack_is1); break;  
                             default:
                                         mErrorMessage = "Unknown decode method: " + method ;
                                         return false;
@@ -224,48 +250,6 @@ namespace iTextFilters
             return decompressed.ToArray();
 
         }
-
-        /*
-         public static byte[] RunLengthDecode(byte[] data)
-        {
-            MemoryStream input = new MemoryStream(data);
-            StringBuilder decompressed = new StringBuilder();
-            
-            int runLength = input.ReadByte();
-            while (runLength > 0)
-            {
-                if (runLength < 128)
-                { //if runLength < 128: decompressed += f.read(runLength + 1)
-                    for (int i = 0; i < runLength + 1; i++)
-                    {
-                        char c = (char)input.ReadByte();
-                        decompressed.Append(c);
-                    }
-                }
-                if (runLength > 128)
-                { //if runLength > 128 decompressed += f.read(1) * (257 - runLength)
-                    String tmp = new String((char)input.ReadByte(), 257 - runLength);
-                    decompressed.Append(tmp);
-                }
-                if (runLength == 128) break;
-
-                runLength = input.ReadByte();
-            }
-
-            char[] cc = decompressed.ToString().ToCharArray();
-            byte[] ret = new byte[cc.Length];
-
-            for (int i = 0; i < cc.Length; i++)
-            {
-                ret[i] = (byte)cc[i];
-            }
-
-
-            return ret;
-        }
-        */
-
-
 
         public static byte[] LzwDecode(byte[] data)
         {
@@ -495,6 +479,41 @@ namespace iTextFilters
 
             return outp.ToArray();
         }
+
+        //not implemented into decode loop yet but debugged already...
+        public static byte[] FaxDecode(byte[] src, int columns, int rows, int k, int encodedByteAlign, int blackIs1)
+        {
+
+            sbyte[] source = (sbyte[])(Array)src;
+            int size = rows * ((columns + 7) >> 3);
+            sbyte[] destination = new sbyte[size];
+
+            CCITTFaxDecoder decoder = new CCITTFaxDecoder(1, columns, rows);
+            decoder.alignProperty = encodedByteAlign == 0 ? true : false;
+            if (k == 0)
+            {
+                decoder.decodeT41D(destination, source, 0, rows);
+            }
+            else if (k > 0)
+            {
+                decoder.decodeT42D(destination, source, 0, rows);
+            }
+            else if (k < 0)
+            {
+                decoder.decodeT6(destination, source, 0, rows);
+            }
+            if (blackIs1 == 0)
+            {
+                for (int i = 0; i < destination.Length; i++)
+                {
+                    // bitwise not
+                    destination[i] = (sbyte)~destination[i];
+                }
+            }
+
+            return (byte[])(Array)destination;
+        }
+
 
     }
 
