@@ -53,7 +53,7 @@ Sub ApplyFilters()
             
             If DecompressionError = True Then Exit For
             
-            If d = FlateDecode Then
+            If d = FlateDecode Then 'And Not csharp.Initilized Then
                 
                 buf = NativeDecompress(buf) 'always use native zlib...
                 

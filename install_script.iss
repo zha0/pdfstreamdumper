@@ -101,7 +101,7 @@ Source: iTextFilters\VB_filtersDebug\org_CSharpFilters.cls; DestDir: {app}\iText
 Source: iTextFilters\VB_filtersDebug\Project1.exe; DestDir: {app}\iTextFilters\VB_filtersDebug
 Source: iTextFilters\VB_filtersDebug\Project1.vbp; DestDir: {app}\iTextFilters\VB_filtersDebug
 Source: iTextFilters\VB_filtersDebug\Project1.vbw; DestDir: {app}\iTextFilters\VB_filtersDebug
-Source: iTextFilters.dll; DestDir: {app}
+Source: iTextFilters.dll; DestDir: {app}; Flags: ignoreversion
 Source: iTextFilters\iText_Filters.sln; DestDir: {app}\iTextFilters\
 Source: iTextFilters.tlb; DestDir: {app}; Flags: regtypelib
 Source: iTextFilters\iText_Filters.reg; DestDir: {app}\iTextFilters\
@@ -250,6 +250,9 @@ Source: mupdf\stm_buffer.cpp; DestDir: {app}\mupdf\
 Source: mupdf\stm_open.cpp; DestDir: {app}\mupdf\
 Source: mupdf\stm_read.cpp; DestDir: {app}\mupdf\
 Source: iTextFilters\iText_Filters\CCITTFaxDecoder.cs; DestDir: {app}\iTextFilters\iText_Filters\
+Source: ./\frmFilterVisualizer.frm; DestDir: {app}
+
+
 
 [Icons]
 Name: {group}\PdfStreamDumper.exe; Filename: {app}\PDFStreamDumper.exe

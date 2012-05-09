@@ -354,4 +354,5 @@ End Function
 
 Private Sub Class_Initialize()
     FileExtension = ".unk"
+    FileType = "Unknown"
 End Sub

@@ -690,6 +690,9 @@ Begin VB.Form Form1
       Begin VB.Menu mnuFilters 
          Caption         =   "Manual_Filters"
       End
+      Begin VB.Menu mnuFilterVisualizer 
+         Caption         =   "Filter Visualizer"
+      End
       Begin VB.Menu mnuHexEditor 
          Caption         =   "View PDF in Hexeditor"
       End
@@ -1241,6 +1244,10 @@ Private Sub mnuExtractURI_Click()
     'Clipboard.SetText r
     'MsgBox Len(r) & " characters copied to clipboard.", vbInformation
     
+End Sub
+
+Private Sub mnuFilterVisualizer_Click()
+    frmFilterVisualizer.Show
 End Sub
 
 Private Sub mnuHelp_Click(Index As Integer)
@@ -2851,14 +2858,18 @@ Function GetActiveData(Item As ListItem, Optional load_ui As Boolean = False, Op
     Set ret_Stream = s
     
     'use err message to determine if decompress was successful or not (or len s.decomdata huh?)
-    
+        
     If Len(s.Message) > 0 Then
         d = s.OriginalData
     ElseIf s.ContainsStream Then
-        If s.isCompressed Then
-            d = s.DecompressedData
-        Else
+        If mnuDisableDecomp.Checked Then
             d = s.OriginalData
+        Else
+            If s.isCompressed Then
+                d = s.DecompressedData
+            Else
+                d = s.OriginalData
+            End If
         End If
     Else
         d = s.GetHeaderWithViewOptions()
@@ -3142,7 +3153,7 @@ Public Sub catch_up()
     DoEvents
 End Sub
 
-Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
+Public Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
     On Error Resume Next
     If selli Is Item Then Exit Sub
     Call GetActiveData(Item, True)
@@ -3150,7 +3161,7 @@ Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
     If fraPictViewer.Visible = True Then fraPictViewer.Visible = False
 End Sub
 
-Private Sub lv2_ItemClick(ByVal Item As MSComctlLib.ListItem)
+Public Sub lv2_ItemClick(ByVal Item As MSComctlLib.ListItem)
     On Error Resume Next
     If selli Is Item Then Exit Sub
     Call GetActiveData(Item, True)
@@ -3352,15 +3363,15 @@ End Function
 '
 'Loop
 '
-Private Sub ucAsyncDownload1_DownloadComplete(fpath As String)
+Private Sub ucAsyncDownload1_DownloadComplete(fPath As String)
     Dim f As String
     Dim a As Long
     
     On Error GoTo hell
     
     pb.Value = 0
-    Name fpath As DownloadPath
-    If fso.FileExists(fpath) Then Kill fpath
+    Name fPath As DownloadPath
+    If fso.FileExists(fPath) Then Kill fPath
     
     Exit Sub
 hell:
