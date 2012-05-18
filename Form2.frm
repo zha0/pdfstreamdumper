@@ -6,7 +6,7 @@ Begin VB.Form Form2
    Caption         =   "PDF Stream Dumper - JS UI"
    ClientHeight    =   8325
    ClientLeft      =   165
-   ClientTop       =   735
+   ClientTop       =   855
    ClientWidth     =   14460
    LinkTopic       =   "Form2"
    ScaleHeight     =   8325
@@ -14,11 +14,11 @@ Begin VB.Form Form2
    StartUpPosition =   3  'Windows Default
    Begin MSComctlLib.ListView lv2 
       Height          =   2670
-      Left            =   0
+      Left            =   30
       TabIndex        =   17
       Top             =   5580
-      Width           =   2355
-      _ExtentX        =   4154
+      Width           =   2295
+      _ExtentX        =   4048
       _ExtentY        =   4710
       View            =   3
       LabelEdit       =   1
@@ -198,6 +198,7 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   10398
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0000
@@ -253,6 +254,7 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   2249
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0080
@@ -798,17 +800,21 @@ End Sub
 
 Private Sub DoMove()
     On Error Resume Next
-    Const buf = 10
-    txtOut.Top = splitter.Top + splitter.Height + buf
-    txtOut.Height = Me.Height - txtOut.Top - buf
-    Frame1.Top = splitter.Top - Frame1.Height - buf
-    txtJS.Height = Frame1.Top - txtJS.Top - buf
+    Dim tw As Integer 'Twips Width
+    Dim th As Integer 'Twips Height
+    tw = Screen.TwipsPerPixelX
+    th = Screen.TwipsPerPixelY
+    Const buf = 30
+    txtOut.Top = splitter.Top + splitter.height + buf
+    txtOut.height = Me.height - txtOut.Top - (th * 60)
+    Frame1.Top = splitter.Top - Frame1.height - buf
+    txtJS.height = Frame1.Top - txtJS.Top - buf
 End Sub
 
 
 Private Function MoveOk(Y&) As Boolean  'Put in any limiters you desire
     MoveOk = False
-    If Y > Frame1.Height * 2 And Y < Me.Height - (Frame1.Height * 2) Then
+    If Y > Frame1.height * 2 And Y < Me.height - (Frame1.height * 2) Then
         MoveOk = True
     End If
 End Function
@@ -914,12 +920,17 @@ End Sub
 
 Private Sub Form_Resize()
     On Error Resume Next
-    txtOut.Width = Me.Width - txtOut.Left - 300
-    txtJS.Width = txtOut.Width
-    txtOut.Height = Me.Height - txtOut.Top - 700
+    Dim tw As Integer 'Twips Width
+    Dim th As Integer 'Twips Height
+    tw = Screen.TwipsPerPixelX
+    th = Screen.TwipsPerPixelY
     
-    lv2.Top = Me.Height - lv2.Height - 750
-    lv.Height = lv2.Top - lv.Top - 25
+    txtOut.Width = Me.Width - txtOut.Left - (tw * 20) '300
+    txtJS.Width = txtOut.Width
+    txtOut.height = Me.height - txtOut.Top - (th * 60) '750
+    
+    lv2.Top = Me.height - lv2.height - (th * 60) '750
+    lv.height = lv2.Top - lv.Top - (tw * 10)  '25
     
     'lv.Height = Me.Height - lv.Top - 700
     Frame1.Width = txtJS.Width
@@ -927,11 +938,11 @@ Private Sub Form_Resize()
     
     If Me.WindowState = vbMinimized Then Exit Sub
     
-    If splitter.Top < Frame1.Height * 2 Then
-        splitter.Top = Frame1.Height * 2
+    If splitter.Top < Frame1.height * 2 Then
+        splitter.Top = Frame1.height * 2
         DoMove
-    ElseIf splitter.Top > Me.Height - (Frame1.Height * 2) Then
-        splitter.Top = Me.Height - (Frame1.Height * 2)
+    ElseIf splitter.Top > Me.height - (Frame1.height * 2) Then
+        splitter.Top = Me.height - (Frame1.height * 2)
         DoMove
     End If
     
