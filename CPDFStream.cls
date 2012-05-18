@@ -330,7 +330,9 @@ Function GetDetailsReport()
                 If StreamDecompressor.DecompressionError = True Then
                     push r, lpad("Decompress Error: ", sz) & StreamDecompressor.DecompErrorMessage
                 Else
-                    push r, lpad("DeCompressed Size: 0x", sz) & Hex(DecompressedSize) & " (" & DecompressedSize & ")"
+                    If Not StreamDecompressor.UnsupportedFilter Then
+                        push r, lpad("DeCompressed Size: 0x", sz) & Hex(DecompressedSize) & " (" & DecompressedSize & ")"
+                    End If
                     push r, lpad("DeCompressed CRC: 0x", sz) & Hex(CRC32(Me.DecompressedData))
                     push r, lpad("Expansion Ratio: ", sz) & Round((DecompressedSize / CompressedSize), 2) & "x  (" & DecompressedSize - CompressedSize & " bytes)"
                 End If

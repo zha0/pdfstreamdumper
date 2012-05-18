@@ -61,6 +61,10 @@ Sub ApplyFilters()
                 
                 buf = HexStringUnescape(buf, True) 'always use my vb implementation
             
+            ElseIf d = CCITTFaxDecode Then
+                
+                buf = HandleFaxDecode(buf, True)
+                
             ElseIf d = JBIG2Decode Then
                 
                 If Form1.mnuEnableJBIG2.Checked Then
@@ -77,7 +81,8 @@ Sub ApplyFilters()
             'all the rest of the decoders are handled in C# code...
             ElseIf csharp.Initilized Then 'And Form1.mnuDisableiText.Checked = False Then  'send everything through the iTextDecode
                 
-                If d = CCITTFaxDecode Then HandleFaxDecode Empty, False 'set decode parameters
+                'default is now to use mupdf version for CCITTFaxDecode
+                If d = CCITTFaxDecode Then HandleFaxDecode buf, False  'set decode parameters
                 If d = DecodePredictor Then ParsePredictor
                 
                 If Not csharp.decode(buf, d) Then
@@ -161,6 +166,7 @@ Function HandleFaxDecode(buf As String, Optional use_MuPdf As Boolean = True)
 
     On Error Resume Next
     Dim k As Long, endofline As Long, encodedbytealign As Long, columns As Long, rows As Long, endofblock As Long, blackis1 As Long
+    Dim height As Long
     
     k = CLng(ExtractNextValue("K", 0))
     endofline = CLng(ExtractNextValue("EndofLine", 0))
@@ -170,10 +176,18 @@ Function HandleFaxDecode(buf As String, Optional use_MuPdf As Boolean = True)
     endofblock = CLng(ExtractNextValue("EndOfBlock", 1))
     blackis1 = CLng(ExtractNextValue("BlackIs1", 0))
     
+    height = CLng(ExtractNextValue("Height", 0)) 'not reliable doesnt seem...works for some fails for others...
+    
     If use_MuPdf Then
         HandleFaxDecode = mupdf.muCCITTFaxDecode(buf, columns, rows, k, endofline, encodedbytealign, endofblock, blackis1)
     Else
         csharp.SetFaxDecodeParams columns, rows, k, endofline, encodedbytealign, endofblock, blackis1
+        If rows = 0 And height > 0 Then
+            'sometimes this is required so we will test now
+            If Not csharp.decode(buf, CCITTFaxDecode) Then
+                csharp.SetFaxDecodeParams columns, height, k, endofline, encodedbytealign, endofblock, blackis1
+            End If
+        End If
     End If
 
 End Function
@@ -295,6 +309,7 @@ Function GetActiveFiltersAsString() As String
         If d = CCITTFaxDecode Then push r, "CCITTFaxDecode"
         If d = JBIG2Decode Then push r, "JBIG2Decode"
         If d = JPXDecode Then push r, "JPXDecode"
+        If d = DecodePredictor Then push r, "DecodePredictor"
     Next
     
     GetActiveFiltersAsString = Join(r, ",")

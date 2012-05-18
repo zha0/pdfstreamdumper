@@ -4,10 +4,10 @@ Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Begin VB.Form Form1 
    Caption         =   "PDF Stream Dumper - http://sandsprite.com"
-   ClientHeight    =   9105
+   ClientHeight    =   9225
    ClientLeft      =   165
-   ClientTop       =   735
-   ClientWidth     =   13950
+   ClientTop       =   855
+   ClientWidth     =   14130
    BeginProperty Font 
       Name            =   "Courier New"
       Size            =   9.75
@@ -19,8 +19,8 @@ Begin VB.Form Form1
    EndProperty
    Icon            =   "Form1.frx":0000
    LinkTopic       =   "Form1"
-   ScaleHeight     =   9105
-   ScaleWidth      =   13950
+   ScaleHeight     =   9225
+   ScaleWidth      =   14130
    StartUpPosition =   3  'Windows Default
    Begin VB.Frame fraPictViewer 
       Caption         =   "Picture Viewer "
@@ -80,6 +80,7 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -105,8 +106,8 @@ Begin VB.Form Form1
          TabIndex        =   14
          Top             =   0
          Visible         =   0   'False
-         Width           =   10275
-         _ExtentX        =   18124
+         Width           =   8475
+         _ExtentX        =   14949
          _ExtentY        =   2566
          View            =   3
          LabelEdit       =   1
@@ -138,8 +139,8 @@ Begin VB.Form Form1
          TabIndex        =   15
          Top             =   0
          Visible         =   0   'False
-         Width           =   11175
-         _ExtentX        =   19711
+         Width           =   9900
+         _ExtentX        =   17463
          _ExtentY        =   2566
          View            =   3
          LabelEdit       =   1
@@ -170,8 +171,8 @@ Begin VB.Form Form1
          Left            =   0
          TabIndex        =   16
          Top             =   0
-         Width           =   11415
-         _ExtentX        =   20135
+         Width           =   11265
+         _ExtentX        =   19870
          _ExtentY        =   2566
          View            =   3
          LabelEdit       =   1
@@ -202,8 +203,8 @@ Begin VB.Form Form1
          Left            =   30
          TabIndex        =   17
          Top             =   0
-         Width           =   11535
-         _ExtentX        =   20346
+         Width           =   11600
+         _ExtentX        =   20452
          _ExtentY        =   3201
          MultiRow        =   -1  'True
          Placement       =   1
@@ -241,7 +242,7 @@ Begin VB.Form Form1
       Left            =   45
       TabIndex        =   6
       Top             =   8370
-      Width           =   14055
+      Width           =   13815
       Begin VB.TextBox txtPDFPath 
          BeginProperty Font 
             Name            =   "Courier New"
@@ -300,7 +301,7 @@ Begin VB.Form Form1
          Height          =   375
          Left            =   0
          TabIndex        =   8
-         Top             =   0
+         Top             =   75
          Width           =   855
       End
       Begin VB.CommandButton cmdAbortProcessing 
@@ -357,13 +358,13 @@ Begin VB.Form Form1
    End
    Begin MSComctlLib.StatusBar StatusBar 
       Align           =   2  'Align Bottom
-      Height          =   255
+      Height          =   390
       Left            =   0
       TabIndex        =   4
-      Top             =   8850
-      Width           =   13950
-      _ExtentX        =   24606
-      _ExtentY        =   450
+      Top             =   8835
+      Width           =   14130
+      _ExtentX        =   24924
+      _ExtentY        =   688
       _Version        =   393216
       BeginProperty Panels {8E3867A5-8586-11D1-B16A-00C0F0283628} 
          NumPanels       =   10
@@ -398,7 +399,6 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -421,7 +421,6 @@ Begin VB.Form Form1
       _ExtentX        =   19923
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1246
@@ -473,8 +472,8 @@ Begin VB.Form Form1
       Left            =   2040
       TabIndex        =   2
       Top             =   0
-      Width           =   11535
-      _ExtentX        =   20346
+      Width           =   11910
+      _ExtentX        =   21008
       _ExtentY        =   11456
       MultiRow        =   -1  'True
       Placement       =   1
@@ -857,6 +856,7 @@ Attribute VB_Exposed = False
 
 Private Declare Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" (ByVal hwnd As Long, ByVal lpszOp As String, ByVal lpszFile As String, ByVal lpszParams As String, ByVal LpszDir As String, ByVal FsShowCmd As Long) As Long
 Private Declare Function GetTickCount Lib "kernel32" () As Long
+Private Declare Function InitCommonControls Lib "comctl32.dll" () As Long
 
 Dim WithEvents parser As CPdfParser
 Attribute parser.VB_VarHelpID = -1
@@ -968,6 +968,11 @@ Private Sub cmdAbortProcessing_Click()
     pb.Value = 0
 End Sub
 
+Private Sub Form_Initialize()
+    InitCommonControls
+End Sub
+
+
 Private Sub lblClosePictViewer_Click()
     fraPictViewer.Visible = False
 End Sub
@@ -998,10 +1003,6 @@ Private Sub mnub64Encode_Click()
     If fso.FileExists(b) Then
         MsgBox "Complete 0x" & Hex(FileLen(b)) & " bytes decompressed saved as: " & vbCrLf & vbCrLf & b
     End If
-End Sub
-
-Private Sub mnuBrowserUnescape_Click()
-    
 End Sub
 
 Private Sub mnuDebugBreakAtStream_Click()
@@ -1368,41 +1369,50 @@ End Function
 
 Private Sub Form_Resize()
     On Error Resume Next
+    Dim tw As Integer 'Twips Width
+    Dim th As Integer 'Twips Height
+    tw = Screen.TwipsPerPixelX
+    th = Screen.TwipsPerPixelY
+    
     'Me.Caption = Me.Height & " w: " & Me.Width
-    If Me.Height < 6500 Then Me.Height = 6500
+    If Me.height < 6500 Then Me.height = 6500
     If Me.Width < 13000 Then Me.Width = 13000
     
-    fraControls.Top = Me.Height - fraControls.Height - StatusBar.Height - 750
-    fraLower.Top = fraControls.Top - fraLower.Height
-    lv.Height = fraControls.Top - lv.Top - 100
+    fraControls.Top = Me.height - fraControls.height - StatusBar.height - (th * 60)
+    fraLower.Top = fraControls.Top - fraLower.height
+    lv.height = fraControls.Top - lv.Top
     
-    ts.Height = fraLower.Top - ts.Top - 100
-    he.Height = ts.Height - 600
-    txtDetails.Height = he.Height
-    txtUncompressed.Height = he.Height
-    pb.Top = ts.Top + ts.Height - 335
+    ts.height = fraLower.Top - ts.Top - (th * 20)  '- 100
+    he.height = ts.height - 600
+    txtDetails.height = he.height
+    txtUncompressed.height = he.height
+    pb.Top = ts.Top + ts.height - (th * 20) '- 335
     
-    txtUncompressed.Width = Me.Width - txtUncompressed.Left - 300
-    TabStrip1.Width = txtUncompressed.Width + 300
+    'txtUncompressed.Width = Me.Width - txtUncompressed.Left - 400
+    'TabStrip1.Width = txtUncompressed.Width + 300
+    TabStrip1.Width = Me.Width - lv.Width - (tw * 20) '10 pixels for the right
+    txtUncompressed.Width = TabStrip1.Width - (tw * 10) 'Add 10 more pixels for of border for the tab control
+    
     ts.Width = TabStrip1.Width
     he.Width = txtUncompressed.Width
     txtDetails.Width = he.Width
     fraLower.Width = he.Width
     
-    fraPictViewer.Move he.Left, he.Top, he.Width, he.Height
+    fraPictViewer.Move he.Left, he.Top, he.Width, he.height
     
     fraControls.Width = Me.Width
-    cmdAbortProcessing.Left = fraControls.Width - fraControls.Left - cmdAbortProcessing.Width - 100
-    cmdDecode.Left = cmdAbortProcessing.Left - cmdDecode.Width - 10
-    cmdBrowse.Left = cmdDecode.Left - cmdBrowse.Width - 10
-    txtPDFPath.Width = cmdBrowse.Left - txtPDFPath.Left - 10
+    cmdAbortProcessing.Left = fraControls.Width - fraControls.Left - cmdAbortProcessing.Width - (tw * 20)
+    cmdDecode.Left = cmdAbortProcessing.Left - cmdDecode.Width - (tw * 2)
+    cmdBrowse.Left = cmdDecode.Left - cmdBrowse.Width - (tw * 2)
+    Command1.Top = cmdAbortProcessing.Top
+    txtPDFPath.Width = cmdBrowse.Left - txtPDFPath.Left - (tw * 2)
     
     lv2.Width = he.Width
     lvSearch.Width = he.Width
     lvDebug.Width = he.Width
-    pb.Width = Me.Width - pb.Left - 200
+    pb.Width = Me.Width - pb.Left - (tw * 20)
     
-    lv2.ColumnHeaders(1).Width = lv2.Width - 75
+    lv2.ColumnHeaders(1).Width = lv2.Width - (tw * 5)
     lvSearch.ColumnHeaders(1).Width = lv2.ColumnHeaders(1).Width
     lvDebug.ColumnHeaders(1).Width = lv2.ColumnHeaders(1).Width
     
@@ -3054,8 +3064,8 @@ Private Sub Form_Load()
     lvDebug.ColumnHeaders(1).Width = lvDebug.Width - 100
     lvSearch.Move lv2.Left, lv2.Top
     lvDebug.Move lv2.Left, lv2.Top
-    txtUncompressed.Move he.Left, he.Top, he.Width, he.Height
-    txtDetails.Move he.Left, he.Top, he.Width, he.Height
+    txtUncompressed.Move he.Left, he.Top, he.Width, he.height
+    txtDetails.Move he.Left, he.Top, he.Width, he.height
     FormPos Me, True
     
     LoadPlugins

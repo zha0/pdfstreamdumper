@@ -36,7 +36,7 @@ Private Sub Form_Load()
     Dim n2 As Node
     Dim n0 As Node
     Dim size As Long
-    Dim text As String
+    Dim Text As String
     
     Dim s As CPDFStream
     Dim filter As String
@@ -55,9 +55,7 @@ Private Sub Form_Load()
     For Each li In Form1.lv.ListItems
         Set s = li.tag
         If s.ContainsStream Then
-            If s.StreamDecompressor.DecompressionError Then
-                errors.Add li
-            ElseIf s.StreamDecompressor.GetActiveFiltersCount > 1 Then
+            If s.StreamDecompressor.GetActiveFiltersCount > 1 Then
                 chains.Add li
             Else
                 filter = s.StreamDecompressor.GetActiveFiltersAsString()
@@ -70,15 +68,15 @@ Private Sub Form_Load()
                 End If
                 
                 'text = IIf(s.ContentType <> Unknown, " - " & s.FileType, "")
-                text = " - " & s.FileType
+                Text = " - " & s.FileType
                 
                 If size > 0 Then
                     If nodeExists(filter, n) Then
-                        Set n2 = tv.Nodes.Add(n, tvwChild, , s.Index & text & " - sz: 0x" & Hex(size))
+                        Set n2 = tv.Nodes.Add(n, tvwChild, , s.Index & Text & " - sz: 0x" & Hex(size))
                         Set n2.tag = li
                     Else
                         Set n = tv.Nodes.Add(n0, tvwChild, filter, filter)
-                        Set n2 = tv.Nodes.Add(n, tvwChild, , s.Index & text & " - sz: 0x" & Hex(size))
+                        Set n2 = tv.Nodes.Add(n, tvwChild, , s.Index & Text & " - sz: 0x" & Hex(size))
                         Set n2.tag = li
                     End If
                 End If
@@ -87,6 +85,13 @@ Private Sub Form_Load()
         End If
     Next
             
+    For Each li In Form1.lv2.ListItems
+        Set s = li.tag
+        If s.ContainsStream And s.StreamDecompressor.DecompressionError Then
+             errors.Add li
+        End If
+    Next
+    
     If errors.Count > 0 Then
         Set n = tv.Nodes.Add(n0, tvwChild, "Errors", "Errors")
         For Each li In errors
@@ -113,6 +118,9 @@ Private Sub Form_Load()
 
 End Sub
 
+Private Function AddItem(li As ListItem)
+
+End Function
 Private Function nodeExists(key, outNode As Node) As Boolean
     On Error Resume Next
     Dim n As Node
@@ -166,7 +174,10 @@ Private Function DeselectAllOthers(lv As ListView, except As ListItem)
     Dim li As ListItem
     For Each li In lv.ListItems
         li.Selected = False
-        If li Is except Then li.Selected = True
+        If li Is except Then
+            li.Selected = True
+            li.EnsureVisible
+        End If
     Next
 End Function
 

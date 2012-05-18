@@ -251,6 +251,7 @@ Source: mupdf\stm_open.cpp; DestDir: {app}\mupdf\
 Source: mupdf\stm_read.cpp; DestDir: {app}\mupdf\
 Source: iTextFilters\iText_Filters\CCITTFaxDecoder.cs; DestDir: {app}\iTextFilters\iText_Filters\
 Source: ./\frmFilterVisualizer.frm; DestDir: {app}
+Source: PDFStreamDumper.exe.manifest; DestDir: {app}
 
 
 
