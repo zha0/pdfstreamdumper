@@ -2,7 +2,7 @@ VERSION 5.00
 Object = "{0E59F1D2-1FBE-11D0-8FF2-00A0D10038BC}#1.0#0"; "msscript.ocx"
 Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
-Object = "{71532E87-B06E-431D-AC3A-686170A406ED}#7.1#0"; "hexed2.ocx"
+Object = "{9A143468-B450-48DD-930D-925078198E4D}#1.0#0"; "hexed.ocx"
 Begin VB.Form Form1 
    Caption         =   "PDF Stream Dumper - http://sandsprite.com"
    ClientHeight    =   9195
@@ -24,14 +24,14 @@ Begin VB.Form Form1
    ScaleWidth      =   14100
    StartUpPosition =   3  'Windows Default
    Begin rhexed.HexEd he 
-      Height          =   1515
-      Left            =   2070
+      Height          =   1575
+      Left            =   2130
       TabIndex        =   22
       Top             =   60
       Visible         =   0   'False
-      Width           =   10065
-      _ExtentX        =   17754
-      _ExtentY        =   2672
+      Width           =   10665
+      _ExtentX        =   18812
+      _ExtentY        =   2778
    End
    Begin VB.Frame fraPictViewer 
       Caption         =   "Picture Viewer "

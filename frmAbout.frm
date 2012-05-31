@@ -37,7 +37,6 @@ Begin VB.Form frmAbout
       _ExtentX        =   19711
       _ExtentY        =   10821
       _Version        =   393217
-      Enabled         =   -1  'True
       ReadOnly        =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"frmAbout.frx":4B1E
@@ -86,8 +85,10 @@ Private Sub Form_Load()
                 "http://github.com/dzzie/VS_LIBEMU\n\n" & _
                 "zlib.dll by Jean-loup Gailly and Mark Adler\n" & _
                 "http://www.zlib.net/\n\n" & _
-                "Crc32 code by Steve McMahon\n" & _
-                "http://www.vbaccelerator.com/home/vb/code/libraries/CRC32/article.asp\n\n" & _
+                "HexEd hexeditor control codebase by Rang3r\n" & _
+                "http://www.Planet-Source-Code.com/vb/scripts/ShowCode.asp?txtCodeId=34729&lngWId=1\n\n" & _
+                "Crc32 and Binary Clipboard class Copyright (c) 2002 Steve McMahon\n" & _
+                "http://www.vbaccelerator.com\n\n" & _
                 "olly.dll GPL code Copyright (C) 2001 Oleh Yuschuk\n" & _
                 "http://home.t-online.de/home/Ollydbg/\n\n" & _
                 "Interface by dzzie@yahoo.com\nhttp://sandsprite.com\n\n" & _
