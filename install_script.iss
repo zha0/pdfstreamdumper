@@ -81,6 +81,7 @@ Source: ./\dependancies\msscript.ocx; DestDir: {win}; Flags: regserver uninsneve
 Source: ./\dependancies\richtx32.ocx; DestDir: {win}; Flags: regserver uninsneveruninstall
 Source: ./\dependancies\SCIVBX.ocx; DestDir: {app}; Flags: regserver
 Source: ./\dependancies\SciLexer.dll; DestDir: {app}
+Source: ./\dependancies\hexed.ocx; DestDir: {app}; Flags: regserver
 Source: CSharpFilters.cls; DestDir: {app}
 Source: frmScTest.frm; DestDir: {app}
 Source: husk.exe; DestDir: {app}

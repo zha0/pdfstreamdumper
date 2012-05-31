@@ -2,12 +2,13 @@ VERSION 5.00
 Object = "{0E59F1D2-1FBE-11D0-8FF2-00A0D10038BC}#1.0#0"; "msscript.ocx"
 Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
+Object = "{71532E87-B06E-431D-AC3A-686170A406ED}#7.1#0"; "hexed2.ocx"
 Begin VB.Form Form1 
    Caption         =   "PDF Stream Dumper - http://sandsprite.com"
-   ClientHeight    =   9225
+   ClientHeight    =   9195
    ClientLeft      =   165
-   ClientTop       =   855
-   ClientWidth     =   14130
+   ClientTop       =   735
+   ClientWidth     =   14100
    BeginProperty Font 
       Name            =   "Courier New"
       Size            =   9.75
@@ -19,14 +20,24 @@ Begin VB.Form Form1
    EndProperty
    Icon            =   "Form1.frx":0000
    LinkTopic       =   "Form1"
-   ScaleHeight     =   9225
-   ScaleWidth      =   14130
+   ScaleHeight     =   9195
+   ScaleWidth      =   14100
    StartUpPosition =   3  'Windows Default
+   Begin rhexed.HexEd he 
+      Height          =   1515
+      Left            =   2070
+      TabIndex        =   22
+      Top             =   60
+      Visible         =   0   'False
+      Width           =   10065
+      _ExtentX        =   17754
+      _ExtentY        =   2672
+   End
    Begin VB.Frame fraPictViewer 
       Caption         =   "Picture Viewer "
       Height          =   2685
       Left            =   8310
-      TabIndex        =   20
+      TabIndex        =   19
       Top             =   2640
       Visible         =   0   'False
       Width           =   3915
@@ -37,7 +48,7 @@ Begin VB.Form Form1
          Left            =   150
          ScaleHeight     =   1815
          ScaleWidth      =   3585
-         TabIndex        =   21
+         TabIndex        =   20
          Top             =   390
          Width           =   3645
       End
@@ -55,7 +66,7 @@ Begin VB.Form Form1
          ForeColor       =   &H00C00000&
          Height          =   255
          Left            =   4170
-         TabIndex        =   22
+         TabIndex        =   21
          Top             =   60
          Width           =   645
       End
@@ -63,7 +74,7 @@ Begin VB.Form Form1
    Begin PDFStreamDumper.ucAsyncDownload ucAsyncDownload1 
       Height          =   615
       Left            =   12870
-      TabIndex        =   19
+      TabIndex        =   18
       Top             =   810
       Visible         =   0   'False
       Width           =   795
@@ -73,14 +84,13 @@ Begin VB.Form Form1
    Begin RichTextLib.RichTextBox txtDetails 
       Height          =   3435
       Left            =   3600
-      TabIndex        =   18
+      TabIndex        =   17
       Top             =   2040
       Visible         =   0   'False
       Width           =   8775
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
-      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -97,13 +107,13 @@ Begin VB.Form Form1
       BorderStyle     =   0  'None
       Height          =   1860
       Left            =   2115
-      TabIndex        =   13
+      TabIndex        =   12
       Top             =   6525
       Width           =   11625
       Begin MSComctlLib.ListView lvDebug 
          Height          =   1455
          Left            =   1200
-         TabIndex        =   14
+         TabIndex        =   13
          Top             =   0
          Visible         =   0   'False
          Width           =   8475
@@ -136,7 +146,7 @@ Begin VB.Form Form1
       Begin MSComctlLib.ListView lvSearch 
          Height          =   1455
          Left            =   360
-         TabIndex        =   15
+         TabIndex        =   14
          Top             =   0
          Visible         =   0   'False
          Width           =   9900
@@ -169,7 +179,7 @@ Begin VB.Form Form1
       Begin MSComctlLib.ListView lv2 
          Height          =   1455
          Left            =   0
-         TabIndex        =   16
+         TabIndex        =   15
          Top             =   0
          Width           =   11265
          _ExtentX        =   19870
@@ -201,7 +211,7 @@ Begin VB.Form Form1
       Begin MSComctlLib.TabStrip TabStrip1 
          Height          =   1815
          Left            =   30
-         TabIndex        =   17
+         TabIndex        =   16
          Top             =   0
          Width           =   11600
          _ExtentX        =   20452
@@ -240,7 +250,7 @@ Begin VB.Form Form1
       BorderStyle     =   0  'None
       Height          =   465
       Left            =   45
-      TabIndex        =   6
+      TabIndex        =   5
       Top             =   8370
       Width           =   13815
       Begin VB.TextBox txtPDFPath 
@@ -256,7 +266,7 @@ Begin VB.Form Form1
          Height          =   315
          Left            =   2040
          OLEDropMode     =   1  'Manual
-         TabIndex        =   11
+         TabIndex        =   10
          Text            =   "Drag and drop pdf file here"
          Top             =   90
          Width           =   8535
@@ -274,7 +284,7 @@ Begin VB.Form Form1
          EndProperty
          Height          =   375
          Left            =   11250
-         TabIndex        =   10
+         TabIndex        =   9
          Top             =   45
          Width           =   1335
       End
@@ -291,7 +301,7 @@ Begin VB.Form Form1
          EndProperty
          Height          =   375
          Left            =   10665
-         TabIndex        =   9
+         TabIndex        =   8
          Top             =   45
          Width           =   615
       End
@@ -300,7 +310,7 @@ Begin VB.Form Form1
          Enabled         =   0   'False
          Height          =   375
          Left            =   0
-         TabIndex        =   8
+         TabIndex        =   7
          Top             =   75
          Width           =   855
       End
@@ -308,7 +318,7 @@ Begin VB.Form Form1
          Caption         =   "Abort"
          Height          =   375
          Left            =   12600
-         TabIndex        =   7
+         TabIndex        =   6
          Top             =   45
          Width           =   1005
       End
@@ -326,7 +336,7 @@ Begin VB.Form Form1
          EndProperty
          Height          =   255
          Left            =   840
-         TabIndex        =   12
+         TabIndex        =   11
          Top             =   120
          Width           =   1095
       End
@@ -334,7 +344,7 @@ Begin VB.Form Form1
    Begin MSComctlLib.ProgressBar pb 
       Height          =   285
       Left            =   5805
-      TabIndex        =   5
+      TabIndex        =   4
       Top             =   6165
       Width           =   7710
       _ExtentX        =   13600
@@ -358,13 +368,13 @@ Begin VB.Form Form1
    End
    Begin MSComctlLib.StatusBar StatusBar 
       Align           =   2  'Align Bottom
-      Height          =   390
+      Height          =   300
       Left            =   0
-      TabIndex        =   4
-      Top             =   8835
-      Width           =   14130
-      _ExtentX        =   24924
-      _ExtentY        =   688
+      TabIndex        =   3
+      Top             =   8895
+      Width           =   14100
+      _ExtentX        =   24871
+      _ExtentY        =   529
       _Version        =   393216
       BeginProperty Panels {8E3867A5-8586-11D1-B16A-00C0F0283628} 
          NumPanels       =   10
@@ -399,31 +409,10 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
-      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
-         Name            =   "Courier New"
-         Size            =   12
-         Charset         =   0
-         Weight          =   700
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-   End
-   Begin RichTextLib.RichTextBox he 
-      Height          =   5895
-      Left            =   2100
-      TabIndex        =   3
-      Top             =   60
-      Width           =   11295
-      _ExtentX        =   19923
-      _ExtentY        =   10398
-      _Version        =   393217
-      HideSelection   =   0   'False
-      ScrollBars      =   2
-      TextRTF         =   $"Form1.frx":1246
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "Courier New"
          Size            =   12
@@ -592,6 +581,7 @@ Begin VB.Form Form1
       Begin VB.Menu mnuExtractHexDump 
          Caption         =   "Extract Hex From HexDump"
          Enabled         =   0   'False
+         Visible         =   0   'False
       End
    End
    Begin VB.Menu mnuUpdateCurrent 
@@ -661,6 +651,9 @@ Begin VB.Form Form1
       End
       Begin VB.Menu mnuSpacer22 
          Caption         =   "-"
+      End
+      Begin VB.Menu mnuB64Clipboard 
+         Caption         =   "Base64 Decode Clipboard"
       End
       Begin VB.Menu mnub64decode 
          Caption         =   "Base64 Decode File"
@@ -737,6 +730,9 @@ Begin VB.Form Form1
          End
          Begin VB.Menu mnuEnableJBIG2 
             Caption         =   "Enable JBIG2 Decoding Support"
+         End
+         Begin VB.Menu mnuUseInternalHexeditor 
+            Caption         =   "Use Internal HexEditor"
          End
       End
       Begin VB.Menu mnuAbout 
@@ -979,6 +975,43 @@ End Sub
 
 Private Sub mnuAlwaysUseZlib_Click()
     mnuAlwaysUseZlib.Checked = Not mnuAlwaysUseZlib.Checked
+End Sub
+
+Private Sub mnuB64Clipboard_Click()
+    On Error Resume Next
+    Dim f As String
+    Dim p As String
+    Dim b() As Byte
+    Dim ff As Long
+    Dim h As CHexEditor
+    
+    f = Clipboard.GetText
+    If Len(f) = 0 Then
+        MsgBox "Clipboard Empty"
+        Exit Sub
+    End If
+    
+    f = b64.b64DecodeString(f)
+    If Len(f) = 0 Then
+        MsgBox "Decoding failed length=0"
+        Exit Sub
+    End If
+    
+    'p = fso.GetFreeFileName(Environ("temp"), ".tmp")
+    '
+    'b() = StrConv(f, vbFromUnicode, LANG_US)
+    'ff = FreeFile
+    'Open p For Binary As ff
+    'Put ff, , b()
+    'Close ff
+    '
+    Set h = New CHexEditor
+    'h.Editor.LoadFile p, False
+    
+    h.Editor.LoadString f, False
+    
+    'MsgBox "File saved. Decoded Length: 0x" & Hex(Len(f))
+    
 End Sub
 
 Private Sub mnub64decode_Click()
@@ -1521,45 +1554,45 @@ Private Sub mnuErrorSaveRaw_Click()
     
 End Sub
 
-Private Sub mnuExtractHexDump_Click()
-    
-    On Error Resume Next
-    Dim x, tmp, i, first, last
-    
-    If Len(he.SelText) > 0 Then
-        x = he.SelText
-    Else
-        x = he.Text
-    End If
-    
-    'handles extraction from these cases
-    'a = "000000   3C 3C 0D 0A 09 2F 54 79 70 65 2F 41 63 74 69 6F    <<.../Type/Actio"
-    'b = "3C 3C 0D 0A 09 2F 54 79 70 65 2F 41 63 74 69 6F    <<.../Type/Actio"
-    'c = "3C 3C 0D 0A 09 2F 54 79 70 65 2F 41"
-    'd = "000   3C 3C 0D 0A 09 2F 54 79 70 65 2F 41 63 74 69 6F    <<."
-    
-    tmp = Split(x, vbCrLf)
-    For i = 0 To UBound(tmp)
-        tmp(i) = Trim(tmp(i))
-        first = InStr(tmp(i), "   ")
-        last = InStr(tmp(i), "    ")
-        
-        If first > 0 And first <> last Then
-            tmp(i) = Mid(tmp(i), first + 1)
-        End If
-        
-        last = InStr(tmp(i), "    ")
-        If last > 0 Then
-            tmp(i) = Mid(tmp(i), 1, last)
-        End If
-    
-        tmp(i) = Replace(tmp(i), " ", Empty)
-        
-    Next
-    
-    he.Text = Join(tmp, "")
-        
-End Sub
+'Private Sub mnuExtractHexDump_Click()
+'
+'    On Error Resume Next
+'    Dim x, tmp, i, first, last
+'
+'    If Len(he.SelText) > 0 Then
+'        x = he.SelText
+'    Else
+'        x = he.Text
+'    End If
+'
+'    'handles extraction from these cases
+'    'a = "000000   3C 3C 0D 0A 09 2F 54 79 70 65 2F 41 63 74 69 6F    <<.../Type/Actio"
+'    'b = "3C 3C 0D 0A 09 2F 54 79 70 65 2F 41 63 74 69 6F    <<.../Type/Actio"
+'    'c = "3C 3C 0D 0A 09 2F 54 79 70 65 2F 41"
+'    'd = "000   3C 3C 0D 0A 09 2F 54 79 70 65 2F 41 63 74 69 6F    <<."
+'
+'    tmp = Split(x, vbCrLf)
+'    For i = 0 To UBound(tmp)
+'        tmp(i) = Trim(tmp(i))
+'        first = InStr(tmp(i), "   ")
+'        last = InStr(tmp(i), "    ")
+'
+'        If first > 0 And first <> last Then
+'            tmp(i) = Mid(tmp(i), first + 1)
+'        End If
+'
+'        last = InStr(tmp(i), "    ")
+'        If last > 0 Then
+'            tmp(i) = Mid(tmp(i), 1, last)
+'        End If
+'
+'        tmp(i) = Replace(tmp(i), " ", Empty)
+'
+'    Next
+'
+'    he.Text = Join(tmp, "")
+'
+'End Sub
 
 Private Sub mnuExtractHexFromParan_Click()
 
@@ -1573,6 +1606,21 @@ End Sub
 
 Private Sub mnuHexEditor_Click()
     Dim h As String
+    Dim f As CHexEditor
+    
+    If Len(txtPDFPath.Text) = 0 Then Exit Sub
+    If txtPDFPath.Text = "Drag and drop pdf file here" Then Exit Sub
+    
+    If Not fso.FileExists(txtPDFPath.Text) Then
+        MsgBox "Could not find file: " & txtPDFPath.Text, vbExclamation
+        Exit Sub
+    End If
+    
+    If mnuUseInternalHexeditor.Checked Then
+        Set f = New CHexEditor
+        f.Editor.LoadFile txtPDFPath.Text
+        Exit Sub
+    End If
     
     h = GetMySetting("hexeditor")
     If Len(h) = 0 Or Not fso.FileExists(h) Then
@@ -1742,6 +1790,10 @@ End Sub
 
 Private Sub mnuSHowRawObject2_Click()
     mnuShowRawObject_Click
+End Sub
+
+Private Sub mnuUseInternalHexeditor_Click()
+    mnuUseInternalHexeditor.Checked = Not mnuUseInternalHexeditor.Checked
 End Sub
 
 Private Sub mnuVisualFormatHeaders_Click()
@@ -2271,7 +2323,8 @@ Private Sub Form_Unload(Cancel As Integer)
     SaveMySetting "AlwaysUseZlib", IIf(mnuAlwaysUseZlib.Checked, 1, 0)
     SaveMySetting "OpenLastAtStart", IIf(mnuOpenLastAtStart.Checked, 1, 0)
     SaveMySetting "EnableJBIG2", IIf(mnuEnableJBIG2.Checked, 1, 0)
-       
+    SaveMySetting "UseInternalHexeditor", IIf(mnuUseInternalHexeditor.Checked, 1, 0)
+    
     FormPos Me, True, True
     
     Dim tmp As String
@@ -2387,7 +2440,7 @@ Public Sub cmdDecode_Click()
     
     txtDetails.Text = Empty
     txtUncompressed.Text = Empty
-    he.Text = Empty
+    he.LoadString "", True
     lv.ListItems.Clear
     lv2.ListItems.Clear
     lvSearch.ListItems.Clear
@@ -2887,10 +2940,9 @@ Function GetActiveData(Item As ListItem, Optional load_ui As Boolean = False, Op
         
     If load_ui Then
          txtUncompressed.Text = Replace(d, Chr(0), ".")
-         he.Text = HexDump(d)
+         'he.Text = HexDump(d)
+         he.LoadString CStr(d), True
          txtDetails.Text = s.GetDetailsReport()
-         
-         
          
          'If InStr(d, Chr(0)) > 0 Then
          '   Set ts.SelectedItem = ts.Tabs(2)
@@ -3057,6 +3109,7 @@ Private Sub Form_Load()
     mnuAlwaysUseZlib.Checked = IIf(GetMySetting("AlwaysUseZlib", 0) = 1, True, False)
     mnuOpenLastAtStart.Checked = IIf(GetMySetting("OpenLastAtStart", 0) = 1, True, False)
     mnuEnableJBIG2.Checked = IIf(GetMySetting("EnableJBIG2", 0) = 1, True, False)
+    mnuUseInternalHexeditor.Checked = IIf(GetMySetting("UseInternalHexeditor", 1) = 1, True, False)
     
     lv2.ColumnHeaders(1).Width = lv2.Width - 100
     lv.ColumnHeaders(1).Width = lv.Width - 100

@@ -95,7 +95,7 @@ End Sub
 
 Function TopMost(f As Form, Optional ontop As Boolean = True)
     s = IIf(ontop, HWND_TOPMOST, HWND_NOTOPMOST)
-    SetWindowPos f.hwnd, s, f.Left / 15, f.Top / 15, f.Width / 15, f.Height / 15, 0
+    SetWindowPos f.hwnd, s, f.Left / 15, f.Top / 15, f.Width / 15, f.height / 15, 0
 End Function
 
 
@@ -386,13 +386,13 @@ Function WebFileNameFromPath(fullpath)
     End If
 End Function
 
-Sub Move(fpath, toFolder)
-    Copy fpath, toFolder
-    Kill fpath
+Sub Move(fPath, toFolder)
+    Copy fPath, toFolder
+    Kill fPath
 End Sub
 
-Sub DeleteFile(fpath)
-    Kill fpath
+Sub DeleteFile(fPath)
+    Kill fPath
 End Sub
 
 Sub Rename(fullpath, NewName)
@@ -400,8 +400,8 @@ Sub Rename(fullpath, NewName)
   Name fullpath As pf & "\" & NewName
 End Sub
 
-Sub SetAttribute(fpath, it As VbFileAttribute)
-   SetAttr fpath, it
+Sub SetAttribute(fPath, it As VbFileAttribute)
+   SetAttr fPath, it
 End Sub
 
 Function GetExtension(path) As String
@@ -444,10 +444,27 @@ Function SafeFileName(proposed) As String
   SafeFileName = CStr(proposed)
 End Function
 
-Function RandomNum()
-    Randomize
-    tmp = Round(Timer * Now * Rnd(), 0)
-    RandomNum = tmp
+Function RandomNum() As Long
+    Dim tmp As Long
+    Dim tries As Long
+    
+    On Error Resume Next
+
+    Do While 1
+        Err.Clear
+        Randomize
+        tmp = Round(Timer * Now * Rnd(), 0)
+        RandomNum = tmp
+        If Err.Number = 0 Then Exit Function
+        If tries < 100 Then
+            tries = tries + 1
+        Else
+            Exit Do
+        End If
+    Loop
+    
+    RandomNum = GetTickCount
+    
 End Function
 
 Function GetFreeFileName(folder, Optional extension = ".txt") As String
@@ -517,20 +534,20 @@ Sub AppendFile(path, it) 'not binary safe
 End Sub
 
 
-Sub Copy(fpath, toFolder)
+Sub Copy(fPath, toFolder)
    If FolderExists(toFolder) Then
-       baseName = fso.FileNameFromPath(fpath)
+       baseName = fso.FileNameFromPath(fPath)
        toFolder = IIf(Right(toFolder, 1) = "\", toFolder, toFolder & "\")
-       FileCopy fpath, toFolder & baseName
+       FileCopy fPath, toFolder & baseName
    Else 'assume tofolder is actually new desired file path
-       FileCopy fpath, toFolder
+       FileCopy fPath, toFolder
    End If
 End Sub
 
-Sub CreateFile(fpath)
+Sub CreateFile(fPath)
     f = FreeFile
-    If fso.FileExists(fpath) Then Exit Sub
-    Open fpath For Binary As f
+    If fso.FileExists(fPath) Then Exit Sub
+    Open fPath For Binary As f
     Close f
 End Sub
 
