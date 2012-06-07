@@ -11,7 +11,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
-
+Private Declare Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" (ByVal hwnd As Long, ByVal lpOperation As String, ByVal lpFile As String, ByVal lpParameters As String, ByVal lpDirectory As String, ByVal nShowCmd As Long) As Long
 
 'Function RegisterPlugin(intMenu As Integer,              <-- which menu to add to
 '                         strMenuName As String,          <-- menu text
@@ -23,12 +23,25 @@ Public frmMain As Object
 Sub SetHost(newref As Object)
     Set frmMain = newref
     frmMain.RegisterPlugin 0, "Object Browser", 0
+    frmMain.RegisterPlugin 0, "FreeMyPDF Decrypter", 1
+    frmMain.RegisterPlugin 0, "CrackMyPDF Decrypter", 2
 End Sub
+
+Private Function LaunchBrowser(ByVal url As String)
+    Call ShellExecute(0&, "open", url, vbNullString, vbNullString, vbNormalFocus)
+End Function
 
 Sub StartUp(intArg As Integer)
     On Error Resume Next
-    Set Form1.frmMain = frmMain
-    Form1.Show '1
+    Select Case intArg
+        Case 0:
+                Set Form1.frmMain = frmMain
+                Form1.Show '1
+        Case 1:
+                LaunchBrowser "http://freemypdf.com"
+        Case 2:
+                LaunchBrowser "http://crackmypdf.com"
+    End Select
 End Sub
 
  
