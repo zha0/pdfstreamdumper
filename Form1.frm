@@ -23,22 +23,12 @@ Begin VB.Form Form1
    ScaleHeight     =   9195
    ScaleWidth      =   14100
    StartUpPosition =   3  'Windows Default
-   Begin rhexed.HexEd he 
-      Height          =   1575
-      Left            =   2130
-      TabIndex        =   22
-      Top             =   60
-      Visible         =   0   'False
-      Width           =   10665
-      _ExtentX        =   18812
-      _ExtentY        =   2778
-   End
    Begin VB.Frame fraPictViewer 
       Caption         =   "Picture Viewer "
       Height          =   2685
-      Left            =   8310
-      TabIndex        =   19
-      Top             =   2640
+      Left            =   8160
+      TabIndex        =   20
+      Top             =   2520
       Visible         =   0   'False
       Width           =   3915
       Begin VB.PictureBox Picture1 
@@ -48,7 +38,7 @@ Begin VB.Form Form1
          Left            =   150
          ScaleHeight     =   1815
          ScaleWidth      =   3585
-         TabIndex        =   20
+         TabIndex        =   21
          Top             =   390
          Width           =   3645
       End
@@ -66,10 +56,20 @@ Begin VB.Form Form1
          ForeColor       =   &H00C00000&
          Height          =   255
          Left            =   4170
-         TabIndex        =   21
+         TabIndex        =   22
          Top             =   60
          Width           =   645
       End
+   End
+   Begin rhexed.HexEd he 
+      Height          =   1575
+      Left            =   2130
+      TabIndex        =   19
+      Top             =   60
+      Visible         =   0   'False
+      Width           =   10665
+      _ExtentX        =   18812
+      _ExtentY        =   2778
    End
    Begin PDFStreamDumper.ucAsyncDownload ucAsyncDownload1 
       Height          =   615
@@ -91,6 +91,7 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -409,7 +410,6 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
