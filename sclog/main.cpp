@@ -79,6 +79,16 @@ ChangeLog:
   4.5.11  - VirtualAllocEx and CreateRemoteThread now do a GlobalAlloc and transfer of execution in process for logging.
 	      - added /hooks option.
 		  - changed /nohex option (default on) to /showhex (default off) - need to add to write file api
+
+  7.31.12 - added /threadredir to optionally handle VirtualAllocEx and CreateRemoteThread inline..
+          - VirtualAllocEx and CreateRemoteThread now can function normally under /nonet
+          - bugfix: LoadLibraryA sometimes dll name passed in was in readonly memory = crash on tolower()
+		  - reverted back to original hooker.lib (to many are doing implicit api jmp+5 now which crashed)
+		  - todo, /alloc mode should support multiple allocs...(default mode is off anyway so..)
+		  - WriteProcessMemory hook supports /dump now too
+		  - added 5 lines of disasm and reg dump on crash handler, 
+		  - fixed intermittant handling of SetUnhandledExceptionFilter (why flakey dunno)
+
 */
 
 
@@ -112,6 +122,9 @@ int showhex=0;    //show hexdumps
 int showadr=0;  //show ret addr for calls outside of shellcode (debugging)
 int allocLogging=0;
 int showHooks=0;
+int threadRedir=0;
+int dumpMode=0;    //used for memory allocs (and WriteProcessMemory)
+int enableDebug=0;
 
 int HOOK_MSGS_OFF = 1;
 int last_GetSizeFHand = -44;
@@ -231,8 +244,21 @@ LPVOID __stdcall My_VirtualAllocEx( HANDLE a0, LPVOID a1, DWORD a2, DWORD a3, DW
 	
 	AddAddr( SCOffset() );
 	LPVOID  ret = 0;
-	ret = GlobalAlloc(0x40, a2);
-	LogAPI("VirtualAllocEx(proc=%x,addr=%x,sz=%x,type=%x) = %x \r\n", (int)a0,a1, a2, a3, ret);
+	
+	LogAPI("VirtualAllocEx(proc=%x,addr=%x,sz=%x,type=%x)", (int)a0,a1, a2, a3);
+
+	if(threadRedir){
+		ret = GlobalAlloc(0x40, a2);
+		LogAPI(" = %x (In Proc Thread Redirection Mode)\r\n", ret);
+	}else{
+		if(nonet){
+			ret = Real_VirtualAllocEx( a0, a1, a2, a3, a4 );
+			LogAPI(" = %x (Allowed)\r\n", ret);
+		}else{
+			LogAPI(" = -1 (Unsafe skipping...)\r\n");
+		}
+	}
+	
 	return ret;
 
 }
@@ -959,7 +985,8 @@ HANDLE __stdcall My_CreateRemoteThread(HANDLE a0,LPSECURITY_ATTRIBUTES a1,DWORD 
 		  __in   DWORD dwCreationFlags,
 		  __out  LPDWORD lpThreadId
 		);
-		HANDLE WINAPI CreateThread(
+
+		HANDLE WINAPI CreateThread(not hooked)
 		  __in_opt   LPSECURITY_ATTRIBUTES lpThreadAttributes,
 		  __in       SIZE_T dwStackSize,
 		  __in       LPTHREAD_START_ROUTINE lpStartAddress,
@@ -971,11 +998,17 @@ HANDLE __stdcall My_CreateRemoteThread(HANDLE a0,LPSECURITY_ATTRIBUTES a1,DWORD 
 	
 	AddAddr( SCOffset() );	
 	LogAPI("CreateRemoteThread(h=%x, start=%x, param=%x)\r\n", a0,a3,a4);
-	LogAPI("\tTransferring execution to threadstart\r\n");
 
-    HANDLE my_ret = 0;
-    //try {
-        
+	if(threadRedir==0){
+		//needed for IE UrlDownload to actually occur
+		return Real_CreateRemoteThread(a0,a1,a2,a3,a4,a5,a6);
+	}else{
+
+		//if they inject code in to another process and you want to see it all inline then use this...
+		LogAPI("\tTransferring execution to threadstart\r\n");
+
+		HANDLE my_ret = 0;
+	
 		_asm{
 			mov eax, a4
 			mov ebx, a3
@@ -983,29 +1016,45 @@ HANDLE __stdcall My_CreateRemoteThread(HANDLE a0,LPSECURITY_ATTRIBUTES a1,DWORD 
 			call ebx
 		}
 
-    //}
-	//catch(...){	} 
-
-    return (HANDLE)1;
+		return (HANDLE)1;
+	}
 
 }
 
 BOOL __stdcall My_WriteProcessMemory(HANDLE a0,LPVOID a1,LPVOID a2,DWORD a3,LPDWORD a4)
 {
 
-    //BOOLWINAPIWriteProcessMemory( HANDLE hProcess, LPVOID lpBaseAddress, LPVOID lpBuffer, DWORD nSize, LPDWORD lpNumberOfBytesWritten );
+    //BOOLWINAPI WriteProcessMemory( HANDLE hProcess, LPVOID lpBaseAddress, LPVOID lpBuffer, DWORD nSize, LPDWORD lpNumberOfBytesWritten );
 
 	AddAddr( SCOffset() );	
 
-	LogAPI("WriteProcessMemory(h=%x, adr=%x, buf=%x, len=%x) (Writing in process)\r\n", a0,a1,a2,a3);
+	LogAPI("WriteProcessMemory(h=%x, adr=%x, buf=%x, len=%x)", a0,a1,a2,a3);
 
     BOOL ret = 0;
     try {
-		
-		if(showhex==1) hexdump( (unsigned char*) a2, a3 );
-        memcpy(a1, a2, a3);
-		ret = 1;
-		if(a4 != 0) *a4 = a3;
+
+		if(threadRedir == 1){
+			LogAPI("  (Writing in process)\r\n");
+			if(showhex==1) hexdump( (unsigned char*) a2, a3 );
+			memcpy(a1, a2, a3); //VirtualAllocEx always writes in process memory (never external)
+			ret = 1;            //if a0 is from CreateProcessA though..then we have a problem...Virtalloc was made..
+			if(a4 != 0) *a4 = a3;
+		}
+		else{
+			if(nonet){
+				ret = Real_WriteProcessMemory(a0,a1,a2,a3,a4);
+				LogAPI("  Allowed\r\n");
+			}else{
+				ret = 1;
+				LogAPI("  (Unsafe skipping...)\r\n");
+			}
+		}
+
+		if(dumpMode){
+			char* ext[200];
+			sprintf((char*)ext,".wpm_0x%x-_0x%x", a2, a3);
+			DumpMemBuf((int)a2,a3,(char*)ext);
+		}
 
     }
 	catch(...){	} 
@@ -1016,13 +1065,18 @@ BOOL __stdcall My_WriteProcessMemory(HANDLE a0,LPVOID a1,LPVOID a2,DWORD a3,LPDW
  
 // ________________________________________________  monitored ________________
 
-HMODULE __stdcall My_LoadLibraryA(char* a0)
+HMODULE __stdcall My_LoadLibraryA(char* dll)
 {
     int isOK=0;
    
     int dllCnt=7,i=0;
 	
 	char *okDlls[] = { "ws2_32","kernel32","advapi32", "urlmon", "msafd", "msvcrt", "mswsock" };
+    char *a0;
+
+	if(!dll) return (HMODULE)0;
+
+	a0 = strdup(dll); //bugfix 7.31.12: get known writable copy so we can lowercase it..
 
 	HMODULE ret = 0;
 
@@ -1057,7 +1111,7 @@ HMODULE __stdcall My_LoadLibraryA(char* a0)
 	}
 	catch(...){	} 
 
-
+	free(a0);
 
 	return ret;
 
@@ -1085,6 +1139,9 @@ FARPROC __stdcall My_GetProcAddress(HMODULE a0,LPCSTR a1)
 //_________________________________________________ end of hook implementations ________
 
 void usage(void){
+
+	system("mode con lines=45");
+
 	printf("           Generic Shellcode Logger v0.1c BETA\r\n");
 	printf(" Author David Zimmer <dzzie@yahoo.com> Developed @ iDefense.com\r\n");
 	printf(" Uses the GPL Asm/Dsm Engines from OllyDbg (C) 2001 Oleh Yuschuk\r\n");
@@ -1105,11 +1162,13 @@ void usage(void){
 	printf("    /hex\t\tdisplay hexdumps\r\n");   
 	printf("    /fopen <file>\topens file handle(s) the shellcode can search for\r\n"); 
 	printf("    /showadr \t\tShow return address for calls outside shellcode bufffer\r\n"); 
-	printf("    /alloc \t\tLog Alloc/Free and memdump allocs from shellcode\r\n");
+	printf("    /alloc \t\tLog Alloc/Free and memdump allocs from shellcode (poc)\r\n");
 	printf("    /log <file> \tWrite all output to logfile\r\n"); 
 	printf("    /dll <dllfile> \tCalls LoadLibrary on <dllfile> to add to memory map\r\n"); 
 	printf("    /foff hexnum \tStarts execution at file offset\r\n"); 
 	printf("    /va  \t\t0xBase-0xSize  VirtualAlloc memory at 0xBase of 0xSize\r\n"); 
+	printf("    /threadredir  \tthread redirection mode (poc feature)\r\n"); 
+	printf("    /enabledebug  \ton crash, allow system jit debugger to handle\r\n"); 
 	printf("    /hooks \t\tshows implemented hooks\r\n\r\n"); 
 
 	SetConsoleTextAttribute(STDOUT,  0x07); //default gray
@@ -1131,17 +1190,52 @@ void usage(void){
 LONG __stdcall exceptFilter(struct _EXCEPTION_POINTERS* ExceptionInfo){
 
 	unsigned int eAdr = (int)ExceptionInfo->ExceptionRecord->ExceptionAddress ;
-	
+
 	if( eAdr > (unsigned int)buf  &&  eAdr < ( (unsigned int)buf+bufsz+50 ) ){
 		eAdr -=(unsigned int)buf;
 	}
 
-	infomsg("   %x Crash!\r\n", eAdr); 
+	infomsg("   %x Crash!\r\n\r\n", eAdr); 
 
+	t_disasm td;
+	unsigned int a = (int)ExceptionInfo->ExceptionRecord->ExceptionAddress;
+
+	try{
+		int leng = Disasm((char*)a,16,a,&td,4);
+
+		infomsg("  %x  %s\r\n", a, td.result);
+		LogAPI("  eax %-8x  ", ExceptionInfo->ContextRecord->Eax);
+		LogAPI("ebx %-8x  ", ExceptionInfo->ContextRecord->Ebx);
+		LogAPI("ecx %-8x  ", ExceptionInfo->ContextRecord->Ecx);
+		LogAPI("edx %-8x  \r\n", ExceptionInfo->ContextRecord->Edx);
+		LogAPI("  esi %-8x  ", ExceptionInfo->ContextRecord->Esi);
+		LogAPI("edi %-8x  ", ExceptionInfo->ContextRecord->Edi);
+		LogAPI("ebp %-8x  ", ExceptionInfo->ContextRecord->Ebp);
+		LogAPI("esp %-8x  \r\n\r\n", ExceptionInfo->ContextRecord->Esp);
+			
+		int inst=1;
+		while(inst < 5){
+			a+=leng;
+			leng = Disasm((char*)a,16,a,&td,4);
+			if(leng < 1) break;
+			infomsg("  %x  %s\r\n", a, td.result);
+			inst++;
+		}
+	}catch(...){
+		infomsg("Could not disasm exception address for display...\n");
+	}
+	
 	myAtExit();
-
-	ExitProcess(0);
-	return 0;
+	
+	if(enableDebug==1){
+		infomsg("\nAllowing system jit debugger to handle crash...");
+		HOOK_MSGS_OFF = 1;
+		anyDll = 1;
+		return 0;
+	}else{
+		ExitProcess(0);
+		return 1;
+	}
 
 }
 
@@ -1154,6 +1248,7 @@ void main(int argc, char **argv){
 	int addbpx=0;
 	int foff=0;
 	int i=0;
+	int handled=0;
 
     VAlloc.offset = 0;
 	GAlloc.offset = 0;
@@ -1170,23 +1265,32 @@ void main(int argc, char **argv){
 	if(argc < 2) usage();
 	if(strstr(argv[1],"?") > 0 ) usage();
 	if(strstr(argv[1],"-h") > 0 ) usage();
+	if(strstr(argv[1],"/h") > 0 ) usage();
 
 	//first scan the args to set the basic options which require no output
-	for( i=1; i<argc; i++){
+	for( i=2; i<argc; i++){
+
+		handled=0;
+		strlower(argv[i]);
 		if(argv[i][0] == '-') argv[i][0] = '/';
 
-		if(strstr(argv[i],"/addbpx") > 0 )  addbpx=1;
-		if(strstr(argv[i],"/break") > 0 )  addbpx=1;
-		if(strstr(argv[i],"/redir") > 0 )   redirect=1;
-		if(strstr(argv[i],"/nonet") > 0 )   nonet=1;
-		if(strstr(argv[i],"/nofilt") > 0 )  nofilt=1;
-		if(strstr(argv[i],"/dump") > 0 )    autoDump=1;
-		if(strstr(argv[i],"/step") > 0 )    stepMode=1; //might still have some side effects 
-		if(strstr(argv[i],"/anydll") > 0 )  anyDll=1;
-		if(strstr(argv[i],"/hex") > 0 )     showhex=1;
-		if(strstr(argv[i],"/showadr") > 0 ) showadr=1;
-		if(strstr(argv[i],"/hooks") > 0 ){  showHooks=1; break;}
-		if(strstr(argv[i],"/alloc") > 0 )	allocLogging = 1; //used in InstalllHooks()
+		if(strstr(argv[i],"/h") > 0 ) usage();
+		if(strstr(argv[i],"/log") > 0 ){		 handled=1;i++;} //handled latter
+		if(strstr(argv[i],"/fopen") > 0 ){		 handled=1;i++;} //handled latter
+		if(strstr(argv[i],"/addbpx") > 0 ){		 addbpx=1;handled=1;}
+		if(strstr(argv[i],"/break") > 0 ){		 addbpx=1;handled=1;}
+		if(strstr(argv[i],"/redir") > 0 ){		 redirect=1;handled=1;}
+		if(strstr(argv[i],"/nonet") > 0 ){		 nonet=1;handled=1;}
+		if(strstr(argv[i],"/nofilt") > 0 ){		 nofilt=1;handled=1;}
+		if(strstr(argv[i],"/dump") > 0 ){		 autoDump=1;dumpMode=1;handled=1;} //autodump set=0 after dump of main code, dumpMode persists as setting..
+		if(strstr(argv[i],"/step") > 0 ){		 stepMode=1;handled=1;} //might still have some side effects 
+		if(strstr(argv[i],"/anydll") > 0 ){		 anyDll=1;handled=1;}
+		if(strstr(argv[i],"/hex") > 0 ){         showhex=1;handled=1;}
+		if(strstr(argv[i],"/showadr") > 0 ){     showadr=1;handled=1;}
+		if(strstr(argv[i],"/hooks") > 0 ){       showHooks=1; break;}
+		if(strstr(argv[i],"/alloc") > 0 ){	     allocLogging = 1;handled=1;} //used in InstalllHooks()
+		if(strstr(argv[i],"/threadredir") > 0 ){ threadRedir = 1;handled=1;}  
+		if(strstr(argv[i],"/enabledebug") > 0 ){ enableDebug = 1;handled=1;} 
 
 		if(strstr(argv[i],"/foff") > 0 ){
 			if(i+1 >= argc){
@@ -1195,6 +1299,8 @@ void main(int argc, char **argv){
 			}
 			foff = strtol(argv[i+1], NULL, 16);
 			printf("Starting at file offset 0x%x\n", foff);
+			handled=1;
+			i++;
 		}
 
 		if(strstr(argv[i],"/dll") > 0 ){
@@ -1204,6 +1310,8 @@ void main(int argc, char **argv){
 			}
 			int hh = (int)LoadLibrary(argv[i+1]);
 			printf("LoadLibrary(%s) = 0x%x\n", argv[i+1], hh);
+			handled=1;
+			i++;
 		}
 
 		if(strstr(argv[i],"/va") > 0 ){
@@ -1225,11 +1333,19 @@ void main(int argc, char **argv){
 				printf("VirtualAlloc(base=%x, size=%x) = %x - %x\n", base, size, r, r+size);
 				if(r==0){ printf("ErrorCode: %x\nAborting...\n", GetLastError()); exit(0);}
 				//0x57 = ERROR_INVALID_PARAMETER 
+				handled=1;
+				i++;
 
 			}else{
 				printf("Invalid option /va must specify 0xBase-0xSize as next arg\n");
 				exit(0);
 			}
+		}
+
+		if(!handled){
+			printf("Unknown option: %s\n",argv[i]);
+			printf("Use -h to see supported commands.\n\n");
+			exit(0);
 		}
 
 	}
@@ -1305,9 +1421,6 @@ void main(int argc, char **argv){
 		printf("Adding Breakpoint to beginning of shellcode buffer\r\n");
 		bufsz++;
 	}
-	else{
-		SetUnhandledExceptionFilter(exceptFilter);
-	}
 
 	atexit(myAtExit); //for GAlloc and VAlloc mem dumping if we have to.
 
@@ -1350,6 +1463,8 @@ void main(int argc, char **argv){
 
 	HOOK_MSGS_OFF = 0;
 
+	if(!addbpx) SetUnhandledExceptionFilter(exceptFilter);
+
 	_asm{
 		   mov eax, buf
 		   mov ebx, foff
@@ -1373,7 +1488,7 @@ void DoHook(void* real, void* hook, void* thunk, char* name){
 		printf("\t%s\r\n",name);
 		hook_count++;
 	}else{
-		if ( !InstallHook( real, hook, thunk, 0) ){ //try to install the real hook here
+		if ( !InstallHook( real, hook, thunk) ){ //try to install the real hook here
 			infomsg("Install %s hook failed...Error: %s\r\n", name, &lastError);
 			ExitProcess(0);
 		}
@@ -1428,7 +1543,7 @@ void InstallHooks(void)
 	//ADDHOOK(URLDownloadToFileA);
 
 	void* real = GetProcAddress( GetModuleHandle("urlmon.dll"), "URLDownloadToFileA");
-	if ( !InstallHook( real, My_URLDownloadToFileA, Real_URLDownloadToFileA,0) ){ 
+	if ( !InstallHook( real, My_URLDownloadToFileA, Real_URLDownloadToFileA) ){ 
 		infomsg("Install hook URLDownloadToFileA failed...Error: \r\n");
 		ExitProcess(0);
 	}
@@ -1446,7 +1561,7 @@ void InstallHooks(void)
 	//ADDHOOK(URLDownloadToCacheFile);
 
 	real = GetProcAddress( GetModuleHandle("urlmon.dll"), "URLDownloadToCacheFileA");
-	if ( !InstallHook( real, My_URLDownloadToCacheFile, Real_URLDownloadToCacheFile,0) ){ 
+	if ( !InstallHook( real, My_URLDownloadToCacheFile, Real_URLDownloadToCacheFile) ){ 
 		infomsg("Install hook URLDownloadToCacheFile failed...Error: \r\n");
 		ExitProcess(0);
 	}
@@ -1457,7 +1572,7 @@ void InstallHooks(void)
 	ADDHOOK(GetFileSize)
 	ADDHOOK(GetTempPathA)
 	ADDHOOK(FindFirstFileA)
-	ADDHOOK(VirtualAllocEx)
+	ADDHOOK(VirtualAllocEx) 
 
 	if(allocLogging == 1){
 		ADDHOOK(VirtualAlloc)

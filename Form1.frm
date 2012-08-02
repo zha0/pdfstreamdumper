@@ -3075,19 +3075,21 @@ Private Sub Form_Load()
     help_vids = Array("Readme file;[readme]", _
                       "Note on help videos;[video_help]", _
                       "Introduction (40min);http://sandsprite.com/CodeStuff/PdfStreamDumper_trainer.wmv", _
-                      "Pdf Analysis> getPageNthWord (10min);http://www.youtube.com/watch?v=W6dJfdH5jHM", _
-                      "      URL Decoder(8min);http://www.youtube.com/watch?v=Ih7lRHwZKpo", _
-                      "      getAnnots (10min);http://sandsprite.com/CodeStuff/getAnnots_demo.wmv", _
-                      "      arguments.callee encrypted script 1 (14min); http://www.youtube.com/watch?v=lyrbPlHMS2o", _
-                      "      arguments.callee encrypted script 2 (10min); http://www.youtube.com/watch?v=mY9hIpNY1Yg", _
-                      "Shellcode> scdbg Trainer 1 - General Use; http://www.youtube.com/watch?v=jFkegwFasIw", _
-                      "      scdbg trainer 2 - Asm and Debug; http://www.youtube.com/watch?v=qkDPUF3bf6E", _
+                      "Shellcode> scdbg Trainer - General Use; http://www.youtube.com/watch?v=jFkegwFasIw", _
                       "      sclog gui; http://www.youtube.com/watch?v=XBcmC4jYiRI", _
-                      "      shellcode 2 exe (14min); http://youtu.be/FTDZyYt7Fqk", _
                       "Misc> Adobe Api Support(10min);http://sandsprite.com/CodeStuff/Adobe_Api_Support.wmv", _
                       "      Sample Database Search Plugin (11min);http://sandsprite.com/CodeStuff/database_search_plugin.wmv", _
                       "      plugin developers and script writers (17min);http://sandsprite.com/CodeStuff/PDFStreamDumper_automation.wmv" _
                 )
+
+                     '"Pdf Analysis> getPageNthWord (10min);http://www.youtube.com/watch?v=W6dJfdH5jHM", _
+                      '"      URL Decoder(8min);http://www.youtube.com/watch?v=Ih7lRHwZKpo", _
+                      '"      getAnnots (10min);http://sandsprite.com/CodeStuff/getAnnots_demo.wmv", _
+                      '"      arguments.callee encrypted script 1 (14min); http://www.youtube.com/watch?v=lyrbPlHMS2o", _
+                      "      arguments.callee encrypted script 2 (10min); http://www.youtube.com/watch?v=mY9hIpNY1Yg", _
+                      "      scdbg trainer 2 - Asm and Debug; http://www.youtube.com/watch?v=qkDPUF3bf6E", _
+                      "      shellcode 2 exe (14min); http://youtu.be/FTDZyYt7Fqk", _
+
 
     Dim vid, i
     For Each vid In help_vids
@@ -3234,9 +3236,19 @@ End Sub
 
 Private Sub lvsearch_ItemClick(ByVal Item As MSComctlLib.ListItem)
     On Error Resume Next
+    Dim ss As CPDFStream
+    Dim s2 As CPDFStream
+    Dim li As ListItem
     If selli Is Item Then Exit Sub
-    Call GetActiveData(Item, True)
+    Call GetActiveData(Item, True, ss)
     Set selli = Item
+    For Each li In lv.ListItems
+        Set s2 = li.tag
+        If ObjPtr(s2) = ObjPtr(ss) Then
+            li.EnsureVisible
+            Exit For
+        End If
+    Next
     If fraPictViewer.Visible = True Then fraPictViewer.Visible = False
 End Sub
 

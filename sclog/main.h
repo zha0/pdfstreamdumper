@@ -25,7 +25,7 @@ struct mem{
 	int size;
 }; 
 
-//should be pretty safe to assume shellcode only does one alloc..
+//should be pretty safe to assume shellcode only does one alloc..wrong...
 struct mem GAlloc;
 struct mem VAlloc;
 
@@ -302,7 +302,7 @@ void infomsg(const char *format, ...)
 void DumpMemBuf(int offset, int size, char* ext){
 	
 		DWORD cbWritten;
-		char pth[MAX_PATH]; //should be more than enough 
+		char pth[0x500]; //should be more than enough 
 		
 		if(size < 1 || offset < 1){
 			infomsg("     DumpMemBuf invalid args %x %x\r\n\r\n", offset,size);
@@ -311,6 +311,11 @@ void DumpMemBuf(int offset, int size, char* ext){
 		
 		if( IsBadReadPtr((void*)offset,size) !=0 ){
 			infomsg("     DumpMemBuf invalid args %x %x\r\n\r\n", offset,size);
+			return;
+		}
+
+		if( strlen(sc_file) + strlen(ext) >= 0x500 ){ //just in case...
+			infomsg("     DumpMemBuf path+ext > buffer skipping...\r\n\r\n");
 			return;
 		}
 

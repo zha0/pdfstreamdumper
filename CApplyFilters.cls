@@ -85,6 +85,8 @@ Sub ApplyFilters()
                 If d = CCITTFaxDecode Then HandleFaxDecode buf, False  'set decode parameters
                 If d = DecodePredictor Then ParsePredictor
                 
+                'If parent.Index = 19 Then Stop
+                
                 If Not csharp.decode(buf, d) Then
                     DecompressionError = True
                     DecompErrorMessage = csharp.ErrorMessage
@@ -124,7 +126,7 @@ Private Function NativeDecompress(ByVal s As String)
     Module4.UncompressData b(), bOut()
     
     If AryIsEmpty(bOut) Then
-        parent.Message = "FlateDecode Decompression Error."
+        parent.Message = "FlateDecode Decompression Error. Input data length = 0x" & Hex(Len(s))
         DecompErrorMessage = parent.Message
         DecompressionError = True
     Else

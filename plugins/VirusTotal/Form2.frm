@@ -302,6 +302,7 @@ Private Sub Command1_Click()
     
     If lvMain Is Nothing Then
         MsgBox "Could not get a reference to the main form listview?"
+        If frmMain Is Nothing Then MsgBox "FrmMain was nothing!?", vbInformation
         Exit Sub
     End If
     

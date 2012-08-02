@@ -19,26 +19,50 @@ Begin VB.Form frmScTest
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   5280
+      Height          =   4950
       Left            =   120
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   3
-      Top             =   1845
+      Top             =   2175
       Width           =   9960
    End
    Begin VB.Frame Frame1 
       Caption         =   "Options"
-      Height          =   1815
+      Height          =   2145
       Left            =   60
       TabIndex        =   0
       Top             =   0
       Width           =   10005
+      Begin VB.CommandButton cmdrowse 
+         Caption         =   "..."
+         Height          =   285
+         Index           =   1
+         Left            =   7830
+         TabIndex        =   28
+         Top             =   1050
+         Width           =   465
+      End
+      Begin VB.TextBox txtTemp 
+         Height          =   315
+         Left            =   1050
+         TabIndex        =   27
+         Top             =   1020
+         Width           =   6705
+      End
+      Begin VB.CheckBox chktemp 
+         Caption         =   "temp"
+         Height          =   315
+         Left            =   210
+         TabIndex        =   26
+         Top             =   1020
+         Width           =   795
+      End
       Begin VB.TextBox txtManualArgs 
          Height          =   285
          Left            =   1800
          TabIndex        =   25
-         Top             =   1080
+         Top             =   1440
          Width           =   5955
       End
       Begin VB.TextBox txtStartOffset 
@@ -60,6 +84,7 @@ Begin VB.Form frmScTest
       Begin VB.CommandButton cmdrowse 
          Caption         =   "..."
          Height          =   285
+         Index           =   0
          Left            =   7830
          TabIndex        =   21
          Top             =   675
@@ -142,7 +167,7 @@ Begin VB.Form frmScTest
          Height          =   375
          Left            =   8370
          TabIndex        =   2
-         Top             =   1035
+         Top             =   1395
          Width           =   1575
       End
       Begin VB.CheckBox chkReport 
@@ -158,7 +183,7 @@ Begin VB.Form frmScTest
          Height          =   285
          Left            =   225
          TabIndex        =   24
-         Top             =   1080
+         Top             =   1440
          Width           =   1410
       End
       Begin VB.Label Label6 
@@ -175,9 +200,9 @@ Begin VB.Form frmScTest
          ForeColor       =   &H00FF0000&
          Height          =   255
          Index           =   8
-         Left            =   3480
+         Left            =   3450
          TabIndex        =   14
-         Top             =   1440
+         Top             =   1770
          Width           =   1335
       End
       Begin VB.Label Label6 
@@ -194,9 +219,9 @@ Begin VB.Form frmScTest
          ForeColor       =   &H00FF0000&
          Height          =   255
          Index           =   7
-         Left            =   4860
+         Left            =   4830
          TabIndex        =   13
-         Top             =   1440
+         Top             =   1770
          Width           =   675
       End
       Begin VB.Label Label6 
@@ -213,9 +238,9 @@ Begin VB.Form frmScTest
          ForeColor       =   &H00FF0000&
          Height          =   255
          Index           =   0
-         Left            =   8190
+         Left            =   8160
          TabIndex        =   12
-         Top             =   1440
+         Top             =   1770
          Width           =   855
       End
       Begin VB.Label Label6 
@@ -232,9 +257,9 @@ Begin VB.Form frmScTest
          ForeColor       =   &H00FF0000&
          Height          =   255
          Index           =   2
-         Left            =   5580
+         Left            =   5550
          TabIndex        =   11
-         Top             =   1440
+         Top             =   1770
          Width           =   1035
       End
       Begin VB.Label Label6 
@@ -251,9 +276,9 @@ Begin VB.Form frmScTest
          ForeColor       =   &H00FF0000&
          Height          =   195
          Index           =   6
-         Left            =   6660
+         Left            =   6630
          TabIndex        =   10
-         Top             =   1440
+         Top             =   1770
          Width           =   375
       End
       Begin VB.Label Label6 
@@ -270,9 +295,9 @@ Begin VB.Form frmScTest
          ForeColor       =   &H00FF0000&
          Height          =   255
          Index           =   4
-         Left            =   1860
+         Left            =   1830
          TabIndex        =   6
-         Top             =   1440
+         Top             =   1770
          Width           =   1455
       End
       Begin VB.Label Label6 
@@ -289,9 +314,9 @@ Begin VB.Form frmScTest
          ForeColor       =   &H00FF0000&
          Height          =   255
          Index           =   3
-         Left            =   240
+         Left            =   210
          TabIndex        =   5
-         Top             =   1440
+         Top             =   1770
          Width           =   1335
       End
       Begin VB.Label Label6 
@@ -308,9 +333,9 @@ Begin VB.Form frmScTest
          ForeColor       =   &H00FF0000&
          Height          =   255
          Index           =   5
-         Left            =   7335
+         Left            =   7305
          TabIndex        =   4
-         Top             =   1440
+         Top             =   1770
          Width           =   735
       End
    End
@@ -454,8 +479,10 @@ Function checkFor_sctest() As Boolean
 End Function
 
 
-Private Sub cmdrowse_Click()
-    txtFopen.Text = dlg.OpenDialog(AllFiles)
+Private Sub cmdrowse_Click(index As Integer)
+    Dim f As String
+    f = dlg.OpenDialog(AllFiles)
+    If index = 0 Then txtFopen.Text = f Else txtTemp = f
 End Sub
 
 Private Sub Command1_Click()
@@ -488,6 +515,7 @@ Private Sub Command1_Click()
     If chkDebugShell.Value = 1 Then cmdline = cmdline & " -vvv"
     If chkFindSc.Value = 1 Then cmdline = cmdline & " -findsc"
     If ChkMemMon.Value = 1 Then cmdline = cmdline & " -mdll"
+    If chktemp.Value = 1 Then cmdline = cmdline & " -temp " & GetShortName(txtTemp)
     
     If chkOffset.Value = 1 Then
         If Not isHexNum(txtStartOffset) Then
@@ -551,6 +579,11 @@ End Function
 
 Private Sub Form_Load()
     Me.Icon = Form1.Icon
+    If fso.FileExists(Form1.txtPDFPath) Then
+        txtFopen = Form1.txtPDFPath
+        txtTemp = fso.GetParentFolder(txtFopen)
+        chktemp.Value = 1
+    End If
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
@@ -560,10 +593,10 @@ Private Sub Form_Unload(Cancel As Integer)
 End Sub
 
 
-Private Sub Label6_Click(Index As Integer)
+Private Sub Label6_Click(index As Integer)
     On Error Resume Next
      
-    cap = Label6(Index).Caption
+    cap = Label6(index).Caption
     
     If InStr(cap, "Help") > 0 Then
         Shell "cmd /k mode con lines=45 cols=100 && """ & App.path & "\libemu\scdbg.exe"" -h", vbNormalFocus
@@ -624,7 +657,7 @@ Private Sub Label6_Click(Index As Integer)
     
 End Sub
 
-Private Sub txtFopen_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, Y As Single)
+Private Sub txtFopen_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, Y As Single)
     On Error Resume Next
-    txtFopen.Text = Data.Files(1)
+    txtFopen.Text = data.Files(1)
 End Sub

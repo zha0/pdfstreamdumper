@@ -119,7 +119,10 @@ Function decode(data As String, decoder As Decoders, Optional surpressErrorMsg A
     Dim addr As Long
     Dim bufsize As Long
     
-    If Len(data) = 0 Then Exit Function 'nothing to do
+    If Len(data) = 0 Then
+        Me.ErrorMessage = "Data length was 0, nothing to do"
+        Exit Function 'nothing to do
+    End If
     
     b() = StrConv(data, vbFromUnicode, LANG_US)
     addr = VarPtr(b(0))
