@@ -6,11 +6,15 @@
 #include <stdarg.h>
 #include <conio.h>
 
+//8.23.12
+//		moved shellcode buf to its own segment and exported by name
+//		-opts now standardized top /opt
+//		added handled flag to cmdline parser and bail on unknown option..
 
-#pragma comment(linker,"/Section:.data,EWR")
-
+#pragma data_seg (".sc")
 int buf[6000] = {0xC3CCCCC3};
-
+#pragma data_seg()
+#pragma comment(linker, "/SECTION:.sc,RWE")
 
 void usage(){
 	system("cls");
@@ -40,12 +44,13 @@ int main(int argc, char* argv[])
 
 	for(int i=1; i<argc; i++){
 		
+		bool handled = false;
+		if( argv[i][0] == '-') argv[i][0] = '/'; //standardize
+
 		if(strstr(argv[i],"/h") > 0 ){usage(); return 0;}
 		if(strstr(argv[i],"/?") > 0 ){usage(); return 0;}
-		if(strstr(argv[i],"-h") > 0 ){usage(); return 0;}
-		if(strstr(argv[i],"-?") > 0 ){usage(); return 0;}
 
-		if(strstr(argv[i],"/break") > 0 )  break_mode=1;
+		if(strstr(argv[i],"/break") > 0 ){ break_mode=1;handled=true;};
 
 		if(strstr(argv[i],"/fopen") > 0 ){ 
 			if(i+1 >= argc){
@@ -56,11 +61,10 @@ int main(int argc, char* argv[])
 				fHand = OpenFile(target, &o , OF_READ);
 				if(fHand==HFILE_ERROR){
 					printf("Option /fopen Could not open file %s\r\n", target);
-					printf("Press any key to continue...\r\n");
-					getch();
-
+					exit(0);
 				}else{
 					printf("Successfully opened a handle (0x%X) to %s\r\n", fHand, target);
+					i++;handled=true;
 				}
 			}
 		}
@@ -84,6 +88,7 @@ int main(int argc, char* argv[])
 				printf("VirtualAlloc(base=%x, size=%x) = %x - %x\n", base, size, r, r+size);
 				if(r==0){ printf("ErrorCode: %x\nAborting...\n", GetLastError()); exit(0);}
 				//0x57 = ERROR_INVALID_PARAMETER 
+				i++;handled=true;
 
 			}else{
 				printf("Invalid option /va must specify 0xBase-0xSize as next arg\n");
@@ -98,6 +103,7 @@ int main(int argc, char* argv[])
 			}
 			int hh = (int)LoadLibrary(argv[i+1]);
 			printf("LoadLibrary(%s) = 0x%x\n", argv[i+1], hh);
+			i++;handled=true;
 		}
 
 		if(strstr(argv[i],"/foff") > 0 ){
@@ -107,6 +113,12 @@ int main(int argc, char* argv[])
 			}
 			foff = strtol(argv[i+1], NULL, 16);
 			printf("Starting at file offset 0x%x\n", foff);
+			i++;handled=true;
+		}
+
+		if( !handled ){
+			printf("Unknown Option %s\n\n", argv[i]);
+			exit(0);
 		}
 
 

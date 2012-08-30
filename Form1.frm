@@ -2939,7 +2939,12 @@ Function GetActiveData(Item As ListItem, Optional load_ui As Boolean = False, Op
     End If
         
     If load_ui Then
-         txtUncompressed.Text = Replace(d, Chr(0), ".")
+         If Len(d) < &H2000 Then
+            txtUncompressed.Text = Replace(d, Chr(0), ".") 'this can cause a hang on large blobs...
+         Else
+            txtUncompressed.Text = Empty
+            txtUncompressed.Text = d
+         End If
          'he.Text = HexDump(d)
          he.LoadString CStr(d), True
          txtDetails.Text = s.GetDetailsReport()
@@ -3067,9 +3072,11 @@ Private Sub Form_Load()
                            "CVE-2010-2884 VulnVer: 10.1.82.76", _
                            "CVE-2010-3654 VulnVer: 10.1.85.3", _
                            "CVE-2011-0609 VulnVer: 10.2.152.32", _
-                           "CVE-2011-611 VulnVer: 10.2.153.1", _
-                           "CVE-2011-627 VulnVer: 10.2.159.1", _
-                           "CVE-2011-2110 VulnVer: 10.3.181.14" _
+                           "CVE-2011-0611 VulnVer: 10.2.153.1", _
+                           "CVE-2011-0627 VulnVer: 10.2.159.1", _
+                           "CVE-2011-2110 VulnVer: 10.3.181.14", _
+                           "CVE-2012-0779 VulnVer: 11.2.202.233", _
+                           "CVE-2012-1535 VulnVer: 11.3.300.270" _
                      )
                      
     help_vids = Array("Readme file;[readme]", _

@@ -128,6 +128,7 @@ int enableDebug=0;
 
 int HOOK_MSGS_OFF = 1;
 int last_GetSizeFHand = -44;
+int last_fpointer = 0;
 int rep_count=0;
 int hook_count=0;
 
@@ -281,6 +282,37 @@ BOOL __stdcall My_VirtualFree( LPVOID a0, DWORD a1, DWORD a2 )
 		ret = Real_VirtualFree(a0,a1,a2);
 	}
 	catch(...){}
+
+	return ret;
+}
+
+DWORD __stdcall My_SetFilePointer( HANDLE a0, LONG a1, PLONG a2, DWORD a3 )
+{
+
+
+	DWORD  ret = 0;
+	try{
+		ret = Real_SetFilePointer(a0,a1,a2,a3);
+	}
+	catch(...){}
+
+	if(ret == -1){
+		if(last_fpointer == 0){
+			AddAddr( SCOffset() );
+			LogAPI("SetFilePointer(h=%x, dist=%x, dhigh=%x, method=%d) = %x\r\n",a0,a1,a2,a3, ret);
+		}
+		if(last_fpointer > -4) last_fpointer--;
+	}else{
+		last_fpointer = 0;
+	}
+	
+	if(last_fpointer < 0 && ret == -1 /*INVALID_SET_FILE_POINTER*/){
+		if(last_fpointer == -2) LogAPI("\tSetFilePointer scanning occuring, hiding output...\r\n");
+	}
+	else{
+		AddAddr( SCOffset() );
+		LogAPI("SetFilePointer(h=%x, dist=%x, dhigh=%x, method=%d) = %x\r\n",a0,a1,a2,a3, ret);
+	}
 
 	return ret;
 }
@@ -1572,7 +1604,10 @@ void InstallHooks(void)
 	ADDHOOK(GetFileSize)
 	ADDHOOK(GetTempPathA)
 	ADDHOOK(FindFirstFileA)
-	ADDHOOK(VirtualAllocEx) 
+
+	//ADDHOOK(VirtualAllocEx) <-- causing bugs fuck it..
+
+	ADDHOOK(SetFilePointer) //8.23.12
 
 	if(allocLogging == 1){
 		ADDHOOK(VirtualAlloc)

@@ -86,6 +86,7 @@ Begin VB.Form frmSclog
       Begin VB.TextBox txtLogFile 
          Height          =   285
          Left            =   1500
+         OLEDropMode     =   1  'Manual
          TabIndex        =   18
          Top             =   1200
          Width           =   7455
@@ -109,6 +110,7 @@ Begin VB.Form frmSclog
       Begin VB.TextBox txtFhand 
          Height          =   285
          Left            =   1500
+         OLEDropMode     =   1  'Manual
          TabIndex        =   15
          Top             =   900
          Width           =   7455
@@ -628,7 +630,12 @@ Private Sub Label5_Click()
     MsgBox "Last command line copied to clipboard: " & vbCrLf & vbCrLf & last_cmdline, vbInformation
 End Sub
 
-Private Sub txtFhand_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub txtFhand_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
     On Error Resume Next
-    txtFhand.Text = data.Files(1)
+    txtFhand.Text = Data.Files(1)
+End Sub
+
+Private Sub txtLogFile_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
+     On Error Resume Next
+     txtLogFile.Text = Data.Files(1)
 End Sub

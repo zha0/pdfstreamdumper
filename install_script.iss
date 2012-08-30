@@ -139,6 +139,7 @@ Source: sclog\sclog.dsp; DestDir: {app}\sclog\
 Source: sclog\sclog.dsw; DestDir: {app}\sclog\
 Source: sclog\README.txt; DestDir: {app}\sclog\
 Source: husk\husk.cpp; DestDir: {app}\husk\
+Source: husk\exports.def; DestDir: {app}\husk\
 Source: husk\husk.dsp; DestDir: {app}\husk\
 Source: husk\husk.dsw; DestDir: {app}\husk\
 Source: plugins\build_db\Form1.frm; DestDir: {app}\plugins\build_db

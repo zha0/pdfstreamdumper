@@ -6,7 +6,7 @@ Begin VB.Form Form2
    Caption         =   "PDF Stream Dumper - JS UI"
    ClientHeight    =   8325
    ClientLeft      =   165
-   ClientTop       =   855
+   ClientTop       =   735
    ClientWidth     =   14460
    LinkTopic       =   "Form2"
    ScaleHeight     =   8325
@@ -198,7 +198,6 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0000
@@ -254,7 +253,6 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   2249
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0080
@@ -1468,13 +1466,13 @@ Private Sub mnuShellcode2Exe_Click(Index As Integer)
     Select Case Index
         Case 0: offset = &H1000
         Case 1: offset = &H1020
-        Case 2: offset = &H8030
+        Case 2: offset = &HC000
     End Select
     
     Dim b As Byte
-    If offset = &H8030 Then 'negative fuckers
-        Seek f, &H7030
-        For i = 0 To &H1000 'this is some stupid shit...
+    If offset = &HC000 Then 'negative fuckers
+        Seek f, &H7000
+        For i = 0 To &H5000 'this is some stupid shit...
             Get f, , b
         Next
         Put f, , Shellcode()

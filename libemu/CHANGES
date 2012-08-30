@@ -1,7 +1,32 @@
 		Changelog for libemu
 
-12.7.11  - added repne support for stosx (0xAB)
+8.23.12  - bugfix: VirtualAlloc huge allocs could stomp on stack memory
+         - added psapi.dll and GetMappedFileNameA
 
+8.2.12   - bugfix libemu JG command (instr_jcc_7f)
+
+7.5.12   - new hooks: Get/Set/Resume Thread Functions, (exec transferrable)
+         - libemu POP_DWORD patch for esp special case
+         
+4.6.12   - new hooks: OpenEventA, CreateEventA
+
+3.3.12   - dump files now honor -temp override
+         - file drops now default to shellcode parent dir, still honor -temp though
+         - gui_launcher project added
+         
+1.6.12   - new hooks: memcpy, strcat (msvcrt and ntdll)
+         - ntdll.text section now hardcoded in. fixes crash under Win7 when trying
+           to live load from memory. (mapping of sections is different)
+        
+12.31.11 - kernel32.text section now hardcoded in so offsets always line up
+           in mem copies of loaded dlls copied to emu memory 
+           (offsets may not line up if not xpsp3 but not worth xx mb for this)
+           
+12.19.11 - new hooks: ExpandEnvironmentStringsA,lstrlenA,lstrcmpiA, lstrcpyA
+
+12.7.11  - added repne support for stosx (0xAB)
+         - disabled SetConsoleMode, messes up Windows 7 accepting input in findsc and dbgshell...
+         
 11.16.11 - new hooks: GetWindowThreadProcessId, OpenProcess
 		 - added support for -u to -dir mode
 		 - added /support/parseBulk (data visualizer for -dir mode output)

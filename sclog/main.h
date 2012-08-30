@@ -90,6 +90,7 @@ ALLOC_THUNK( BOOL     __stdcall Real_VirtualFree( LPVOID a0, DWORD a1, DWORD a2 
 ALLOC_THUNK( DWORD    __stdcall Real_GetTempPathA( DWORD a0, LPSTR a1 ) );
 
 ALLOC_THUNK( LPVOID __stdcall Real_VirtualAllocEx( HANDLE a0, LPVOID a1, DWORD a2, DWORD a3, DWORD a4 ) );
+ALLOC_THUNK( DWORD __stdcall Real_SetFilePointer( HANDLE a0, LONG a1, PLONG a2, DWORD a3 ) );
 
 //my header and lib files are old! and i dont want to link to msvc90.dll with vs08..so fuck it
 //ALLOC_THUNK( DWORD    __stdcall Real_GetFileSizeEx( HANDLE a0, PLARGE_INTEGER  a1 ) );

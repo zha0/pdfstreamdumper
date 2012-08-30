@@ -34,20 +34,29 @@ Begin VB.Form frmScTest
       TabIndex        =   0
       Top             =   0
       Width           =   10005
+      Begin VB.CheckBox chkIgnoreRW 
+         Caption         =   "Do not log RW"
+         Height          =   195
+         Left            =   5640
+         TabIndex        =   29
+         Top             =   480
+         Width           =   1395
+      End
       Begin VB.CommandButton cmdrowse 
          Caption         =   "..."
          Height          =   285
          Index           =   1
-         Left            =   7830
+         Left            =   7860
          TabIndex        =   28
-         Top             =   1050
+         Top             =   1080
          Width           =   465
       End
       Begin VB.TextBox txtTemp 
          Height          =   315
          Left            =   1050
+         OLEDropMode     =   1  'Manual
          TabIndex        =   27
-         Top             =   1020
+         Top             =   1080
          Width           =   6705
       End
       Begin VB.CheckBox chktemp 
@@ -55,7 +64,7 @@ Begin VB.Form frmScTest
          Height          =   315
          Left            =   210
          TabIndex        =   26
-         Top             =   1020
+         Top             =   1080
          Width           =   795
       End
       Begin VB.TextBox txtManualArgs 
@@ -67,7 +76,7 @@ Begin VB.Form frmScTest
       End
       Begin VB.TextBox txtStartOffset 
          Height          =   285
-         Left            =   8055
+         Left            =   9240
          TabIndex        =   22
          Text            =   "0"
          Top             =   180
@@ -76,18 +85,18 @@ Begin VB.Form frmScTest
       Begin VB.CheckBox chkOffset 
          Caption         =   "Start Offset  0x"
          Height          =   255
-         Left            =   6660
+         Left            =   7860
          TabIndex        =   23
-         Top             =   195
-         Width           =   1515
+         Top             =   180
+         Width           =   1395
       End
       Begin VB.CommandButton cmdrowse 
          Caption         =   "..."
          Height          =   285
          Index           =   0
-         Left            =   7830
+         Left            =   7860
          TabIndex        =   21
-         Top             =   675
+         Top             =   720
          Width           =   465
       End
       Begin VB.TextBox txtFopen 
@@ -95,7 +104,7 @@ Begin VB.Form frmScTest
          Left            =   1035
          OLEDropMode     =   1  'Manual
          TabIndex        =   20
-         Top             =   675
+         Top             =   720
          Width           =   6720
       End
       Begin VB.CheckBox chkfopen 
@@ -103,16 +112,16 @@ Begin VB.Form frmScTest
          Height          =   240
          Left            =   225
          TabIndex        =   19
-         Top             =   720
+         Top             =   780
          Width           =   1230
       End
       Begin VB.CheckBox ChkMemMon 
          Caption         =   "Monitor DLL Read/Write"
          Height          =   195
-         Left            =   5640
+         Left            =   7860
          TabIndex        =   18
          Top             =   480
-         Width           =   2295
+         Width           =   2055
       End
       Begin VB.CheckBox chkFindSc 
          Caption         =   "FindSc"
@@ -479,10 +488,17 @@ Function checkFor_sctest() As Boolean
 End Function
 
 
-Private Sub cmdrowse_Click(index As Integer)
+Private Sub cmdrowse_Click(Index As Integer)
     Dim f As String
     f = dlg.OpenDialog(AllFiles)
-    If index = 0 Then txtFopen.Text = f Else txtTemp = f
+    If Index = 0 Then txtFopen.Text = f Else txtTemp = f
+    If Len(f) > 0 Then
+        If Index = 0 Then chkfopen.Value = 1 Else chktemp.Value = 1
+        If Index = 0 And Len(txtTemp) = 0 Then
+            txtTemp = fso.GetParentFolder(txtFopen) & "\"
+            chktemp.Value = 1
+        End If
+    End If
 End Sub
 
 Private Sub Command1_Click()
@@ -516,6 +532,7 @@ Private Sub Command1_Click()
     If chkFindSc.Value = 1 Then cmdline = cmdline & " -findsc"
     If ChkMemMon.Value = 1 Then cmdline = cmdline & " -mdll"
     If chktemp.Value = 1 Then cmdline = cmdline & " -temp " & GetShortName(txtTemp)
+    If chkIgnoreRW.Value = 1 Then cmdline = cmdline & " -norw"
     
     If chkOffset.Value = 1 Then
         If Not isHexNum(txtStartOffset) Then
@@ -593,10 +610,10 @@ Private Sub Form_Unload(Cancel As Integer)
 End Sub
 
 
-Private Sub Label6_Click(index As Integer)
+Private Sub Label6_Click(Index As Integer)
     On Error Resume Next
      
-    cap = Label6(index).Caption
+    cap = Label6(Index).Caption
     
     If InStr(cap, "Help") > 0 Then
         Shell "cmd /k mode con lines=45 cols=100 && """ & App.path & "\libemu\scdbg.exe"" -h", vbNormalFocus
@@ -613,9 +630,9 @@ Private Sub Label6_Click(index As Integer)
     End If
     
     If InStr(cap, "Example") > 0 Then
-        x = QuickDecode("ACACD13AD13FD4C3C5C5C5610BF38BDCBC49382A79DAC31BEA4E2B6A1A5226A36A26A35A3685A36A22C321A36A1EA56A56A36A16A3FA2B6A16A3E42B6252A3690AA3F42B71361BD71BE07F7FA3E42B263AA951244D5B5B695D2CA31BA9512B5E7E425C5D2CA313ABEA2EABEB2EADE05EF3ADD75EFF2BDC2BD47FC20D2A2A2A5E505E5A084D524D0A05410A1A081A081A081A0A4F4D5E0A5F4148495A411B1C084D524D2A442AC20B2A2A2A5D29EBC2252A2A2A5F4148495A411B1C084D524D2A442AC22F2A2A2A27AEC9D7D7D7EB7273757AABC67E1BEAA3D6A5626AA3FFDB849A6E837F7C79794402442979797D7BD700ABEE7EADEAEB683C793C203C683C0B3C0A3C093C103C0F3C0E3C")
-        x = HexStringUnescape(x)
-        Me.InitInterface CStr(x)
+        X = QuickDecode("ACACD13AD13FD4C3C5C5C5610BF38BDCBC49382A79DAC31BEA4E2B6A1A5226A36A26A35A3685A36A22C321A36A1EA56A56A36A16A3FA2B6A16A3E42B6252A3690AA3F42B71361BD71BE07F7FA3E42B263AA951244D5B5B695D2CA31BA9512B5E7E425C5D2CA313ABEA2EABEB2EADE05EF3ADD75EFF2BDC2BD47FC20D2A2A2A5E505E5A084D524D0A05410A1A081A081A081A0A4F4D5E0A5F4148495A411B1C084D524D2A442AC20B2A2A2A5D29EBC2252A2A2A5F4148495A411B1C084D524D2A442AC22F2A2A2A27AEC9D7D7D7EB7273757AABC67E1BEAA3D6A5626AA3FFDB849A6E837F7C79794402442979797D7BD700ABEE7EADEAEB683C793C203C683C0B3C0A3C093C103C0F3C0E3C")
+        X = HexStringUnescape(X)
+        Me.InitInterface CStr(X)
     End If
     
     If InStr(cap, "Demo") > 0 Then
@@ -657,7 +674,18 @@ Private Sub Label6_Click(index As Integer)
     
 End Sub
 
-Private Sub txtFopen_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, Y As Single)
+Private Sub txtFopen_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
     On Error Resume Next
-    txtFopen.Text = data.Files(1)
+    txtFopen.Text = Data.Files(1)
+    chkfopen.Value = 1
+    If Len(txtTemp) = 0 Then
+        txtTemp = fso.GetParentFolder(txtFopen) & "\"
+        chktemp.Value = 1
+    End If
+End Sub
+
+Private Sub txtTemp_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
+    On Error Resume Next
+    txtTemp.Text = Data.Files(1)
+    chktemp.Value = 1
 End Sub
