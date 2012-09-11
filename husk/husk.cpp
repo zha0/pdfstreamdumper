@@ -118,7 +118,8 @@ int main(int argc, char* argv[])
 
 		if( !handled ){
 			printf("Unknown Option %s\n\n", argv[i]);
-			exit(0);
+			usage();
+			return 0;
 		}
 
 
@@ -129,6 +130,13 @@ int main(int argc, char* argv[])
 
 	int* pBuf = buf;
 
+	int (*sc)();
+	sc = (int (*)())&buf[foff]; //9.7.12 no more inline asm...
+
+	if(break_mode) DebugBreak();
+	(int)(*sc)();
+
+	/*
 	_asm{
 		   mov eax, pBuf
 		   mov ebx, foff
@@ -140,7 +148,7 @@ int main(int argc, char* argv[])
 no_break:
 		   jmp eax
 	}
-
+	*/
 
 
 }
