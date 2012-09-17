@@ -392,24 +392,14 @@ End Function
 
 Function checkForMap() As Boolean
         
-        'sclog = "c:\idefense\map\sc_log\bin\sclog.exe"
-        sclog = GetShortName(App.path & "\sclog\bin\sclog.exe")
+        sclog = GetShortName(App.path & "\sclog.exe")
         If Not fso.FileExists(sclog) Then
-            'If MsgBox("Can not find sclog do you want to download the Malcode Analyst Pack?", vbYesNo) = vbYes Then
-            '    Shell "cmd.exe /c start http://labs.idefense.com/software/download/?downloadID=8", vbHide
-            '    MsgBox "Just install it to its default directory and relaunch this UI", vbInformation
-            'End If
-            
             MsgBox "Can not find sclog should have been installed by installer?", vbCritical
-            
         Else
             checkForMap = True
         End If
         
 End Function
-
-
-
 
 Private Sub cmdLogFile_Click()
     Dim f As String
@@ -460,14 +450,6 @@ Private Sub Command1_Click()
     'End If
     
     If Not checkForMap() Then Exit Sub
-    
-    'sclog global filled out when checkformap() is called
-    'sclog = "c:\idefense\map\sc_log\bin\sclog.exe" 'no spaces in cmdline
-    'If Not fso.FileExists(sclog) Then
-    '    MsgBox "Can not find sclog in app.path or default MAP directory exiting", vbCritical
-    '    Exit Sub
-    'End If
-   
     Dim cmdline As String
     Dim f As String
     
@@ -630,12 +612,12 @@ Private Sub Label5_Click()
     MsgBox "Last command line copied to clipboard: " & vbCrLf & vbCrLf & last_cmdline, vbInformation
 End Sub
 
-Private Sub txtFhand_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub txtFhand_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
     On Error Resume Next
-    txtFhand.Text = Data.Files(1)
+    txtFhand.Text = data.Files(1)
 End Sub
 
-Private Sub txtLogFile_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub txtLogFile_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
      On Error Resume Next
-     txtLogFile.Text = Data.Files(1)
+     txtLogFile.Text = data.Files(1)
 End Sub

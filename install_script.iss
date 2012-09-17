@@ -15,11 +15,6 @@ Name: {app}\iTextFilters\iText_Filters\Properties
 Name: {app}\iTextFilters\VB_filtersDebug
 Name: {app}\scripts
 Name: {app}\libemu
-Name: {app}\sclog
-Name: {app}\sclog\bin
-Name: {app}\sclog\hooker
-Name: {app}\sclog\hook_test
-Name: {app}\sclog\parse_h
 Name: {app}\husk
 Name: {app}\plugins
 Name: {app}\plugins\build_db
@@ -76,6 +71,9 @@ Source: ./\frmManualFilters.frx; DestDir: {app}
 Source: ./\JS_UI_Readme.txt; DestDir: {app}
 Source: ./\ucScint.ctl; DestDir: {app}
 Source: ./\api.api; DestDir: {app}
+Source: ./\sclog.exe; DestDir: {app}
+Source: sclog_README.txt; DestDir: {app}
+Source: ./\sclog.url; DestDir: {app}
 Source: ./\dependancies\MSCOMCTL.OCX; DestDir: {win}; Flags: regserver uninsneveruninstall
 Source: ./\dependancies\msscript.ocx; DestDir: {win}; Flags: regserver uninsneveruninstall
 Source: ./\dependancies\richtx32.ocx; DestDir: {win}; Flags: regserver uninsneveruninstall
@@ -115,33 +113,10 @@ Source: scripts\filter_chains.vbs; DestDir: {app}\scripts\
 Source: scripts\obsfuscated_headers.vbs; DestDir: {app}\scripts\
 Source: scripts\README.txt; DestDir: {app}\scripts\
 Source: scripts\pdfbox_extract_text_page_by_page.vbs; DestDir: {app}\scripts\
-Source: sclog\bin\sclog.exe; DestDir: {app}\sclog\bin
-Source: sclog\hooker\asmserv.c; DestDir: {app}\sclog\hooker
-Source: sclog\hooker\assembl.c; DestDir: {app}\sclog\hooker
-Source: sclog\hooker\disasm.c; DestDir: {app}\sclog\hooker
-Source: sclog\hooker\disasm.h; DestDir: {app}\sclog\hooker
-Source: sclog\hooker\hooker.c; DestDir: {app}\sclog\hooker
-Source: sclog\hooker\makelib.txt; DestDir: {app}\sclog\hooker
-Source: sclog\hook_test\hook_test.c; DestDir: {app}\sclog\hook_test
-Source: sclog\hook_test\hook_test.dsp; DestDir: {app}\sclog\hook_test
-Source: sclog\hook_test\hook_test.dsw; DestDir: {app}\sclog\hook_test
-Source: sclog\parse_h\example_output.gif; DestDir: {app}\sclog\parse_h
-Source: sclog\parse_h\Form1.frm; DestDir: {app}\sclog\parse_h
-Source: sclog\parse_h\parse_h.exe; DestDir: {app}\sclog\parse_h
-Source: sclog\parse_h\Project1.vbp; DestDir: {app}\sclog\parse_h
-Source: sclog\parse_h\Project1.vbw; DestDir: {app}\sclog\parse_h
-Source: sclog\hooker.h; DestDir: {app}\sclog\
-Source: sclog\hooker.lib; DestDir: {app}\sclog\
-Source: sclog\main.cpp; DestDir: {app}\sclog\
-Source: sclog\main.h; DestDir: {app}\sclog\
-Source: sclog\psapi.lib; DestDir: {app}\sclog\
-Source: sclog\sclog.dsp; DestDir: {app}\sclog\
-Source: sclog\sclog.dsw; DestDir: {app}\sclog\
-Source: sclog\README.txt; DestDir: {app}\sclog\
 Source: husk\husk.cpp; DestDir: {app}\husk\
 Source: husk\exports.def; DestDir: {app}\husk\
-Source: husk\husk.dsp; DestDir: {app}\husk\
-Source: husk\husk.dsw; DestDir: {app}\husk\
+Source: husk\husk.vcproj; DestDir: {app}\husk\
+Source: husk\husk.sln; DestDir: {app}\husk\
 Source: plugins\build_db\Form1.frm; DestDir: {app}\plugins\build_db
 Source: plugins\build_db\MD5Hash.cls; DestDir: {app}\plugins\build_db
 Source: plugins\build_db\plugin.cls; DestDir: {app}\plugins\build_db
@@ -264,11 +239,11 @@ Name: {group}\Readme.txt; Filename: {app}\Readme.txt
 Name: {group}\Uninstall; Filename: {app}\unins000.exe
 Name: {userdesktop}\PdfStreamDumper.exe; Filename: {app}\PDFStreamDumper.exe; IconIndex: 0
 Name: {group}\Source\iTextFilters.sln; Filename: {app}\iTextFilters\iText_Filters.sln
-Name: {group}\Source\sclog.dsw; Filename: {app}\sclog\sclog.dsw
-Name: {group}\Source\husk.dsw; Filename: {app}\husk\husk.dsw
+Name: {group}\Source\husk.vcproj; Filename: {app}\husk\husk.vcproj
 Name: {group}\Source\BuildDb_Plugin.vbp; Filename: {app}\plugins\build_db\Project1.vbp
 Name: {group}\Source\ObjBrowser_Plugin.vbp; Filename: {app}\plugins\objbrowser\Project1.vbp
 Name: {group}\Source\scDbg Source; Filename: {app}\VS_LIBEMU.url
+Name: {group}\Source\scLog Source; Filename: {app}\sclog.url
 Name: {group}\Source\mupdf.vcproj; Filename: {app}\mupdf\mupdf_dll.vcproj
 
 [Run]

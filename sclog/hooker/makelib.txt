@@ -1,1 +1,0 @@
-lib /out:hooker.lib asmserv.obj assembl.obj disasm.obj hooker.obj
