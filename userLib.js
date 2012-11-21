@@ -49,17 +49,22 @@ function BSClass(){
 
 //this.info, doc.info
 function InfoClass(){
+	var xx=''
 	//tb.alert("in info fields")
 	f = tb.GetInfoFields()
 	//tb.alert("InfoFields: " + f)
 	f = f.split(",") //get csv list of names in info list
     for(i=0; i<f.length; i++){
-	     tmp = tb.GetInfoField( f[i] ) //get the value
-	     sc = "this."+f[i]+"=tmp"      //dynamically set this.[name] = tmp
-	     eval(sc)
-	     eval(sc.toLowerCase()) //this.Author, this.author adobe is not case specific so we add both.
+	     if(f[i] && f[i].length > 0){
+		     tmp = tb.GetInfoField( f[i] ) //get the value
+		     sc = "this."+f[i]+"=tmp"      //dynamically set this.[name] = tmp
+		     eval(sc)
+		     eval(sc.toLowerCase()) //this.Author, this.author adobe is not case specific so we add both.
+		     xx+= sc + " ("+ tmp + ")\n";
+	     }
    }
    //tb.alert("info class done loading")
+   jsdebug("InfoClass added: " + xx)
 }
 
  
@@ -113,7 +118,7 @@ function setRefs(obj){  //we make one big obj for simplicity
     obj.util = util
     obj.doc = doc
     obj.Doc = doc
-    obj.target = doc //for event.target
+    obj.target = doc //for event.target (sometimes this is doc sometimes this should be info object...)
 
     obj.platform = "WIN"
 	obj.syncAnnotScan = function(){}

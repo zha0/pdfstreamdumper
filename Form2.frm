@@ -198,6 +198,7 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   10398
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0000
@@ -253,6 +254,7 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   2249
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0080
@@ -1248,8 +1250,11 @@ Private Function PrepareShellcode(x) As String
     If InStr(x, "+") > 0 Then x = Replace(x, "+", Empty)
     If InStr(x, "'") > 0 Then x = Replace(x, "'", Empty)
     If InStr(x, " ") > 0 Then x = Replace(x, " ", Empty)
+    orglen = Len(x)
     x = MultiEscape(x)
-
+    If Len(x) = orglen Then 'nothing happened, is it a hexchar string?
+        x = HexStringUnescape(x, , , True)
+    End If
     PrepareShellcode = x
     
 End Function
