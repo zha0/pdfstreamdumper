@@ -28,6 +28,7 @@ End Enum
 Public Index As Long
 Public Header As String
 Public escapedHeader As String
+Public isBinary As Boolean
 
 Public RawObject As String
 Public ObjectStartOffset As Long
@@ -218,8 +219,10 @@ Function ParseSelf()
     
     End If
     
-    
-    
+    Dim xx As String
+    xx = Mid(activeData, 1, 20)
+    If InStr(1, xx, Chr(0)) > 0 Then isBinary = True
+            
 End Function
 
 Private Sub SetContentType(ad)

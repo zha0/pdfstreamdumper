@@ -11,6 +11,23 @@ Begin VB.Form frmBruteZLib
    ScaleHeight     =   8055
    ScaleWidth      =   14175
    StartUpPosition =   3  'Windows Default
+   Begin VB.OptionButton optLZW 
+      Caption         =   "lzw"
+      Height          =   255
+      Left            =   10140
+      TabIndex        =   24
+      Top             =   120
+      Width           =   735
+   End
+   Begin VB.OptionButton optZlib 
+      Caption         =   "zlib"
+      Height          =   255
+      Left            =   9300
+      TabIndex        =   23
+      Top             =   120
+      Value           =   -1  'True
+      Width           =   675
+   End
    Begin VB.Frame fraReplaceStream 
       Caption         =   "Replace Stream "
       Height          =   2490
@@ -162,7 +179,6 @@ Begin VB.Form frmBruteZLib
       _ExtentX        =   19235
       _ExtentY        =   9313
       _Version        =   393217
-      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"frmBruteZLib.frx":0000
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -241,7 +257,7 @@ Begin VB.Form frmBruteZLib
       TabIndex        =   1
       Text            =   "Drag And Drop file here"
       Top             =   45
-      Width           =   10140
+      Width           =   8100
    End
    Begin VB.Label Label1 
       Caption         =   "Load File"
@@ -374,7 +390,7 @@ Private Sub Command1_Click()
         DoEvents
         If abort Then Exit For
         
-        If csharp.QuickDeflate(b(), bOut(), i) Then
+        If csharp.QuickDeflate(b(), bOut(), i, optZlib.Value) Then
         
             Module4.CompressData bOut, tmp 'figure out how big compressed block was
             Set c = New CPDFStream
@@ -594,6 +610,7 @@ Private Sub Form_Load()
     pb.Value = 0
     lv.ColumnHeaders(1).Width = lv.Width - 100
     txtFile = Form1.txtPDFPath
+    optLZW.Visible = isIde()
 End Sub
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
@@ -751,14 +768,14 @@ Private Sub mnuSaveToFile_Click()
     
 End Sub
 
-Function SaveStream(c As CPDFStream, fpath) As Boolean
+Function SaveStream(c As CPDFStream, fPath) As Boolean
     On Error Resume Next
     Dim b() As Byte
     Dim f As Long
     
     b() = StrConv(c.DecompressedData, vbFromUnicode, LANG_US)
     f = FreeFile
-    Open fpath For Binary As f
+    Open fPath For Binary As f
     Put f, , b()
     Close f
     

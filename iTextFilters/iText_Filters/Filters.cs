@@ -262,7 +262,8 @@ namespace iTextFilters
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.ToString() );
+                //mErrorMessage = "LZW Decode Error: " + e.ToString();
+                //MessageBox.Show(e.ToString() );
             }
             return new byte[0];
         }

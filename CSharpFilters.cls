@@ -106,7 +106,7 @@ Function SetPredictorParams(predictor As Integer, Optional columns = 1, Optional
 hell:
 End Function
 
-Function decode(data As String, decoder As Decoders, Optional surpressErrorMsg As Boolean = True, Optional dbugMode As Boolean = False) As Boolean
+Function decode(Data As String, decoder As Decoders, Optional surpressErrorMsg As Boolean = True, Optional dbugMode As Boolean = False) As Boolean
     
     On Error GoTo hell
         
@@ -119,12 +119,12 @@ Function decode(data As String, decoder As Decoders, Optional surpressErrorMsg A
     Dim addr As Long
     Dim bufsize As Long
     
-    If Len(data) = 0 Then
+    If Len(Data) = 0 Then
         Me.ErrorMessage = "Data length was 0, nothing to do"
         Exit Function 'nothing to do
     End If
     
-    b() = StrConv(data, vbFromUnicode, LANG_US)
+    b() = StrConv(Data, vbFromUnicode, LANG_US)
     addr = VarPtr(b(0))
     bufsize = UBound(b)
     
@@ -184,7 +184,7 @@ Function Decrypt(inFile As String, retString As String, Optional startMsg As Str
            
 End Function
 
-Function QuickDeflate(DataIn() As Byte, DataOut() As Byte, Optional startOffset As Long = 0) As Boolean
+Function QuickDeflate(DataIn() As Byte, DataOut() As Byte, Optional startOffset As Long = 0, Optional useZlib As Boolean = True) As Boolean
     
     On Error GoTo hell
         
@@ -203,7 +203,7 @@ Function QuickDeflate(DataIn() As Byte, DataOut() As Byte, Optional startOffset 
     
     iTextFilters.Debug = False
     
-    If iTextFilters.decode(addr, bufsize, 1) Then
+    If iTextFilters.decode(addr, bufsize, IIf(useZlib, 1, 4)) Then
         ReDim DataOut(bufsize - 1) 'addr, bufsize - these were set byref in csharp to describe response buffer
         CopyFromMem DataOut(0), addr, bufsize
         QuickDeflate = True

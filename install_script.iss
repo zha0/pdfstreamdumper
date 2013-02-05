@@ -61,7 +61,7 @@ Source: ./\simple-fso..bas; DestDir: {app}
 Source: ./\CInstruction.cls; DestDir: {app}
 Source: ./\CDisassembler.cls; DestDir: {app}
 Source: ./\modEscapes.bas; DestDir: {app}
-Source: ./\olly.dll; DestDir: {app}
+;Source: ./\olly.dll; DestDir: {app}
 Source: ./\zlib.dll; DestDir: {app}
 Source: ./\userLib.js; DestDir: {app}
 Source: ./\myMain.js; DestDir: {app}
@@ -82,7 +82,7 @@ Source: ./\dependancies\SciLexer.dll; DestDir: {app}
 Source: ./\dependancies\hexed.ocx; DestDir: {app}; Flags: regserver
 Source: CSharpFilters.cls; DestDir: {app}
 Source: frmScTest.frm; DestDir: {app}
-Source: husk.exe; DestDir: {app}
+Source: husk.dat; DestDir: {app}
 Source: simple_husk.dat; DestDir: {app}
 Source: frmBruteZLib.frm; DestDir: {app}
 Source: frmBruteZLib.frx; DestDir: {app}

@@ -25,9 +25,9 @@ Dim alertCycles As Long
 
 Dim oBrowser As Object
 
-Function GetListviewData(index As Long)
+Function GetListviewData(Index As Long)
     On Error Resume Next
-    GetListviewData = lv.ListItems(index).tag
+    GetListviewData = lv.ListItems(Index).tag
 End Function
 
 Function ResetAlertCount()
@@ -109,11 +109,11 @@ Function GetAnnotCountForPage(page)
     GetAnnotCountForPage = oBrowser.GetAnnotCountForPage(page)
 End Function
 
-Function GetSubjectForAnnot(page, index)
+Function GetSubjectForAnnot(page, Index)
     'MsgBox "GetSubjectForAnnot(" & page & " , " & index & ")"
     'GetSubjectForAnnot = "page: " & page & " index: " & Index
     On Error Resume Next
-    GetSubjectForAnnot = oBrowser.GetAnnot(page, index)
+    GetSubjectForAnnot = oBrowser.GetAnnot(page, Index)
 End Function
 
 Function GetViewerVersion()
@@ -127,14 +127,14 @@ Public Function CRC(s)
     CRC = CRC32(CStr(s))
 End Function
 
-Public Function GetStream(index)
+Public Function GetStream(Index)
         
         On Error Resume Next
         Dim s As CPDFStream
         Dim li As ListItem
         For Each li In Form1.lv.ListItems
             Set s = li.tag
-            If s.index = index Then
+            If s.Index = Index Then
                 If s.isCompressed Then
                     GetStream = s.DecompressedData
                 Else
@@ -147,7 +147,10 @@ Public Function GetStream(index)
 End Function
 
 Public Function disasm(bytes)
-
+    
+    MsgBox "olly.dll removed due to av alert, I didnt use this much anyway...", vbInformation
+    Exit Function
+    
     Dim d As Collection
     Dim ci As CInstruction
     Dim op() As Byte

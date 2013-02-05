@@ -5,10 +5,10 @@ Begin VB.Form Form2
    ClientHeight    =   7770
    ClientLeft      =   60
    ClientTop       =   345
-   ClientWidth     =   9210
+   ClientWidth     =   9285
    LinkTopic       =   "Form2"
    ScaleHeight     =   7770
-   ScaleWidth      =   9210
+   ScaleWidth      =   9285
    StartUpPosition =   2  'CenterScreen
    Begin VB.CommandButton Command1 
       Caption         =   "Load Files Embedded in PDF"
@@ -20,7 +20,7 @@ Begin VB.Form Form2
    End
    Begin VB.Timer tmrDelay 
       Enabled         =   0   'False
-      Interval        =   4500
+      Interval        =   17000
       Left            =   3360
       Top             =   630
    End

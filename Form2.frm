@@ -1427,7 +1427,7 @@ Private Sub mnuShellcode2Exe_Click(Index As Integer)
     simple_husk = True
     If Index = 2 Then simple_husk = False
     
-    hFile = App.path & IIf(simple_husk, "\simple_husk.dat", "\husk.exe")
+    hFile = App.path & IIf(simple_husk, "\simple_husk.dat", "\husk.dat")
     If Not fso.FileExists(hFile) Then
         MsgBox "Husk.exe container was not found did your AV eat it?", vbInformation
         Exit Sub
@@ -1440,7 +1440,10 @@ Private Sub mnuShellcode2Exe_Click(Index As Integer)
         husk() = StrConv(hFile, vbFromUnicode, LANG_US)
         For i = 0 To UBound(husk): husk(i) = husk(i) Xor &H77: Next
     Else
+        'husk() = StrConv(hFile, vbFromUnicode, LANG_US)
+        hFile = HexStringUnescape(hFile)
         husk() = StrConv(hFile, vbFromUnicode, LANG_US)
+        For i = 0 To UBound(husk): husk(i) = husk(i) Xor &H77: Next
     End If
     
     x = PrepareShellcode(x)

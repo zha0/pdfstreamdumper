@@ -655,6 +655,9 @@ Begin VB.Form Form1
       Begin VB.Menu mnuB64Clipboard 
          Caption         =   "Base64 Decode Clipboard"
       End
+      Begin VB.Menu mn_b64EncClip 
+         Caption         =   "Base64 Encode Clipboard"
+      End
       Begin VB.Menu mnub64decode 
          Caption         =   "Base64 Decode File"
       End
@@ -733,6 +736,9 @@ Begin VB.Form Form1
          End
          Begin VB.Menu mnuUseInternalHexeditor 
             Caption         =   "Use Internal HexEditor"
+         End
+         Begin VB.Menu mnuAutoSwitchTabs 
+            Caption         =   "AutoSwitch Tabs for Binary Data"
          End
       End
       Begin VB.Menu mnuAbout 
@@ -973,8 +979,24 @@ Private Sub lblClosePictViewer_Click()
     fraPictViewer.Visible = False
 End Sub
 
+Private Sub mn_b64EncClip_Click()
+    
+    On Error Resume Next
+    Dim x As String
+    x = Clipboard.GetText
+    x = b64.EncodeString(x)
+    Clipboard.Clear
+    Clipboard.SetText x
+    MsgBox "Clipboard text encoded (not binary safe)", vbInformation
+    
+End Sub
+
 Private Sub mnuAlwaysUseZlib_Click()
     mnuAlwaysUseZlib.Checked = Not mnuAlwaysUseZlib.Checked
+End Sub
+
+Private Sub mnuAutoSwitchTabs_Click()
+    mnuAutoSwitchTabs.Checked = Not mnuAutoSwitchTabs.Checked
 End Sub
 
 Private Sub mnuB64Clipboard_Click()
@@ -2134,6 +2156,19 @@ Private Sub mnuUpdateCurrent_Click()
     new_bytes() = bOut()
     new_file = txtPDFPath & "_upd.pdf"
     
+    Dim baseName As String
+    Dim baseDir As String
+    
+    
+    baseDir = fso.GetParentFolder(txtPDFPath)
+    baseName = fso.GetBaseName(txtPDFPath)
+    If VBA.Right(baseName, 1) = "_" Then baseName = Mid(baseName, 1, Len(baseName) - 1)
+    
+    new_file = baseDir & "\" & baseName & ".u" & i
+    While fso.FileExists(new_file)
+        i = i + 1
+        new_file = baseDir & "\" & baseName & ".u" & i
+    Wend
     
     If stream.CompressedSize < UBound(new_bytes) Then
         msg = "Original Compressed Stream size was smaller than new data.." & vbCrLf & _
@@ -2311,7 +2346,7 @@ Private Sub Form_Unload(Cancel As Integer)
     'If defaultLCID <> LANG_US And defaultLCID <> 0 Then SetLocale defaultLCID
     
     parser.abort = True
-    SaveSetting App.EXEName, "Settings", "LastFile", txtPDFPath
+    If txtPDFPath <> "Drag and drop pdf file here" Then SaveSetting App.EXEName, "Settings", "LastFile", txtPDFPath
     
     SaveMySetting "EscapeHeaders", IIf(mnuAutoEscapeHeaders.Checked, 1, 0)
     SaveMySetting "FormatHeaders", IIf(mnuVisualFormatHeaders.Checked, 1, 0)
@@ -2324,6 +2359,7 @@ Private Sub Form_Unload(Cancel As Integer)
     SaveMySetting "OpenLastAtStart", IIf(mnuOpenLastAtStart.Checked, 1, 0)
     SaveMySetting "EnableJBIG2", IIf(mnuEnableJBIG2.Checked, 1, 0)
     SaveMySetting "UseInternalHexeditor", IIf(mnuUseInternalHexeditor.Checked, 1, 0)
+    SaveMySetting "AutoSwitchTabs", IIf(mnuAutoSwitchTabs.Checked, 1, 0)
     
     FormPos Me, True, True
     
@@ -2583,7 +2619,7 @@ Private Sub mnuExploitScan_Click()
     
     Dim li As ListItem
     Dim c As CPDFStream
-    Dim data As String
+    Dim Data As String
     Dim p() As String
     Dim report() As String
     Dim i As Long
@@ -2591,20 +2627,20 @@ Private Sub mnuExploitScan_Click()
     On Error Resume Next
     
     For Each li In lv.ListItems
-        data = GetActiveData(li, False, c)
+        Data = GetActiveData(li, False, c)
         For i = 0 To UBound(exploits)
             p() = Split(exploits(i), "=")
-            If ContainsExploit(data, p(1), , c) Then
+            If ContainsExploit(Data, p(1), , c) Then
                 push report, "Exploit " & p(0) & " - " & p(1) & " - found in stream: " & c.Index
             End If
         Next
     Next
     
     For Each li In lv2.ListItems
-        data = GetActiveData(li, False, c)
+        Data = GetActiveData(li, False, c)
         For i = 0 To UBound(exploits)
             p() = Split(exploits(i), "=")
-            If ContainsExploit(data, p(1), , c) Then
+            If ContainsExploit(Data, p(1), , c) Then
                 push report, "Exploit " & p(0) & " found in stream " & c.Index
             End If
         Next
@@ -2916,6 +2952,7 @@ Function GetActiveData(Item As ListItem, Optional load_ui As Boolean = False, Op
     On Error Resume Next
     Dim s As CPDFStream
     Dim d As String
+    Dim xx As String
     
     Set s = Item.tag
     Set ret_Stream = s
@@ -2939,22 +2976,24 @@ Function GetActiveData(Item As ListItem, Optional load_ui As Boolean = False, Op
     End If
         
     If load_ui Then
+
          If Len(d) < &H2000 Then
             txtUncompressed.Text = Replace(d, Chr(0), ".") 'this can cause a hang on large blobs...
          Else
             txtUncompressed.Text = Empty
-            txtUncompressed.Text = d
+            If s.isBinary Then
+                txtUncompressed.Text = "[Binary data --- see hexdump ---  type: " + s.FileType + " ]"
+            Else
+                txtUncompressed.Text = d
+            End If
          End If
-         'he.Text = HexDump(d)
+         
          he.LoadString CStr(d), True
          txtDetails.Text = s.GetDetailsReport()
          
-         'If InStr(d, Chr(0)) > 0 Then
-         '   Set ts.SelectedItem = ts.Tabs(2)
-         'Else
-         '   Set ts.SelectedItem = ts.Tabs(1)
-         'End If
-         'ts_Click
+         If mnuAutoSwitchTabs.Checked And ts.SelectedItem.Index <> 3 Then 'and not viewing headers pane..
+            ts.Tabs(IIf(s.isBinary, 2, 1)).Selected = True
+         End If
          
     End If
         
@@ -3053,6 +3092,7 @@ Private Sub Form_Load()
                      "CVE-2009-1492 Date:5.12.09 v9.1=getAnnots", _
                      "CVE-2009-1493 Date:5.12.09 v9.1=customDictionaryOpen", _
                      "CVE-2009-4324 Date:12.15.09 v9.2=media.newPlayer", _
+                     "Contains JBIG2Decode Stream Filter possible CVE-2009-0658 (Date:3.10.09 ver<9.1)=filteris:JBIG2Decode", _
                      "Contains U3D file - possible CVE-2009-4324(v9.1.3) or CVE-2011-2462(Date:12.16.11 v9.4.6) =^U3D", _
                      "Contains flash file=^CWS", _
                      "Contains flash file=^FWS", _
@@ -3062,7 +3102,7 @@ Private Sub Form_Load()
                      "CVE-2010-4091 Date:11.4.10 v9.2 or v8.1.7=printSeps", _
                      "CVE-2010-0188 Date:2.32.10 v9.3=rawValue", _
                      "Contains PRC file - possible CVE-2011-4369 (Date:12.16.11 v9.4.6)=^PRC", _
-                     "Contains JBIG2Decode Stream Filter possible CVE-2009-0658 (Date:3.10.09 ver<9.1)=filteris:JBIG2Decode" _
+                     "CVE-2012-0775 Date: 4.10.2012 v10-10.102=addToolButton" _
                      )
                      
                      'is just using the JBIG2 Filter to generic to detect on?
@@ -3119,6 +3159,7 @@ Private Sub Form_Load()
     mnuOpenLastAtStart.Checked = IIf(GetMySetting("OpenLastAtStart", 0) = 1, True, False)
     mnuEnableJBIG2.Checked = IIf(GetMySetting("EnableJBIG2", 0) = 1, True, False)
     mnuUseInternalHexeditor.Checked = IIf(GetMySetting("UseInternalHexeditor", 1) = 1, True, False)
+    mnuAutoSwitchTabs.Checked = IIf(GetMySetting("AutoSwitchTabs", 1) = 1, True, False)
     
     lv2.ColumnHeaders(1).Width = lv2.Width - 100
     lv.ColumnHeaders(1).Width = lv.Width - 100
@@ -3346,10 +3387,10 @@ Private Sub txtPDFPath_KeyDown(KeyCode As Integer, Shift As Integer)
     If KeyCode = 13 Then cmdDecode_Click
 End Sub
 
-Private Sub txtPDFPath_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, Y As Single)
+Private Sub txtPDFPath_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, Y As Single)
     On Error Resume Next
     AutomatationRun = False
-    txtPDFPath = data.Files(1)
+    txtPDFPath = Data.Files(1)
     cmdDecode_Click
 End Sub
 
