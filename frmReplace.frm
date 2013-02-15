@@ -358,8 +358,16 @@ Private Sub Command1_Click()
         compare = vbTextCompare
     End If
     
+    Dim curLine As Long
+    Dim o As ucScint
+    
     If Option1.Value Then 'whole selection
+        If TypeName(active_object) = "ucScint" Then
+            Set o = active_object
+            curLine = o.CurrentLine
+        End If
         active_object.Text = Replace(active_object.Text, f, r, , , compare)
+        If curLine > 0 Then o.GotoLine curLine
     Else
         sl = active_object.SelStart
         nt = Replace(active_object.SelText, f, r, , , compare)
@@ -395,11 +403,23 @@ End Sub
 Private Sub Form_Load()
     Me.Icon = Form1.Icon
     FormPos Me, False
-    SetWindowPos Me.hwnd, HWND_TOPMOST, Me.Left / 15, Me.Top / 15, Me.Width / 15, Me.Height / 15, SWP_SHOWWINDOW
+    SetWindowPos Me.hwnd, HWND_TOPMOST, Me.Left / 15, Me.Top / 15, Me.Width / 15, Me.height / 15, SWP_SHOWWINDOW
+    Text1 = GetMySetting("lastFind")
+    Text2 = GetMySetting("lastReplace")
+    If GetMySetting("wholeText", 1) = "1" Then Option1.Value = True Else Option2.Value = True
+End Sub
+
+Private Sub Form_Resize()
+    On Error Resume Next
+    lv.Width = Me.Width - lv.Left - 200
+    lv.height = Me.height - lv.Top - 300
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
     FormPos Me, False, True
+    SaveMySetting "lastFind", Text1
+    SaveMySetting "lastReplace", Text2
+    SaveMySetting "wholeText", IIf(Option1.Value, 1, 0)
 End Sub
 
 Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)

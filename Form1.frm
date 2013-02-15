@@ -91,7 +91,6 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
-      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -410,6 +409,7 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -765,6 +765,9 @@ Begin VB.Form Form1
       End
       Begin VB.Menu mnuSpacer99 
          Caption         =   "-"
+      End
+      Begin VB.Menu mnuWipeStream 
+         Caption         =   "Wipe Object"
       End
       Begin VB.Menu mnuMarkStream 
          Caption         =   "Mark Stream"
@@ -2212,6 +2215,91 @@ Private Sub mnuUpdateCurrent_Click()
   
 End Sub
 
+Private Sub mnuWipeStream_Click()
+     
+     If lv.SelectedItem Is Nothing Then
+        MsgBox "Select a stream first"
+        Exit Sub
+    End If
+    
+    Dim new_data As String
+    Dim new_file As String
+    Dim pf As String
+    Dim f As Long
+    Dim f2 As Long
+    Dim stream As CPDFStream
+    Dim msg As String
+    Dim b() As Byte
+    Dim new_bytes() As Byte
+    
+    GetActiveData lv.SelectedItem, False, stream
+    
+    If stream Is Nothing Then
+        MsgBox "Could not get active stream?", vbCritical
+        Exit Sub
+    End If
+       
+    new_file = txtPDFPath & "_upd.pdf"
+    
+    Dim baseName As String
+    Dim baseDir As String
+    Dim i As Long
+    
+    baseDir = fso.GetParentFolder(txtPDFPath)
+    baseName = fso.GetBaseName(txtPDFPath)
+    If VBA.Right(baseName, 1) = "_" Then baseName = Mid(baseName, 1, Len(baseName) - 1)
+    
+    new_file = baseDir & "\" & baseName & ".u" & i
+    While fso.FileExists(new_file)
+        i = i + 1
+        new_file = baseDir & "\" & baseName & ".u" & i
+    Wend
+    
+    new_file = dlg.SaveDialog(AllFiles, pf, "Save New PDF As", Me.hwnd, Me.hwnd, fso.FileNameFromPath(new_file))
+    If Len(new_file) = 0 Then Exit Sub
+    
+    If new_file = txtPDFPath Then
+        MsgBox "Sorry I can not overwrite file we are modifying", vbExclamation
+        Exit Sub
+    End If
+    
+    If fso.FileExists(new_file) Then fso.DeleteFile new_file
+    
+    Dim totalSize As Long
+    totalSize = stream.ObjectEndOffset - stream.ObjectStartOffset + 1
+    new_data = String(totalSize, "A")
+    new_bytes() = StrConv(new_data, vbFromUnicode, LANG_US)
+        
+    f = FreeFile
+    Open txtPDFPath For Binary As f
+    
+    f2 = FreeFile
+    Open new_file For Binary As f2
+    
+    ReDim b(stream.ObjectStartOffset - 1)
+    Get f, , b() 'load the file up to the original stream
+    Put f2, , b() 'save it to the new file
+    
+    Put f2, , new_bytes() 'save our new stream to new file
+    
+    'ReDim b(stream.CompressedSize)
+    'Get f, , b() 'advance file pointer size of orginal compressed data
+    
+    ReDim b(LOF(f) - stream.ObjectEndOffset - 2)
+    Get f, stream.ObjectEndOffset + 2, b() 'load teh rest of the original file
+    Put f2, , b() 'save rest of file to new file
+    
+    Close f
+    Close f2
+                
+    If MsgBox("New PDF File Generated, would you like to load it now?", vbYesNo) = vbYes Then
+        txtPDFPath = new_file
+        cmdDecode_Click
+    End If
+    
+ 
+End Sub
+
 Private Sub mnuZlibBrute_Click()
     Dim f As New frmBruteZLib
     f.Show 'this way we can compare multiple files..
@@ -2249,6 +2337,17 @@ Private Sub parser_NewStream(stream As CPDFStream)
         
         Dim li As ListItem
         Dim h As String
+        Dim totalSize As Long
+        Dim ph_size As Long
+        
+        
+        If Not stream.ContainsStream Then
+            ph_size = Len(stream.Header)
+            totalSize = stream.ObjectEndOffset - stream.ObjectStartOffset
+            If ph_size + 100 < totalSize Then
+                parser_DebugMessage "Stream " & stream.Index & " @ offset 0x" & Hex(stream.ObjectStartOffset) & " may be hiding something in its headers (parser bug) right click and use 'Show Raw Object'. Extra: 0x" & Hex(totalSize - ph_size) & " bytes detected"
+            End If
+        End If
         
         If Len(stream.Message) > 0 Then
             'add it to the error list
@@ -2563,6 +2662,8 @@ end_of_func:
     Dim oBrowser As Object
     Set oBrowser = GetObject("", "obj_Browser.plugin") 'not much of a plugin is it! more of a lib at this point :P
     oBrowser.initasLib Me
+    
+    TabStrip1.Tabs(3).Caption = "Debug" & IIf(lvDebug.ListItems.Count > 0, " (" & lvDebug.ListItems.Count & ")", "")
     
     If Len(ExtractToFolder) > 0 Then ExtractTo ExtractToFolder
         
@@ -3148,6 +3249,8 @@ Private Sub Form_Load()
     Next
     
     mnuDebugBreakAtStream.Visible = isIde()
+    mnuWipeStream.Visible = isIde()
+    
     mnuAutoEscapeHeaders.Checked = IIf(GetMySetting("EscapeHeaders", 1) = 1, True, False)
     mnuVisualFormatHeaders.Checked = IIf(GetMySetting("FormatHeaders", 1) = 1, True, False)
     mnuHideDups.Checked = IIf(GetMySetting("HideDups", 0) = 1, True, False)
@@ -3486,15 +3589,15 @@ End Function
 '
 'Loop
 '
-Private Sub ucAsyncDownload1_DownloadComplete(fPath As String)
+Private Sub ucAsyncDownload1_DownloadComplete(fpath As String)
     Dim f As String
     Dim a As Long
     
     On Error GoTo hell
     
     pb.Value = 0
-    Name fPath As DownloadPath
-    If fso.FileExists(fPath) Then Kill fPath
+    Name fpath As DownloadPath
+    If fso.FileExists(fpath) Then Kill fpath
     
     Exit Sub
 hell:

@@ -173,22 +173,22 @@ Function VisualFormatHeader(ByVal h) As String
 End Function
 
 
-Function ContainsExploit(data, ByVal sig, Optional offset As Long, Optional stream As CPDFStream) As Boolean
+Function ContainsExploit(Data, ByVal sig, Optional offset As Long, Optional stream As CPDFStream) As Boolean
         Dim tmp() As String
         On Error Resume Next
         
         If InStr(sig, "*") > 0 Then 'its a like expression
             
-            If data Like sig Then
+            If Data Like sig Then
                 tmp = Split(sig, "*")
                 sig = tmp(1) 'they should all start with * so 0=empty
-                offset = InStr(data, sig)
+                offset = InStr(Data, sig)
                 ContainsExploit = True
             End If
             
         ElseIf VBA.Left(sig, 1) = "^" Then
             sig = Mid(sig, 2)
-            If sig = VBA.Left(data, Len(sig)) Then
+            If sig = VBA.Left(Data, Len(sig)) Then
                 ContainsExploit = True
                 offset = 1
             End If
@@ -205,7 +205,7 @@ Function ContainsExploit(data, ByVal sig, Optional offset As Long, Optional stre
             End If
             
         Else
-            offset = InStr(1, data, sig, vbTextCompare)
+            offset = InStr(1, Data, sig, vbTextCompare)
             If offset > 0 Then ContainsExploit = True
         End If
         
@@ -612,12 +612,12 @@ Function AddKey(t As String, c As Collection) As Boolean
 hell:
 End Function
 
-Function AnyofTheseInstr(data, match, Optional compare As VbCompareMethod = vbTextCompare) As Boolean
+Function AnyofTheseInstr(Data, match, Optional compare As VbCompareMethod = vbTextCompare) As Boolean
     Dim tmp() As String
     Dim x
     tmp = Split(match, ",")
     For Each x In tmp
-        If InStr(1, data, x, compare) > 0 Then
+        If InStr(1, Data, x, compare) > 0 Then
             AnyofTheseInstr = True
             Exit Function
         End If
