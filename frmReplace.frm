@@ -5,10 +5,10 @@ Begin VB.Form frmReplace
    ClientHeight    =   2640
    ClientLeft      =   60
    ClientTop       =   345
-   ClientWidth     =   5355
+   ClientWidth     =   5370
    LinkTopic       =   "Form3"
    ScaleHeight     =   2640
-   ScaleWidth      =   5355
+   ScaleWidth      =   5370
    StartUpPosition =   3  'Windows Default
    Begin VB.CommandButton cmdFindAll 
       Caption         =   "Find All"
@@ -239,9 +239,9 @@ Private Sub cmdFind_Click()
 End Sub
 
 
-Private Sub cmdFindAll_Click()
+Public Sub cmdFindAll_Click()
     On Error Resume Next
-    Me.Width = 10440
+    If Me.Width < 10440 Then Me.Width = 10440
     lv.ColumnHeaders(2).Width = lv.Width - lv.ColumnHeaders(1).Left - 100
     lv.ListItems.Clear
     lv.Visible = True
@@ -406,20 +406,21 @@ Private Sub Form_Load()
     SetWindowPos Me.hwnd, HWND_TOPMOST, Me.Left / 15, Me.Top / 15, Me.Width / 15, Me.height / 15, SWP_SHOWWINDOW
     Text1 = GetMySetting("lastFind")
     Text2 = GetMySetting("lastReplace")
-    If GetMySetting("wholeText", 1) = "1" Then Option1.Value = True Else Option2.Value = True
+    If GetMySetting("wholeText", "1") = "1" Then Option1.Value = True Else Option2.Value = True
 End Sub
 
 Private Sub Form_Resize()
     On Error Resume Next
     lv.Width = Me.Width - lv.Left - 200
     lv.height = Me.height - lv.Top - 300
+    lv.ColumnHeaders(2).Width = lv.Width - lv.ColumnHeaders(2).Left - 200
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
     FormPos Me, False, True
     SaveMySetting "lastFind", Text1
     SaveMySetting "lastReplace", Text2
-    SaveMySetting "wholeText", IIf(Option1.Value, 1, 0)
+    SaveMySetting "wholeText", IIf(Option1.Value, "1", "0")
 End Sub
 
 Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)

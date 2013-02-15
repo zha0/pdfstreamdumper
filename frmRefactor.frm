@@ -10,6 +10,14 @@ Begin VB.Form frmRefactor
    ScaleHeight     =   7050
    ScaleWidth      =   14715
    StartUpPosition =   3  'Windows Default
+   Begin VB.CommandButton cmdCopyRenameMap 
+      Caption         =   "Copy Rename Map"
+      Height          =   375
+      Left            =   4560
+      TabIndex        =   10
+      Top             =   360
+      Width           =   1575
+   End
    Begin VB.CheckBox chkUseOriginalText 
       Caption         =   "Use Original Text"
       Height          =   375
@@ -178,6 +186,29 @@ Private Sub chkUseOriginalText_Click()
 End Sub
 
 
+Private Sub cmdCopyRenameMap_Click()
+    Dim tmp
+    Dim li As ListItem
+    
+    tmp = "Functions: " & vbCrLf & String(40, "-") & vbCrLf
+    For Each li In lv.ListItems
+        tmp = tmp & li.Text & vbCrLf
+    Next
+    
+    lv_ItemClick lv.ListItems(lv.ListItems.Count)
+    
+    tmp = tmp & vbCrLf & "Global vars: " & vbCrLf & String(40, "-") & vbCrLf
+    For Each li In lvArgs.ListItems
+        tmp = tmp & li.Text & vbCrLf
+    Next
+    
+    Clipboard.Clear
+    Clipboard.SetText tmp
+    
+    MsgBox Len(tmp) & " bytes copied", vbInformation
+    
+End Sub
+
 Private Sub Command4_Click()
     'save and exit
     
@@ -208,7 +239,10 @@ Private Sub Command4_Click()
         End If
     Next
     
+    Complete = Replace(Complete, "__gvar_", "gvar_") 'cheap shot bug fix...
+    
     Form2.txtJS.Text = Complete
+    Form2.mnuFunctionScan_Click
     Unload Me
     
 End Sub

@@ -91,6 +91,7 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -409,7 +410,6 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -1994,6 +1994,8 @@ Public Sub mnuJavascriptUI_Click()
         Form2.txtJS.SelLength = Len(t)
     End If
     
+    Form2.mnuFunctionScan_Click
+    
 End Sub
 
 Function looksEscaped(Header) 'as boolean
@@ -3287,10 +3289,18 @@ Private Sub Form_Load()
     '    TabStrip1.Tabs(3).Selected = True
     'End If
     
-    If Len(command) > 0 Then
-        If InStr(1, command, ".js", vbTextCompare) > 0 Or InStr(1, command, ".vbs", vbTextCompare) > 0 Then
+    If Len(command) > 0 Then 'handle files draged and droped on icon or on command line...
+        If InStr(1, command, ".js", vbTextCompare) > 0 Then 'js files load in jseditor
+            f = Replace(command, """", Empty)
+            If fso.FileExists(f) Then
+                x = fso.ReadFile(f)
+                Form2.Show
+                Form2.txtJS.Text = x
+                Form2.mnuFunctionScan_Click
+            End If
+        ElseIf InStr(1, command, ".vbs", vbTextCompare) > 0 Then 'vbs scripts run as automation scripts
             RunAutomationScript command
-        ElseIf InStr(1, command, ".sc", vbTextCompare) > 0 Then
+        ElseIf InStr(1, command, ".sc", vbTextCompare) > 0 Then  'sc files loaded as shellcode (expects binary input)
             'load a shellcode file for analysis
             f = Replace(command, """", Empty)
             If fso.FileExists(f) Then

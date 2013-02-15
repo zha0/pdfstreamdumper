@@ -71,7 +71,7 @@ Sub ParseName()
            
         Me.OrgName = Trim(Mid(x, sp, p1 - sp))
         Me.NewName = "func_" & Me.Index
- 
+        
 End Sub
 
 Sub ParseAsGlobal()
@@ -87,22 +87,22 @@ Sub ParseAsGlobal()
         
         body = x
         tmp = Split(body, vbCrLf)
-        For Each y In tmp
+        For Each Y In tmp
              
-            a = InStr(y, "var ")
+            a = InStr(Y, "var ")
             If a > 0 Then
-                b1 = InStr(a + 4, y, "-") 'todo change to scan for next nontext
-                b2 = InStr(a + 4, y, "+")
-                b3 = InStr(a + 4, y, "^")
-                b4 = InStr(a + 4, y, "=")
+                b1 = InStr(a + 4, Y, "-") 'todo change to scan for next nontext
+                b2 = InStr(a + 4, Y, "+")
+                b3 = InStr(a + 4, Y, "^")
+                b4 = InStr(a + 4, Y, "=")
                 'b5 = InStr(a + 4, y, " ")
                 b = GetLowest(b1, b2, b3, b4)
                 If b > 0 Then
-                    newVar = Trim(Mid(y, a + 4, b - a - 4))
+                    newVar = Trim(Mid(Y, a + 4, b - a - 4))
                     If Not tokenExists(newVar) Then
                         OrgVars.Add newVar
                         AddToken newVar
-                        If debugOut Then Debug.Print "Adding g orgvar: " & Trim(Mid(y, a + 4, b - a - 4))
+                        If debugOut Then Debug.Print "Adding g orgvar: " & Trim(Mid(Y, a + 4, b - a - 4))
                     End If
                 End If
             End If
@@ -142,9 +142,9 @@ Sub ParseSelf() 'as function w/prototype
         n = Mid(x, p1 + 1, p2 - p1 - 1) 'args between parathensis
         tmp = Split(n, ",")
         If Not AryIsEmpty(tmp) Then
-            For Each y In tmp
-                If Trim(Len(y)) > 0 Then
-                    OrgArgs.Add Trim(y)
+            For Each Y In tmp
+                If Trim(Len(Y)) > 0 Then
+                    OrgArgs.Add Trim(Y)
                 End If
             Next
         End If
@@ -152,17 +152,17 @@ Sub ParseSelf() 'as function w/prototype
         'now we parse the function body line by line to extract explicitly var declared variables
         body = Mid(x, p2 + 1) 'from first { to last } --> BUG CHECK: JUST ADDED THE +1 HERE !!
         tmp = Split(body, vbCrLf)
-        For Each y In tmp
+        For Each Y In tmp
             
-            a = InStr(y, "var ")
+            a = InStr(Y, "var ")
             If a > 0 Then
-                b1 = InStr(a + 4, y, "-") 'todo change to scan for next nontext
-                b2 = InStr(a + 4, y, "+")
-                b3 = InStr(a + 4, y, "^")
-                b4 = InStr(a + 4, y, "=")
+                b1 = InStr(a + 4, Y, "-") 'todo change to scan for next nontext
+                b2 = InStr(a + 4, Y, "+")
+                b3 = InStr(a + 4, Y, "^")
+                b4 = InStr(a + 4, Y, "=")
                 b = GetLowest(b1, b2, b3, b4)
                 If b > 0 Then
-                    newVar = Trim(Mid(y, a + 4, b - a - 4))
+                    newVar = Trim(Mid(Y, a + 4, b - a - 4))
                     If Not tokenExists(newVar) Then
                         OrgVars.Add newVar
                         AddToken newVar
@@ -533,10 +533,10 @@ End Function
 Function GetLowest(ParamArray args())
     Dim lowest As Long
     lowest = -1
-    For Each y In args
-        If y > 0 Then
-            If lowest = -1 Then lowest = y
-            If y < lowest Then lowest = y
+    For Each Y In args
+        If Y > 0 Then
+            If lowest = -1 Then lowest = Y
+            If Y < lowest Then lowest = Y
         End If
     Next
     GetLowest = lowest

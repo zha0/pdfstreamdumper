@@ -59,6 +59,22 @@ Private Const HWND_NOTOPMOST = -2
 '    NtSetDefaultLocale CInt(mode), lcid
 'End Sub
 
+Public Sub LV_ColumnSort(ListViewControl As ListView, Column As ColumnHeader)
+     On Error Resume Next
+    With ListViewControl
+       If .SortKey <> Column.Index - 1 Then
+             .SortKey = Column.Index - 1
+             .SortOrder = lvwAscending
+       Else
+             If .SortOrder = lvwAscending Then
+              .SortOrder = lvwDescending
+             Else
+              .SortOrder = lvwAscending
+             End If
+       End If
+       .Sorted = -1
+    End With
+End Sub
 
 Public Function isIde() As Boolean
     On Error GoTo hell
@@ -386,13 +402,13 @@ Function WebFileNameFromPath(fullpath)
     End If
 End Function
 
-Sub Move(fPath, toFolder)
-    Copy fPath, toFolder
-    Kill fPath
+Sub Move(fpath, toFolder)
+    Copy fpath, toFolder
+    Kill fpath
 End Sub
 
-Sub DeleteFile(fPath)
-    Kill fPath
+Sub DeleteFile(fpath)
+    Kill fpath
 End Sub
 
 Sub Rename(fullpath, NewName)
@@ -400,8 +416,8 @@ Sub Rename(fullpath, NewName)
   Name fullpath As pf & "\" & NewName
 End Sub
 
-Sub SetAttribute(fPath, it As VbFileAttribute)
-   SetAttr fPath, it
+Sub SetAttribute(fpath, it As VbFileAttribute)
+   SetAttr fpath, it
 End Sub
 
 Function GetExtension(path) As String
@@ -534,20 +550,20 @@ Sub AppendFile(path, it) 'not binary safe
 End Sub
 
 
-Sub Copy(fPath, toFolder)
+Sub Copy(fpath, toFolder)
    If FolderExists(toFolder) Then
-       baseName = fso.FileNameFromPath(fPath)
+       baseName = fso.FileNameFromPath(fpath)
        toFolder = IIf(Right(toFolder, 1) = "\", toFolder, toFolder & "\")
-       FileCopy fPath, toFolder & baseName
+       FileCopy fpath, toFolder & baseName
    Else 'assume tofolder is actually new desired file path
-       FileCopy fPath, toFolder
+       FileCopy fpath, toFolder
    End If
 End Sub
 
-Sub CreateFile(fPath)
+Sub CreateFile(fpath)
     f = FreeFile
-    If fso.FileExists(fPath) Then Exit Sub
-    Open fPath For Binary As f
+    If fso.FileExists(fpath) Then Exit Sub
+    Open fpath For Binary As f
     Close f
 End Sub
 

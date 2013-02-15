@@ -4,12 +4,12 @@ Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Begin VB.Form Form2 
    Caption         =   "PDF Stream Dumper - JS UI"
-   ClientHeight    =   8325
+   ClientHeight    =   8310
    ClientLeft      =   165
    ClientTop       =   735
    ClientWidth     =   14460
    LinkTopic       =   "Form2"
-   ScaleHeight     =   8325
+   ScaleHeight     =   8310
    ScaleWidth      =   14460
    StartUpPosition =   3  'Windows Default
    Begin MSComctlLib.ListView lv2 
@@ -212,13 +212,13 @@ Begin VB.Form Form2
       EndProperty
    End
    Begin MSComctlLib.ListView lv 
-      Height          =   5235
+      Height          =   2775
       Left            =   45
       TabIndex        =   1
       Top             =   270
       Width           =   2295
       _ExtentX        =   4048
-      _ExtentY        =   9234
+      _ExtentY        =   4895
       View            =   3
       LabelEdit       =   1
       MultiSelect     =   -1  'True
@@ -264,6 +264,31 @@ Begin VB.Form Form2
          Underline       =   0   'False
          Italic          =   0   'False
          Strikethrough   =   0   'False
+      EndProperty
+   End
+   Begin MSComctlLib.ListView lvFunc 
+      Height          =   2490
+      Left            =   60
+      TabIndex        =   18
+      Top             =   3060
+      Width           =   2295
+      _ExtentX        =   4048
+      _ExtentY        =   4392
+      View            =   3
+      LabelEdit       =   1
+      LabelWrap       =   -1  'True
+      HideSelection   =   -1  'True
+      FullRowSelect   =   -1  'True
+      GridLines       =   -1  'True
+      _Version        =   393217
+      ForeColor       =   -2147483640
+      BackColor       =   -2147483643
+      BorderStyle     =   1
+      Appearance      =   1
+      NumItems        =   1
+      BeginProperty ColumnHeader(1) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         Text            =   "Functions"
+         Object.Width           =   2540
       EndProperty
    End
    Begin VB.Label lblClipboard 
@@ -493,6 +518,19 @@ Begin VB.Form Form2
          Caption         =   "Copy All w/Data"
       End
    End
+   Begin VB.Menu mnuPopupFuncs 
+      Caption         =   "mnuPopupFuncs"
+      Visible         =   0   'False
+      Begin VB.Menu mnuFunctionScan 
+         Caption         =   "Rescan"
+      End
+      Begin VB.Menu mnuRenameFunc 
+         Caption         =   "Rename"
+      End
+      Begin VB.Menu mnuFindFuncRefs 
+         Caption         =   "Find All References"
+      End
+   End
 End
 Attribute VB_Name = "Form2"
 Attribute VB_GlobalNameSpace = False
@@ -545,6 +583,22 @@ Private Sub lv2_MouseUp(Button As Integer, Shift As Integer, x As Single, Y As S
     If Button = 2 Then PopupMenu mnuPopup3
 End Sub
 
+Private Sub lvFunc_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
+    LV_ColumnSort lvFunc, ColumnHeader
+End Sub
+
+Private Sub lvFunc_DblClick()
+    On Error Resume Next
+    If Not lvFunc.SelectedItem Is Nothing Then
+         txtJS.GotoLine lvFunc.SelectedItem.tag
+         txtJS.SelectLine
+    End If
+End Sub
+
+Private Sub lvFunc_MouseUp(Button As Integer, Shift As Integer, x As Single, Y As Single)
+    If Button = 2 Then PopupMenu mnuPopupFuncs
+End Sub
+
 Private Sub mnuAutoComplete_Click()
     mnuAutoComplete.Checked = Not mnuAutoComplete.Checked
     txtJS.AutoCompleteOnCTRLSpace = mnuAutoComplete.Checked
@@ -594,6 +648,42 @@ Private Sub mnuCopyToLower_Click()
     txtOut.Text = lv.SelectedItem.tag
 End Sub
 
+Private Sub mnuFindFuncRefs_Click()
+    On Error Resume Next
+    If lvFunc.SelectedItem Is Nothing Then Exit Sub
+    Find = lvFunc.SelectedItem.Text
+    If Len(Find) = 0 Then Exit Sub
+    frmReplace.LaunchReplaceForm txtJS
+    frmReplace.Text1 = Find
+    frmReplace.cmdFindAll_Click
+End Sub
+
+Public Sub mnuFunctionScan_Click()
+    
+    'very quick and dirty function scan, assumes you already ran format js
+    On Error Resume Next
+    
+    Dim li As ListItem
+    lvFunc.ListItems.Clear
+    
+    i = -1
+    tmp = Split(txtJS.Text, vbCrLf)
+    For Each x In tmp
+        i = i + 1
+        func = Empty
+        If x Like "function *(*)*" And GetCount(x, "function") = 2 Then
+            a = InStr(x, "(")
+            b = InStrRev(x, " ", a)
+            func = Trim(Mid(x, b, a - b))
+            If Len(func) > 0 Then
+                Set li = lvFunc.ListItems.Add(, , func)
+                li.tag = i
+            End If
+        End If
+    Next
+    
+End Sub
+
 Private Sub mnuGotoLine_Click()
     On Error Resume Next
     x = InputBox("Enter line to goto:")
@@ -641,6 +731,33 @@ Private Sub mnuQuickEval_Click()
     s = InputBox("Enter a script to execute in current script contect. You can use this to probe runtime variables like tb.alert(my_var) or tb.t(longtext_var)")
     If Len(s) = 0 Then Exit Sub
     sc.eval s
+End Sub
+
+Private Sub mnuRenameFunc_Click()
+
+    On Error Resume Next
+    If lvFunc.SelectedItem Is Nothing Then Exit Sub
+    oldname = lvFunc.SelectedItem.Text
+    NewName = InputBox("Enter new name for " & oldname, , oldname)
+    If Len(NewName) = 0 Then Exit Sub
+    
+    For Each li In lvFunc.ListItems
+        If li.Text = NewName Then
+            MsgBox "This name is already taken"
+            Exit Sub
+        End If
+    Next
+    
+    If InStr(txtJS.Text, NewName) > 0 Then
+        MsgBox "This string is already found in the current script please make unique"
+        Exit Sub
+    End If
+    
+    x = txtJS.CurrentLine
+    txtJS.Text = Replace(txtJS.Text, oldname, NewName)
+    txtJS.GotoLine x
+    lvFunc.SelectedItem.Text = NewName
+    
 End Sub
 
 Private Sub mnuScintillaOptions_Click()
@@ -877,6 +994,8 @@ Private Sub lblToolbox_Click(Index As Integer)
     PopupMenu mnuPopup2
 End Sub
 
+ 
+
 Private Sub Form_Load()
     On Error Resume Next
     
@@ -891,6 +1010,7 @@ Private Sub Form_Load()
     txtJS.Folding = mnuCodeFolding.Checked
     txtJS.AutoCompleteOnCTRLSpace = mnuAutoComplete.Checked
     
+    lvFunc.ColumnHeaders(1).Width = lv.Width - 200
     lv.ColumnHeaders(1).Width = lv.Width - 200
     FormPos Me, True
     splitter.Top = GetMySetting("SplitterTop", splitter.Top)
@@ -928,7 +1048,8 @@ Private Sub Form_Resize()
     txtOut.height = Me.height - txtOut.Top - (th * 60) '750
     
     lv2.Top = Me.height - lv2.height - (th * 60) '750
-    lv.height = lv2.Top - lv.Top - (tw * 10)  '25
+    lvFunc.Top = lv2.Top - lvFunc.height '- (th * 60)   '750
+    lv.height = lvFunc.Top - lv.Top - (tw * 10)  '25
     
     'lv.Height = Me.Height - lv.Top - 700
     Frame1.Width = txtJS.Width
@@ -993,6 +1114,7 @@ End Sub
 Private Sub lv_DblClick()
     If lv.SelectedItem Is Nothing Then Exit Sub
     txtJS.Text = lv.SelectedItem.tag
+    mnuFunctionScan_Click
 End Sub
 
 
@@ -1126,6 +1248,7 @@ Private Sub mnuBeautify_Click()
     sc2.AddObject "txtUncompressed", txtJS, True
     sc2.AddCode "txtUncompressed.text = js_beautify(txtUncompressed.text, {indent_size: 1, indent_char: '\t'}).split('\n').join('\r\n');"
 
+    mnuFunctionScan_Click
 
 End Sub
 
@@ -1264,6 +1387,7 @@ Public Sub mnuLoadFile_Click()
     If Len(f) = 0 Then Exit Sub
     If Not fso.FileExists(f) Then Exit Sub
     txtJS.Text = fso.ReadFile(f)
+    mnuFunctionScan_Click
 End Sub
 
 Private Sub mnuManualEscape_Click(Index As Integer)
