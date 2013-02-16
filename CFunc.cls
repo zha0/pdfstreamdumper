@@ -70,7 +70,7 @@ Sub ParseName()
         sp = InStrRev(x, " ", p1) 'first space (between fun name and agrs)
            
         Me.OrgName = Trim(Mid(x, sp, p1 - sp))
-        Me.NewName = "func_" & Me.Index
+        Me.NewName = "func_" & SafeFuncIndex(Me.Index)
         
 End Sub
 
@@ -216,8 +216,8 @@ Private Function FinalReplace(ByVal x)
             End If
             
             
-            If InStr(x, "__func_" & aIndex) > 0 Then
-                x = Replace(x, "__func_" & aIndex, "func_" & aIndex)
+            If InStr(x, "__func_" & SafeFuncIndex(aIndex)) > 0 Then
+                x = Replace(x, "__func_" & SafeFuncIndex(aIndex), "func_" & SafeFuncIndex(aIndex))
             End If
             
          
@@ -377,7 +377,7 @@ Private Function ReplaceTokens(ByVal l, Optional startPos As Long = 1) 'l = a li
                             b = Mid(l, tokenstart + Len(buf) + 1)
                         End If
                         
-                        newtoken = "__func_" & f.Index
+                        newtoken = "__func_" & SafeFuncIndex(f.Index)
                         l = a & newtoken & b
                         ReplaceTokens = ReplaceTokens(l, Len(a) + Len(newtoken))
                         Exit Function
@@ -464,7 +464,7 @@ skip_token:
                 b = Mid(l, tokenstart + Len(buf) + 1)
             End If
             
-            l = a & "__func_" & f.Index & b
+            l = a & "__func_" & SafeFuncIndex(f.Index) & b
         End If
         
     Next
@@ -474,6 +474,10 @@ skip_token:
     
     
     
+End Function
+
+Function SafeFuncIndex(x As Long) As String
+    SafeFuncIndex = IIf(x < 10, "0" & x, x)
 End Function
 
 Function isTextRange(x As Integer, Optional includeNumeric As Boolean = False) As Boolean

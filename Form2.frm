@@ -198,6 +198,7 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   10398
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0000
@@ -253,6 +254,7 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   2249
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0080
@@ -276,8 +278,9 @@ Begin VB.Form Form2
       _ExtentY        =   4392
       View            =   3
       LabelEdit       =   1
+      MultiSelect     =   -1  'True
       LabelWrap       =   -1  'True
-      HideSelection   =   -1  'True
+      HideSelection   =   0   'False
       FullRowSelect   =   -1  'True
       GridLines       =   -1  'True
       _Version        =   393217
@@ -527,8 +530,14 @@ Begin VB.Form Form2
       Begin VB.Menu mnuRenameFunc 
          Caption         =   "Rename"
       End
+      Begin VB.Menu mnuExtractFunc 
+         Caption         =   "Extract"
+      End
       Begin VB.Menu mnuFindFuncRefs 
          Caption         =   "Find All References"
+      End
+      Begin VB.Menu mnuFindFuncDependancies 
+         Caption         =   "Dependancies (Func)"
       End
    End
 End
@@ -646,6 +655,75 @@ Private Sub mnuCopyToLower_Click()
     On Error Resume Next
     If lv.SelectedItem Is Nothing Then Exit Sub
     txtOut.Text = lv.SelectedItem.tag
+End Sub
+
+Private Function ExtractFunction(startLine As Long, Optional ByRef foundEnd) As String
+
+    Data = vbCrLf & vbCrLf
+    startLine = startLine - 1
+    tmp = Split(txtJS.Text, vbCrLf)
+    i = -1
+    Data = vbCrLf & vbCrLf
+    foundEnd = False
+    
+    For Each x In tmp
+        i = i + 1
+        If i > startLine Then
+            Data = Data & x & vbCrLf
+            If RTrim(x) = "}" Then
+                foundEnd = True
+                Exit For
+            End If
+        End If
+    Next
+    
+    ExtractFunction = Data & vbCrLf & vbCrLf
+    
+End Function
+Private Sub mnuExtractFunc_Click()
+    On Error Resume Next
+    If lvFunc.SelectedItem Is Nothing Then Exit Sub
+    Dim li As ListItem
+    Dim Data As String
+    Dim foundEnd As Boolean
+    For Each li In lvFunc.ListItems
+        If li.Selected Then
+            Data = Data & ExtractFunction(CLng(li.tag), foundEnd)
+            If Not foundEnd Then Exit Sub
+        End If
+    Next
+    tmp = fso.GetFreeFileName(Environ("temp"))
+    fso.writeFile tmp, Data & vbCrLf & vbCrLf
+    Shell "notepad.exe " & tmp, vbNormalFocus
+End Sub
+
+Private Sub mnuFindFuncDependancies_Click()
+    On Error Resume Next
+    If lvFunc.SelectedItem Is Nothing Then Exit Sub
+    Dim li As ListItem
+    Dim Data As String
+    Dim foundEnd As Boolean
+    Dim func() As String
+     
+    startFunc = lvFunc.SelectedItem.Text
+    
+    Data = ExtractFunction(CLng(lvFunc.SelectedItem.tag), foundEnd)
+    
+    For Each li In lvFunc.ListItems
+        If li.Text <> startFunc Then li.Selected = False
+        If InStr(Data, li.Text & "(") > 0 And li.Text <> startFunc Then
+            push func, li.Text
+            li.Selected = True
+        End If
+    Next
+    
+    report = "Non Recursive function references found within: " & startFunc & vbCrLf & vbCrLf
+    report = report & vbTab & Join(func, vbCrLf & vbTab)
+    
+    tmp = fso.GetFreeFileName(Environ("temp"))
+    fso.writeFile tmp, report
+    Shell "notepad.exe " & tmp, vbNormalFocus
+    
 End Sub
 
 Private Sub mnuFindFuncRefs_Click()
