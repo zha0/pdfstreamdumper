@@ -41,6 +41,58 @@ Attribute VB_Exposed = False
 Event AutoCompleteEvent(className As String)
 Event CtrlH()
 
+Property Get SCI() As SCIVB
+    Set SCI = sciMain
+End Property
+
+Sub GotoLineCentered(ByVal line As Long, Optional selected As Boolean = True)
+        
+        mline = line - CInt(sciMain.DirectSCI.LinesOnScreen / 2)
+        FirstVisibleLine = mline
+        GotoLine line
+        If selected Then SelectLine
+        
+End Sub
+
+Property Get FirstVisibleLine() As Long
+    FirstVisibleLine = sciMain.DirectSCI.GetFirstVisibleLine
+End Property
+
+Property Let FirstVisibleLine(topLine As Long)
+
+    GotoLine topLine + sciMain.DirectSCI.LinesOnScreen + 5 'go past it
+    GotoLine topLine 'now go to it and it will be topmost line..
+    
+'   'Const SCI_SETFIRSTVISIBLELINE = 2613
+'   'sciMain.DirectSCI.SendEditor(SCI_SETFIRSTVISIBLELINE, v, 0)
+'
+'     topLine = topLine - 1
+'     GotoLine topLine
+'     x = sciMain.DirectSCI.GetFirstVisibleLine 'this fucks up when code folding is on or topline > 5900...
+'
+'     If Abs(x - topLine) > sciMain.DirectSCI.LinesOnScreen + 2 Then
+'        'stupid bug in control? cant seem to handle topline > 5900 or so..
+'        Exit Property
+'     End If
+'
+'     If x < 2 Then Exit Property
+'
+'     For i = 0 To sciMain.DirectSCI.LinesOnScreen
+'        If x = topLine Then Exit For
+'        If x < topLine Then
+'            sciMain.DirectSCI.LineScrollDown
+'        Else
+'            sciMain.DirectSCI.LineScrollUp
+'        End If
+'        x = sciMain.DirectSCI.GetFirstVisibleLine
+'     Next
+'
+End Property
+
+Property Get VisibleLines() As Long
+    VisibleLines = sciMain.DirectSCI.LinesOnScreen
+End Property
+
 Property Let AutoCompleteString(x As String)
     sciMain.AutoCompleteString = x
 End Property
@@ -183,6 +235,7 @@ Private Sub UserControl_Initialize()
             MsgBox "Highlighter folder not found"
         End If
         
+        
         sciMain.InitScintilla UserControl.hwnd
         sciMain.LoadAPIFile App.path & "\api.api"
                
@@ -202,11 +255,12 @@ Private Sub UserControl_Initialize()
         sciMain.HighlightBraces = True
         sciMain.EdgeColor = vbWhite
         sciMain.IndentationGuide = False
+        sciMain.Gutter0Width = 40
+        sciMain.Gutter1Width = 40
+        sciMain.FoldAtElse = True
         
         hlMain.SetHighlighterExt sciMain, "bs.js"
         sciMain.SetFocus
-        
-    
   
 End Sub
 
@@ -230,6 +284,7 @@ Private Function FolderExists(path) As Boolean
 End Function
 
 Private Sub UserControl_Resize()
+    On Error Resume Next
     sciMain.MoveSCI 0, 0, UserControl.ScaleWidth, UserControl.ScaleHeight
 End Sub
 

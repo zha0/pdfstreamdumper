@@ -198,7 +198,6 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   10398
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0000
@@ -254,7 +253,6 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   2249
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0080
@@ -504,6 +502,9 @@ Begin VB.Form Form2
       Begin VB.Menu mnuCodeFolding 
          Caption         =   "Code Folding"
       End
+      Begin VB.Menu mnuCollapseAll 
+         Caption         =   "Collapse/Expand All"
+      End
       Begin VB.Menu mnuScintillaOptions 
          Caption         =   "Scintilla Options"
       End
@@ -577,6 +578,10 @@ End Function
 
 
 
+ 
+
+ 
+
 Private Sub lv2_ItemClick(ByVal Item As MSComctlLib.ListItem)
     On Error Resume Next
     If Len(Item.SubItems(1)) > 0 Then
@@ -599,7 +604,8 @@ End Sub
 Private Sub lvFunc_DblClick()
     On Error Resume Next
     If Not lvFunc.SelectedItem Is Nothing Then
-         txtJS.GotoLine lvFunc.SelectedItem.tag
+         'txtJS.GotoLine lvFunc.SelectedItem.tag
+         txtJS.FirstVisibleLine = CLng(lvFunc.SelectedItem.tag)
          txtJS.SelectLine
     End If
 End Sub
@@ -616,6 +622,11 @@ End Sub
 Private Sub mnuCodeFolding_Click()
     mnuCodeFolding.Checked = Not mnuCodeFolding.Checked
     txtJS.Folding = mnuCodeFolding.Checked
+End Sub
+
+Private Sub mnuCollapseAll_Click()
+    If mnuCodeFolding.Checked = False Then mnuCodeFolding_Click
+    txtJS.SCI.FoldAll
 End Sub
 
 Private Sub mnuCopyAllDatalv2_Click()
@@ -680,6 +691,11 @@ Private Function ExtractFunction(startLine As Long, Optional ByRef foundEnd) As 
     ExtractFunction = Data & vbCrLf & vbCrLf
     
 End Function
+
+Private Sub mnuExpandAll_Click()
+    If mnuCodeFolding.Checked = True Then mnuCodeFolding_Click
+End Sub
+
 Private Sub mnuExtractFunc_Click()
     On Error Resume Next
     If lvFunc.SelectedItem Is Nothing Then Exit Sub
@@ -687,7 +703,7 @@ Private Sub mnuExtractFunc_Click()
     Dim Data As String
     Dim foundEnd As Boolean
     For Each li In lvFunc.ListItems
-        If li.Selected Then
+        If li.selected Then
             Data = Data & ExtractFunction(CLng(li.tag), foundEnd)
             If Not foundEnd Then Exit Sub
         End If
@@ -710,10 +726,10 @@ Private Sub mnuFindFuncDependancies_Click()
     Data = ExtractFunction(CLng(lvFunc.SelectedItem.tag), foundEnd)
     
     For Each li In lvFunc.ListItems
-        If li.Text <> startFunc Then li.Selected = False
+        If li.Text <> startFunc Then li.selected = False
         If InStr(Data, li.Text & "(") > 0 And li.Text <> startFunc Then
             push func, li.Text
-            li.Selected = True
+            li.selected = True
         End If
     Next
     
@@ -765,7 +781,9 @@ End Sub
 Private Sub mnuGotoLine_Click()
     On Error Resume Next
     x = InputBox("Enter line to goto:")
-    txtJS.GotoLine CLng(x)
+    'txtJS.GotoLine CLng(x)
+    'txtJS.FirstVisibleLine = CLng(x) - 1
+    txtJS.GotoLineCentered CLng(x) - 1
 End Sub
 
 Private Sub mnuHex2Unicode_Click()
@@ -831,9 +849,22 @@ Private Sub mnuRenameFunc_Click()
         Exit Sub
     End If
     
-    x = txtJS.CurrentLine
+    txtJS.SelectLine
+    x = txtJS.CurrentLine       'if the user scrolls using scroll bar, this wont change...
+    fl = txtJS.FirstVisibleLine 'this can be buggy...
     txtJS.Text = Replace(txtJS.Text, oldname, NewName)
-    txtJS.GotoLine x
+    'txtJS.GotoLine x
+    
+    If x < 5 And fl = 0 Then
+        txtJS.FirstVisibleLine = CLng(lvFunc.SelectedItem.tag)
+    ElseIf x > 5800 Or fl = 0 Then
+        txtJS.GotoLineCentered x, False
+    Else
+        txtJS.FirstVisibleLine = fl
+    End If
+    
+    'MsgBox txtJS.SCI.ReplaceAll(CStr(oldname), CStr(NewName), True) 'buggy...
+    
     lvFunc.SelectedItem.Text = NewName
     
 End Sub
@@ -1206,7 +1237,7 @@ Private Sub lv_KeyDown(KeyCode As Integer, Shift As Integer)
     
     If KeyCode = 82 And Shift = 2 Then 'ctrl-r - rename
         For Each li In lv.ListItems
-            If li.Selected Then
+            If li.selected Then
                 x = InputBox("Rename entry " & li.Text, , li.Text)
                 If Len(x) > 0 Then li.Text = x
             End If
@@ -1215,20 +1246,20 @@ Private Sub lv_KeyDown(KeyCode As Integer, Shift As Integer)
     
     If KeyCode = 65 And Shift = 2 Then 'ctrl-a - select all
         For Each li In lv.ListItems
-            li.Selected = True
+            li.selected = True
         Next
     End If
     
     If KeyCode = 73 And Shift = 2 Then 'ctrl-i - invert selection
         For Each li In lv.ListItems
-            li.Selected = Not li.Selected
+            li.selected = Not li.selected
         Next
     End If
     
     If KeyCode = 68 And Shift = 2 Then 'ctrl-d - delete selected
         If MsgBox("Are you sure you want to deleted the selected entries?", vbYesNo) = vbYes Then
             For i = lv.ListItems.Count To 1 Step -1
-                If li.Selected = True Then
+                If li.selected = True Then
                     lv.ListItems.Remove i
                 End If
             Next
@@ -1237,7 +1268,7 @@ Private Sub lv_KeyDown(KeyCode As Integer, Shift As Integer)
     
     If KeyCode = 78 And Shift = 2 Then 'ctrl-n -select none
         For Each li In lv.ListItems
-            li.Selected = False
+            li.selected = False
         Next
     End If
     
@@ -1764,7 +1795,7 @@ Private Sub sc_Error()
     With sc.error
     
         curLine = txtJS.CurrentLine
-        adjustedLine = .Line - IIf(USING_MYMAIN, 4, 0)
+        adjustedLine = .line - IIf(USING_MYMAIN, 4, 0)
         
         txtOut.Text = "Time: " & Now & vbCrLf & "Error: " & .Description & vbCrLf & "Line: " & adjustedLine
         txtOut.Text = txtOut.Text & vbCrLf & "Source: " & txtJS.GetLineText(adjustedLine) 'vbsci specific
