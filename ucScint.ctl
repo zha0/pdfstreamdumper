@@ -37,6 +37,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 'we wrap this control so that its interchangable with the rtf box
 'i used to use just in case i want to switch back!
+Private Declare Function GetTickCount Lib "kernel32" () As Long
+Private lastPaste As Long
 
 Event AutoCompleteEvent(className As String)
 Event CtrlH()
@@ -195,7 +197,12 @@ Private Sub sciMain_KeyDown(KeyCode As Long, Shift As Long)
             Case 65: sciMain.SelectAll 'a
             Case 88: sciMain.Cut 'x
             Case 67: sciMain.Copy 'c
-            'Case 86: sciMain.Paste 'v
+            Case 86:
+                    Dim x As Long
+                    x = GetTickCount
+                    If x - lastPaste < 100 Then Exit Sub
+                    lastPaste = x
+                    sciMain.Paste 'v
         End Select
     End If
 End Sub
@@ -214,7 +221,7 @@ Private Sub sciMain_KeyUp(KeyCode As Long, Shift As Long)
             Case 65: sciMain.SelectAll 'a
             Case 88: sciMain.Cut 'x
             Case 67: sciMain.Copy 'c
-            Case 86: sciMain.Paste 'v
+            'Case 86: sciMain.Paste 'v causes bug leave disabled...
             Case 32: 'ctrl space show auto complete - little messy but it correctly supports multiple objects.
                      Dim x As Long
                      x = sciMain.SelStart - 1

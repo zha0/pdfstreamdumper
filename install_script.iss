@@ -72,8 +72,10 @@ Source: ./\JS_UI_Readme.txt; DestDir: {app}
 Source: ./\ucScint.ctl; DestDir: {app}
 Source: ./\api.api; DestDir: {app}
 Source: ./\sclog.exe; DestDir: {app}
-Source: sclog_README.txt; DestDir: {app}
+Source: ./\sclog_README.txt; DestDir: {app}
 Source: ./\sclog.url; DestDir: {app}
+Source: ./\frmInlineDecoderCalls.frm; DestDir: {app}
+Source: ./\frmInlineDecoderCalls.frx; DestDir: {app}
 Source: ./\dependancies\MSCOMCTL.OCX; DestDir: {win}; Flags: regserver uninsneveruninstall
 Source: ./\dependancies\msscript.ocx; DestDir: {win}; Flags: regserver uninsneveruninstall
 Source: ./\dependancies\richtx32.ocx; DestDir: {win}; Flags: regserver uninsneveruninstall

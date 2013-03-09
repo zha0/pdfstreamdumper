@@ -86,7 +86,7 @@ Begin VB.Form Form2
          Height          =   285
          Left            =   5220
          TabIndex        =   15
-         Text            =   "1"
+         Text            =   "0"
          Top             =   225
          Width           =   465
       End
@@ -198,6 +198,7 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   10398
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0000
@@ -253,6 +254,7 @@ Begin VB.Form Form2
       _ExtentX        =   20981
       _ExtentY        =   2249
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form2.frx":0080
@@ -447,8 +449,14 @@ Begin VB.Form Form2
    Begin VB.Menu mnuReplace 
       Caption         =   "Find/Replace"
    End
-   Begin VB.Menu mnuBasicRefactor 
-      Caption         =   "Basic_Refactor"
+   Begin VB.Menu mnuDeobTools 
+      Caption         =   "Deobsfuscation Tools"
+      Begin VB.Menu mnuBasicRefactor 
+         Caption         =   "Basic Refactor"
+      End
+      Begin VB.Menu mnuStripInlineDecoderCalls 
+         Caption         =   "Strip Inline Decoder Calls"
+      End
    End
    Begin VB.Menu mnuPopup 
       Caption         =   "mnuPopup"
@@ -529,16 +537,19 @@ Begin VB.Form Form2
          Caption         =   "Rescan"
       End
       Begin VB.Menu mnuRenameFunc 
-         Caption         =   "Rename"
+         Caption         =   "Rename  (N)"
       End
       Begin VB.Menu mnuExtractFunc 
          Caption         =   "Extract"
+      End
+      Begin VB.Menu mnuCopyFuncNames 
+         Caption         =   "Copy All Names"
       End
       Begin VB.Menu mnuFindFuncRefs 
          Caption         =   "Find All References"
       End
       Begin VB.Menu mnuFindFuncDependancies 
-         Caption         =   "Dependancies (Func)"
+         Caption         =   "Function Dependancies"
       End
    End
 End
@@ -610,6 +621,13 @@ Private Sub lvFunc_DblClick()
     End If
 End Sub
 
+Private Sub lvFunc_KeyPress(KeyAscii As Integer)
+    If KeyAscii = Asc("N") Or KeyAscii = Asc("n") Then
+        mnuRenameFunc_Click
+        KeyAscii = 0
+    End If
+End Sub
+
 Private Sub lvFunc_MouseUp(Button As Integer, Shift As Integer, x As Single, Y As Single)
     If Button = 2 Then PopupMenu mnuPopupFuncs
 End Sub
@@ -642,6 +660,17 @@ Private Sub mnuCopyAllDatalv2_Click()
     MsgBox Len(ret) & " bytes copied", vbInformation
 End Sub
 
+Private Sub mnuCopyFuncNames_Click()
+    Dim li As ListItem
+    Dim tmp
+    For Each li In lvFunc.ListItems
+        tmp = tmp & li.Text & vbCrLf
+    Next
+    Clipboard.Clear
+    Clipboard.SetText tmp
+    MsgBox Len(tmp) & " bytes copied", vbInformation
+End Sub
+
 Private Sub mnuCopyFuncsNames_Click()
     On Error Resume Next
     x = Split(txtJS.Text, vbCrLf)
@@ -670,17 +699,17 @@ End Sub
 
 Private Function ExtractFunction(startLine As Long, Optional ByRef foundEnd) As String
 
-    Data = vbCrLf & vbCrLf
+    data = vbCrLf & vbCrLf
     startLine = startLine - 1
     tmp = Split(txtJS.Text, vbCrLf)
     i = -1
-    Data = vbCrLf & vbCrLf
+    data = vbCrLf & vbCrLf
     foundEnd = False
     
     For Each x In tmp
         i = i + 1
         If i > startLine Then
-            Data = Data & x & vbCrLf
+            data = data & x & vbCrLf
             If RTrim(x) = "}" Then
                 foundEnd = True
                 Exit For
@@ -688,7 +717,7 @@ Private Function ExtractFunction(startLine As Long, Optional ByRef foundEnd) As 
         End If
     Next
     
-    ExtractFunction = Data & vbCrLf & vbCrLf
+    ExtractFunction = data & vbCrLf & vbCrLf
     
 End Function
 
@@ -700,16 +729,16 @@ Private Sub mnuExtractFunc_Click()
     On Error Resume Next
     If lvFunc.SelectedItem Is Nothing Then Exit Sub
     Dim li As ListItem
-    Dim Data As String
+    Dim data As String
     Dim foundEnd As Boolean
     For Each li In lvFunc.ListItems
         If li.selected Then
-            Data = Data & ExtractFunction(CLng(li.tag), foundEnd)
+            data = data & ExtractFunction(CLng(li.tag), foundEnd)
             If Not foundEnd Then Exit Sub
         End If
     Next
     tmp = fso.GetFreeFileName(Environ("temp"))
-    fso.writeFile tmp, Data & vbCrLf & vbCrLf
+    fso.writeFile tmp, data & vbCrLf & vbCrLf
     Shell "notepad.exe " & tmp, vbNormalFocus
 End Sub
 
@@ -717,17 +746,17 @@ Private Sub mnuFindFuncDependancies_Click()
     On Error Resume Next
     If lvFunc.SelectedItem Is Nothing Then Exit Sub
     Dim li As ListItem
-    Dim Data As String
+    Dim data As String
     Dim foundEnd As Boolean
     Dim func() As String
      
     startFunc = lvFunc.SelectedItem.Text
     
-    Data = ExtractFunction(CLng(lvFunc.SelectedItem.tag), foundEnd)
+    data = ExtractFunction(CLng(lvFunc.SelectedItem.tag), foundEnd)
     
     For Each li In lvFunc.ListItems
         If li.Text <> startFunc Then li.selected = False
-        If InStr(Data, li.Text & "(") > 0 And li.Text <> startFunc Then
+        If InStr(data, li.Text & "(") > 0 And li.Text <> startFunc Then
             push func, li.Text
             li.selected = True
         End If
@@ -802,7 +831,7 @@ Private Sub mnuHex2Unicode_Click()
        b = Mid(x, i + 2, 2)
        ret = ret & "%u" & b & a
     Next
-    If Right(ret, 2) = "%u" Then ret = Mid(ret, 1, Len(ret) - 2)
+    If right(ret, 2) = "%u" Then ret = Mid(ret, 1, Len(ret) - 2)
     txtJS.SelText = ret
 End Sub
 
@@ -939,6 +968,10 @@ End Sub
 
 Private Sub mnuShowHelp_Click()
     toolbox.Help
+End Sub
+
+Private Sub mnuStripInlineDecoderCalls_Click()
+    frmInlineDecoderCalls.Show
 End Sub
 
 Private Sub mnuVarPrefix_Click()
@@ -1152,13 +1185,14 @@ Private Sub Form_Resize()
     tw = Screen.TwipsPerPixelX
     th = Screen.TwipsPerPixelY
     
-    txtOut.Width = Me.Width - txtOut.Left - (tw * 20) '300
+    txtOut.Width = Me.Width - txtOut.left - (tw * 20) '300
     txtJS.Width = txtOut.Width
     txtOut.height = Me.height - txtOut.Top - (th * 60) '750
     
     lv2.Top = Me.height - lv2.height - (th * 60) '750
-    lvFunc.Top = lv2.Top - lvFunc.height '- (th * 60)   '750
-    lv.height = lvFunc.Top - lv.Top - (tw * 10)  '25
+    lvFunc.height = Me.height - lv2.height - lvFunc.Top - (th * 60)
+    'lvFunc.Top = lv2.Top - lvFunc.height '- (th * 60)   '750
+    'lv.height = lvFunc.Top - lv.Top - (tw * 10)  '25
     
     'lv.Height = Me.Height - lv.Top - 700
     Frame1.Width = txtJS.Width
@@ -1199,21 +1233,25 @@ Private Sub Form_Unload(Cancel As Integer)
     
 End Sub
 
+
+Public Sub SaveToListView(data As String, Optional nameAs As String)
+    Dim li As ListItem
+    On Error Resume Next
+    If Len(nameAs) = 0 Then nameAs = (lv.ListItems.Count + 1) & " len - " & Len(txtJS.Text)
+    Set li = lv.ListItems.Add(, , nameAs)
+    li.tag = data
+    li.ToolTipText = data
+End Sub
+
 Private Sub lblClipboard_Click(Index As Integer)
     
     Dim li As ListItem
     On Error Resume Next
     
     Select Case Index
-        Case 0
-            Set li = lv.ListItems.Add(, , (lv.ListItems.Count + 1) & " len - " & Len(txtJS.Text))
-            li.tag = txtJS.Text
-            li.ToolTipText = li.tag
-        Case 1
-            Set li = lv.ListItems.Add(, , (lv.ListItems.Count + 1) & " len - " & Len(txtOut.Text))
-            li.tag = txtOut.Text
-            li.ToolTipText = li.tag
-        Case 2
+        Case 0: SaveToListView txtJS.Text
+        Case 1: SaveToListView txtOut.Text
+        Case 2:
             txtJS.Text = txtOut.Text
             txtOut.Text = Empty
     End Select
@@ -1309,34 +1347,15 @@ End Sub
 Private Sub mnuBasicRefactor_Click()
     
     On Error GoTo hell
-    Dim debugMode As Boolean
-     
+    Const debugMode As Boolean = True
+    
     If InStr(1, txtJS.Text, vbCrLf & "}" & vbCrLf) < 1 Then
         MsgBox "This assumes you already ran Format_Javascript", vbInformation
         'Exit Sub
     End If
     
-   
-    'debugMode = False
-    debugMode = True
-    
-    
-    lblClipboard_Click 0 'save a copy of the original
     frmRefactor.LoadFunctions txtJS.Text, debugMode
-    
-    If debugMode = False Then
-        Dim f As CFunc
-        Dim script As String
-        script = txtJS.Text
-        For Each f In frmRefactor.funcs
-            script = Replace(script, f.OrgText, f.CleanText)
-        Next
-        
-        txtJS.Text = script
-        
-        Unload frmRefactor
-    End If
-    
+     
     Exit Sub
 hell:
        MsgBox "Error in mnuBasicRefactor_Click() original was saved to left list probably have to restore from there", vbInformation

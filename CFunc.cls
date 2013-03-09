@@ -30,8 +30,9 @@ Public OverRides As New Collection
 Public IsGlobal As Boolean
 Public OverRideScript As String
 Public UseOriginalText As Boolean
-Public debugOut As Boolean
-
+Public debugout As Boolean
+Public UseOriginalFuncName As Boolean
+Public logger As ListBox
 
 Private tokenizedScript As String
 Private my_tokens As New Collection
@@ -71,6 +72,7 @@ Sub ParseName()
            
         Me.OrgName = Trim(Mid(x, sp, p1 - sp))
         Me.NewName = "func_" & SafeFuncIndex(Me.Index)
+        If Not Me.logger Is Nothing Then logger.AddItem "Found Function " & Me.OrgName & " -> " & Me.NewName
         
 End Sub
 
@@ -81,7 +83,7 @@ Sub ParseAsGlobal()
         
         x = Me.OrgText
          
-        debugOut = True
+        debugout = True
         
         'On Error GoTo hell
         
@@ -102,7 +104,7 @@ Sub ParseAsGlobal()
                     If Not tokenExists(newVar) Then
                         OrgVars.Add newVar
                         AddToken newVar
-                        If debugOut Then Debug.Print "Adding g orgvar: " & Trim(Mid(Y, a + 4, b - a - 4))
+                        If debugout And Not Me.logger Is Nothing Then logger.AddItem "Adding g orgvar: " & Trim(Mid(Y, a + 4, b - a - 4))
                     End If
                 End If
             End If
@@ -132,7 +134,8 @@ Sub ParseSelf() 'as function w/prototype
         If Me.IsGlobal Then Exit Sub
         
         x = Me.OrgText
-         
+        debugout = True
+        
         'On Error GoTo hell
         
         p1 = InStr(x, "(")
@@ -153,7 +156,7 @@ Sub ParseSelf() 'as function w/prototype
         body = Mid(x, p2 + 1) 'from first { to last } --> BUG CHECK: JUST ADDED THE +1 HERE !!
         tmp = Split(body, vbCrLf)
         For Each Y In tmp
-            
+            DoEvents
             a = InStr(Y, "var ")
             If a > 0 Then
                 b1 = InStr(a + 4, Y, "-") 'todo change to scan for next nontext
@@ -166,7 +169,7 @@ Sub ParseSelf() 'as function w/prototype
                     If Not tokenExists(newVar) Then
                         OrgVars.Add newVar
                         AddToken newVar
-                        If debugOut Then Debug.Print "ParseSelf adding new token: " & newVar
+                        If debugout And Not logger Is Nothing Then logger.AddItem Me.OrgName & " ParseSelf adding new token: " & newVar
                     End If
                 End If
             End If
@@ -252,10 +255,11 @@ Private Function ReplaceTokens(ByVal l, Optional startPos As Long = 1) 'l = a li
     Dim inQuotes As Boolean
     Dim outOfQuotes As Boolean
     Dim f As CFunc
+    Dim debugout As Boolean
     
+    debugout = False
     
-    
-    If debugOut And startPos = 1 Then Debug.Print "In ReplaceTokens line: " & l
+    If debugout And startPos = 1 Then Debug.Print "In ReplaceTokens line: " & l
     
     'If InStr(l, "sc.replace(re, kc)") > 0 Then Stop
     
@@ -264,6 +268,7 @@ Private Function ReplaceTokens(ByVal l, Optional startPos As Long = 1) 'l = a li
     'special chars 5C=\ 27=' 22="
     i = startPos
     While i < Len(l) + 1 'extract & replace tokens as found
+        DoEvents
         c = Mid(l, i, 1)
         c2 = Empty
         
@@ -293,7 +298,7 @@ Private Function ReplaceTokens(ByVal l, Optional startPos As Long = 1) 'l = a li
                  
                 
                 'If buf = "replace" Then Stop
-                If debugOut Then Debug.Print "complete token: " & buf
+                If debugout Then Debug.Print "complete token: " & buf
                 'If Me.IsGlobal And buf = s Then Stop
                 
                 j = 0
@@ -469,7 +474,7 @@ skip_token:
         
     Next
                 
-    If debugOut Then Debug.Print "Ending ReplaceTOkens final line: " & l
+    If debugout Then Debug.Print "Ending ReplaceTOkens final line: " & l
     ReplaceTokens = l
     
     

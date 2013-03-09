@@ -91,7 +91,6 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
-      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -410,6 +409,7 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -750,6 +750,9 @@ Begin VB.Form Form1
       Begin VB.Menu mnuDebugBreakAtStream 
          Caption         =   "Debug> Break At Stream"
       End
+      Begin VB.Menu mnuBrowseHomeDir 
+         Caption         =   "Browse Home Directory"
+      End
    End
    Begin VB.Menu mnuPopup 
       Caption         =   "mnuPopup"
@@ -1061,6 +1064,11 @@ Private Sub mnub64Encode_Click()
     If fso.FileExists(b) Then
         MsgBox "Complete 0x" & Hex(FileLen(b)) & " bytes decompressed saved as: " & vbCrLf & vbCrLf & b
     End If
+End Sub
+
+Private Sub mnuBrowseHomeDir_Click()
+    On Error Resume Next
+    Shell "explorer.exe """ & App.path & """", vbNormalFocus
 End Sub
 
 Private Sub mnuDebugBreakAtStream_Click()
@@ -1456,19 +1464,19 @@ Private Sub Form_Resize()
     txtDetails.Width = he.Width
     fraLower.Width = he.Width
     
-    fraPictViewer.Move he.Left, he.Top, he.Width, he.height
+    fraPictViewer.Move he.left, he.Top, he.Width, he.height
     
     fraControls.Width = Me.Width
-    cmdAbortProcessing.Left = fraControls.Width - fraControls.Left - cmdAbortProcessing.Width - (tw * 20)
-    cmdDecode.Left = cmdAbortProcessing.Left - cmdDecode.Width - (tw * 2)
-    cmdBrowse.Left = cmdDecode.Left - cmdBrowse.Width - (tw * 2)
+    cmdAbortProcessing.left = fraControls.Width - fraControls.left - cmdAbortProcessing.Width - (tw * 20)
+    cmdDecode.left = cmdAbortProcessing.left - cmdDecode.Width - (tw * 2)
+    cmdBrowse.left = cmdDecode.left - cmdBrowse.Width - (tw * 2)
     Command1.Top = cmdAbortProcessing.Top
-    txtPDFPath.Width = cmdBrowse.Left - txtPDFPath.Left - (tw * 2)
+    txtPDFPath.Width = cmdBrowse.left - txtPDFPath.left - (tw * 2)
     
     lv2.Width = he.Width
     lvSearch.Width = he.Width
     lvDebug.Width = he.Width
-    pb.Width = Me.Width - pb.Left - (tw * 20)
+    pb.Width = Me.Width - pb.left - (tw * 20)
     
     lv2.ColumnHeaders(1).Width = lv2.Width - (tw * 5)
     lvSearch.ColumnHeaders(1).Width = lv2.ColumnHeaders(1).Width
@@ -1486,19 +1494,19 @@ Private Sub lv_KeyDown(KeyCode As Integer, Shift As Integer)
     
     If KeyCode = 65 And Shift = 2 Then 'ctrl-a - select all
         For Each li In lv.ListItems
-            li.Selected = True
+            li.selected = True
         Next
     End If
     
     If KeyCode = 73 And Shift = 2 Then 'ctrl-i - invert selection
         For Each li In lv.ListItems
-            li.Selected = Not li.Selected
+            li.selected = Not li.selected
         Next
     End If
     
     If KeyCode = 68 And Shift = 2 Then 'ctrl-d - delete selected
         For i = lv.ListItems.Count To 1 Step -1
-            If li.Selected = True Then
+            If li.selected = True Then
                 lv.ListItems.Remove i
             End If
         Next
@@ -1506,7 +1514,7 @@ Private Sub lv_KeyDown(KeyCode As Integer, Shift As Integer)
     
     If KeyCode = 78 And Shift = 2 Then 'ctrl-n -select none
         For Each li In lv.ListItems
-            li.Selected = False
+            li.selected = False
         Next
     End If
     
@@ -1671,7 +1679,7 @@ Private Sub mnuHideUnselected_Click()
     Dim i As Long
     
     For i = lv.ListItems.Count To 1 Step -1
-        If lv.ListItems(i).Selected = False Then
+        If lv.ListItems(i).selected = False Then
             lv.ListItems.Remove i
         End If
     Next
@@ -1794,7 +1802,7 @@ Private Sub mnuShowRawHeader_Click()
     Dim s As CPDFStream
     Set s = selli.tag
     txtUncompressed.Text = s.Header
-    ts.Tabs(1).Selected = True
+    ts.Tabs(1).selected = True
     
 End Sub
 
@@ -1809,7 +1817,7 @@ Private Sub mnuShowRawObject_Click()
     Dim s As CPDFStream
     Set s = selli.tag
     txtUncompressed.Text = s.RawObject
-    ts.Tabs(1).Selected = True
+    ts.Tabs(1).selected = True
     
 End Sub
 
@@ -1864,7 +1872,7 @@ Private Sub mnuGotoObject_Click()
     For Each li In lv.ListItems
         Set s = li.tag
         If s.Index = x Then
-            li.Selected = True
+            li.selected = True
             li.EnsureVisible
             lv_ItemClick li
             Exit Sub
@@ -1918,7 +1926,7 @@ Private Sub mnuHideSelected_Click()
     Dim i As Long
     
     For i = lv.ListItems.Count To 1 Step -1
-        If lv.ListItems(i).Selected = True Then
+        If lv.ListItems(i).selected = True Then
             lv.ListItems.Remove i
         End If
     Next
@@ -1965,13 +1973,13 @@ Public Sub mnuJavascriptUI_Click()
     
     Dim selCount As Long
     For Each li In lv.ListItems
-        If li.Selected Then selCount = selCount + 1
+        If li.selected Then selCount = selCount + 1
     Next
     
     If selCount > 1 Then
         'multiple streams selected..put them all together for js ui
         For Each li In lv.ListItems
-            If li.Selected Then
+            If li.selected Then
                 t = t & GetActiveData(li, False) & vbCrLf
             End If
         Next
@@ -2026,7 +2034,7 @@ Private Sub mnuSearchFilter_Click(Index As Integer)
     For Each li In lv.ListItems
         Set s = li.tag
         match = False
-        If li.Selected Then li.Selected = False
+        If li.selected Then li.selected = False
         
         Select Case Index
             Case 0:   If AnyofTheseInstr(pound_unescape(s.Header), "/JS,/Javascript") Then match = True
@@ -2044,7 +2052,7 @@ Private Sub mnuSearchFilter_Click(Index As Integer)
             Set sli = lvSearch.ListItems.Add(, , li.Text)
             Set sli.tag = li.tag
             sli.Text = sli.Text & "   " & IIf(Index = 5, s.Header, pound_unescape(s.Header))
-            li.Selected = True
+            li.selected = True
         End If
         
     Next
@@ -2070,7 +2078,7 @@ Private Sub mnuSearchFilter_Click(Index As Integer)
     Next
     
     'If lvSearch.ListItems.Count > 0 Then
-        TabStrip1.Tabs(2).Selected = True
+        TabStrip1.Tabs(2).selected = True
     'End If
     
     lvSearch.ColumnHeaders(1).Text = lvSearch.ListItems.Count & " Search Results"
@@ -2167,7 +2175,7 @@ Private Sub mnuUpdateCurrent_Click()
     
     baseDir = fso.GetParentFolder(txtPDFPath)
     baseName = fso.GetBaseName(txtPDFPath)
-    If VBA.Right(baseName, 1) = "_" Then baseName = Mid(baseName, 1, Len(baseName) - 1)
+    If VBA.right(baseName, 1) = "_" Then baseName = Mid(baseName, 1, Len(baseName) - 1)
     
     new_file = baseDir & "\" & baseName & ".u" & i
     While fso.FileExists(new_file)
@@ -2219,6 +2227,8 @@ End Sub
 
 Private Sub mnuWipeStream_Click()
      
+     'currently wipes body ok, but couple bytes of header left to wipe that specify the object index..
+     
      If lv.SelectedItem Is Nothing Then
         MsgBox "Select a stream first"
         Exit Sub
@@ -2233,6 +2243,9 @@ Private Sub mnuWipeStream_Click()
     Dim msg As String
     Dim b() As Byte
     Dim new_bytes() As Byte
+    Dim prevItem As ListItem
+    Dim li As ListItem
+    Dim prevStream As CPDFStream
     
     GetActiveData lv.SelectedItem, False, stream
     
@@ -2241,6 +2254,11 @@ Private Sub mnuWipeStream_Click()
         Exit Sub
     End If
        
+    For Each li In lv.ListItems
+        If ObjPtr(li) = ObjPtr(lv.SelectedItem) Then Exit For
+        Set prevItem = li
+    Next
+        
     new_file = txtPDFPath & "_upd.pdf"
     
     Dim baseName As String
@@ -2249,7 +2267,7 @@ Private Sub mnuWipeStream_Click()
     
     baseDir = fso.GetParentFolder(txtPDFPath)
     baseName = fso.GetBaseName(txtPDFPath)
-    If VBA.Right(baseName, 1) = "_" Then baseName = Mid(baseName, 1, Len(baseName) - 1)
+    If VBA.right(baseName, 1) = "_" Then baseName = Mid(baseName, 1, Len(baseName) - 1)
     
     new_file = baseDir & "\" & baseName & ".u" & i
     While fso.FileExists(new_file)
@@ -2257,19 +2275,19 @@ Private Sub mnuWipeStream_Click()
         new_file = baseDir & "\" & baseName & ".u" & i
     Wend
     
-    new_file = dlg.SaveDialog(AllFiles, pf, "Save New PDF As", Me.hwnd, Me.hwnd, fso.FileNameFromPath(new_file))
-    If Len(new_file) = 0 Then Exit Sub
+    'new_file = dlg.SaveDialog(AllFiles, pf, "Save New PDF As", Me.hwnd, Me.hwnd, fso.FileNameFromPath(new_file))
+    'If Len(new_file) = 0 Then Exit Sub
     
-    If new_file = txtPDFPath Then
-        MsgBox "Sorry I can not overwrite file we are modifying", vbExclamation
-        Exit Sub
-    End If
+    'If new_file = txtPDFPath Then
+    '    MsgBox "Sorry I can not overwrite file we are modifying", vbExclamation
+    '    Exit Sub
+    'End If
     
     If fso.FileExists(new_file) Then fso.DeleteFile new_file
     
     Dim totalSize As Long
     totalSize = stream.ObjectEndOffset - stream.ObjectStartOffset + 1
-    new_data = String(totalSize, "A")
+    new_data = String(totalSize, Chr(&H20))
     new_bytes() = StrConv(new_data, vbFromUnicode, LANG_US)
         
     f = FreeFile
@@ -2287,9 +2305,23 @@ Private Sub mnuWipeStream_Click()
     'ReDim b(stream.CompressedSize)
     'Get f, , b() 'advance file pointer size of orginal compressed data
     
-    ReDim b(LOF(f) - stream.ObjectEndOffset - 2)
-    Get f, stream.ObjectEndOffset + 2, b() 'load teh rest of the original file
-    Put f2, , b() 'save rest of file to new file
+    Dim sz As Long
+    sz = LOF(f) - stream.ObjectEndOffset - 2
+    If sz > 0 Then
+        ReDim b(sz)
+        Get f, stream.ObjectEndOffset + 2, b() 'load teh rest of the original file
+        Put f2, , b() 'save rest of file to new file
+    End If
+        
+    Dim remainder As Long
+    If Not prevItem Is Nothing Then
+        Set prevStream = prevItem.tag
+        remainder = stream.ObjectStartOffset - prevStream.ObjectEndOffset
+        If remainder > 0 Then
+            b() = StrConv(String(remainder, Chr(&H20)), vbFromUnicode, LANG_US)
+            Put f2, prevStream.ObjectEndOffset + 2, b()
+        End If
+    End If
     
     Close f
     Close f2
@@ -2702,6 +2734,20 @@ Function ExtractTo(folder As String)
         End If
     Next
             
+    On Error Resume Next
+    
+    For Each li In lv2.ListItems 'all the error streams..(probably images with JPX or DTCDecode)
+        Set s = li.tag
+        d = Empty
+        If s.ContainsStream Then
+            d = s.OriginalData
+        End If
+        If Len(d) > 0 Then
+            pth = folder & "\Error_stream_" & Hex(s.Index) & s.FileExtension
+            fso.writeFile pth, d
+        End If
+    Next
+    
     End
     
 End Function
@@ -2722,7 +2768,7 @@ Private Sub mnuExploitScan_Click()
     
     Dim li As ListItem
     Dim c As CPDFStream
-    Dim Data As String
+    Dim data As String
     Dim p() As String
     Dim report() As String
     Dim i As Long
@@ -2730,20 +2776,20 @@ Private Sub mnuExploitScan_Click()
     On Error Resume Next
     
     For Each li In lv.ListItems
-        Data = GetActiveData(li, False, c)
+        data = GetActiveData(li, False, c)
         For i = 0 To UBound(exploits)
             p() = Split(exploits(i), "=")
-            If ContainsExploit(Data, p(1), , c) Then
+            If ContainsExploit(data, p(1), , c) Then
                 push report, "Exploit " & p(0) & " - " & p(1) & " - found in stream: " & c.Index
             End If
         Next
     Next
     
     For Each li In lv2.ListItems
-        Data = GetActiveData(li, False, c)
+        data = GetActiveData(li, False, c)
         For i = 0 To UBound(exploits)
             p() = Split(exploits(i), "=")
-            If ContainsExploit(Data, p(1), , c) Then
+            If ContainsExploit(data, p(1), , c) Then
                 push report, "Exploit " & p(0) & " found in stream " & c.Index
             End If
         Next
@@ -3095,7 +3141,7 @@ Function GetActiveData(Item As ListItem, Optional load_ui As Boolean = False, Op
          txtDetails.Text = s.GetDetailsReport()
          
          If mnuAutoSwitchTabs.Checked And ts.SelectedItem.Index <> 3 Then 'and not viewing headers pane..
-            ts.Tabs(IIf(s.isBinary, 2, 1)).Selected = True
+            ts.Tabs(IIf(s.isBinary, 2, 1)).selected = True
          End If
          
     End If
@@ -3153,7 +3199,7 @@ Private Sub mnuSearch_Click()
     Next
     
     If lvSearch.ListItems.Count > 0 Then
-        TabStrip1.Tabs(2).Selected = True
+        TabStrip1.Tabs(2).selected = True
     Else
         MsgBox "0 Search Results", vbInformation
     End If
@@ -3270,10 +3316,10 @@ Private Sub Form_Load()
     lv.ColumnHeaders(1).Width = lv.Width - 100
     lvSearch.ColumnHeaders(1).Width = lvSearch.Width - 100
     lvDebug.ColumnHeaders(1).Width = lvDebug.Width - 100
-    lvSearch.Move lv2.Left, lv2.Top
-    lvDebug.Move lv2.Left, lv2.Top
-    txtUncompressed.Move he.Left, he.Top, he.Width, he.height
-    txtDetails.Move he.Left, he.Top, he.Width, he.height
+    lvSearch.Move lv2.left, lv2.Top
+    lvDebug.Move lv2.left, lv2.Top
+    txtUncompressed.Move he.left, he.Top, he.Width, he.height
+    txtDetails.Move he.left, he.Top, he.Width, he.height
     FormPos Me, True
     
     LoadPlugins
@@ -3435,7 +3481,7 @@ End Sub
 
 Private Sub parser_SetObjectCount(cnt As Long)
     On Error Resume Next
-    pb.Max = cnt
+    pb.max = cnt
     pb.Value = 0
 End Sub
 
@@ -3446,7 +3492,7 @@ End Sub
 
 Private Sub scAuto_Error()
      MsgBox "Automation Script Error: " & scAuto.error.Description & vbCrLf & _
-            "Line: " & scAuto.error.Line & vbCrLf & _
+            "Line: " & scAuto.error.line & vbCrLf & _
             "Source: " & scAuto.error.Source & vbCrLf & _
             "Text: " & scAuto.error.Text
 End Sub
@@ -3500,10 +3546,10 @@ Private Sub txtPDFPath_KeyDown(KeyCode As Integer, Shift As Integer)
     If KeyCode = 13 Then cmdDecode_Click
 End Sub
 
-Private Sub txtPDFPath_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, Y As Single)
+Private Sub txtPDFPath_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, Y As Single)
     On Error Resume Next
     AutomatationRun = False
-    txtPDFPath = Data.Files(1)
+    txtPDFPath = data.Files(1)
     cmdDecode_Click
 End Sub
 
@@ -3628,7 +3674,7 @@ End Sub
 
 Private Sub ucAsyncDownload1_Progress(current As Long, total As Long)
     On Error Resume Next 'bug if total > pb.max capability? (single)
-    pb.Max = total + 1
+    pb.max = total + 1
     pb.Value = current
 End Sub
 '

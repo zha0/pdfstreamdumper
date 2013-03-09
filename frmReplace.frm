@@ -5,10 +5,10 @@ Begin VB.Form frmReplace
    ClientHeight    =   2640
    ClientLeft      =   60
    ClientTop       =   345
-   ClientWidth     =   5370
+   ClientWidth     =   5355
    LinkTopic       =   "Form3"
    ScaleHeight     =   2640
-   ScaleWidth      =   5370
+   ScaleWidth      =   5355
    StartUpPosition =   3  'Windows Default
    Begin VB.CommandButton cmdFindAll 
       Caption         =   "Find All"
@@ -242,7 +242,7 @@ End Sub
 Public Sub cmdFindAll_Click()
     On Error Resume Next
     If Me.Width < 10440 Then Me.Width = 10440
-    lv.ColumnHeaders(2).Width = lv.Width - lv.ColumnHeaders(1).Left - 100
+    lv.ColumnHeaders(2).Width = lv.Width - lv.ColumnHeaders(1).left - 100
     lv.ListItems.Clear
     lv.Visible = True
     
@@ -386,7 +386,7 @@ Public Sub LaunchReplaceForm(txtObj As Object)
     
     If Len(txtObj.SelText) > 1 Then
         lblSelSize = "Selection Size: " & Len(txtObj.SelText)
-        Option2.Value = True
+        'Option2.Value = True 'since we auto load selection into txtFind, and autoload last search type, this was a conflict of interest..
     End If
     
     If txtObj.Name = "txtJS" Then
@@ -403,7 +403,7 @@ End Sub
 Private Sub Form_Load()
     Me.Icon = Form1.Icon
     FormPos Me, False
-    SetWindowPos Me.hwnd, HWND_TOPMOST, Me.Left / 15, Me.Top / 15, Me.Width / 15, Me.height / 15, SWP_SHOWWINDOW
+    SetWindowPos Me.hwnd, HWND_TOPMOST, Me.left / 15, Me.Top / 15, Me.Width / 15, Me.height / 15, SWP_SHOWWINDOW
     Text1 = GetMySetting("lastFind")
     Text2 = GetMySetting("lastReplace")
     If GetMySetting("wholeText", "1") = "1" Then Option1.Value = True Else Option2.Value = True
@@ -411,9 +411,9 @@ End Sub
 
 Private Sub Form_Resize()
     On Error Resume Next
-    lv.Width = Me.Width - lv.Left - 200
+    lv.Width = Me.Width - lv.left - 200
     lv.height = Me.height - lv.Top - 300
-    lv.ColumnHeaders(2).Width = lv.Width - lv.ColumnHeaders(2).Left - 200
+    lv.ColumnHeaders(2).Width = lv.Width - lv.ColumnHeaders(2).left - 200
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
@@ -425,9 +425,17 @@ End Sub
 
 Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
     On Error Resume Next
+    Dim o As ucScint
+    
     Set selli = Item
-    active_object.GotoLine Item.Text
-    active_object.SelectLine
+    If TypeName(active_object) = "ucScint" Then
+        Set o = active_object
+        o.GotoLineCentered CLng(Item.Text)
+    Else
+        active_object.GotoLine Item.Text
+        active_object.SelectLine
+    End If
+    
 End Sub
 
 Private Sub lv_MouseDown(Button As Integer, Shift As Integer, x As Single, Y As Single)
