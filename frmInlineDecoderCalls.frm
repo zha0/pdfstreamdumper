@@ -11,6 +11,14 @@ Begin VB.Form frmInlineDecoderCalls
    ScaleHeight     =   8475
    ScaleWidth      =   9450
    StartUpPosition =   2  'CenterScreen
+   Begin VB.CommandButton cmdExample 
+      Caption         =   "Example"
+      Height          =   315
+      Left            =   120
+      TabIndex        =   19
+      Top             =   60
+      Width           =   1095
+   End
    Begin VB.CheckBox chkUseHex 
       Caption         =   "Hex Output"
       Height          =   255
@@ -249,9 +257,18 @@ Attribute VB_Exposed = False
 Dim d As New RegExp
 Dim mc As MatchCollection
 Dim abort As Boolean
+Dim example_decoder As String
+Dim example_script As String
 
 Private Sub cmdAbort_Click()
     abort = True
+End Sub
+
+Private Sub cmdExample_Click()
+    txtDecoder = example_decoder
+    Form2.txtJS.Text = example_script & Form2.txtJS.Text
+    MsgBox "A sample decoder has been loaded, and sample data prepended to the data in teh script ui. (Both for a numeric expansion as well as a decoder call)"
+    Me.SetFocus
 End Sub
 
 Private Sub cmdHandleNumericExpansions_Click()
@@ -264,6 +281,11 @@ Private Sub cmdHandleNumericExpansions_Click()
     Dim m As match
     Dim li As ListItem
     Dim i As Long
+    Dim stripEq As Boolean
+    Dim stripSemi As Boolean
+    
+    If InStr(txtNumeric, "=") > 0 Then stripEq = True
+    If InStr(txtNumeric, ";") > 0 Then stripSemi = True
     
     lv.ListItems.Clear
     Set mc = d.Execute(Form2.txtJS.Text)
@@ -275,7 +297,18 @@ Private Sub cmdHandleNumericExpansions_Click()
         Set li = lv.ListItems.Add(, , m.FirstIndex)
         li.SubItems(1) = m.Value
         li.tag = m.Length
-        tmp = sc.eval(li.SubItems(1))
+        
+        tmp = li.SubItems(1)
+        
+        If (VBA.left(li.SubItems(1), 1)) <> "(" And VBA.right(li.SubItems(1), 1) = ")" Then 'they tweaked regex lets balance it out..
+            tmp = "(" & tmp
+        End If
+
+        If stripEq Then tmp = Replace(tmp, "=", Empty)
+        If stripSemi Then tmp = Replace(tmp, ";", Empty)
+        
+        tmp = sc.eval(tmp)
+        
         If chkUseHex.Value Then
             Err.Clear
             li.SubItems(2) = "0x" & Hex(tmp)
@@ -351,6 +384,7 @@ End Sub
 
 Private Sub cmdTest_Click()
     On Error Resume Next
+    txtDecoder = example_decoder
     tmp = "decoder('#o]l[o]m.e0g]b[if.[o0atp[sr.d0r.1#S]e.f0eaf0r]g[a0umfx]mf[pe.1',8609,211)"
     If Not isIde() Then tmp = Empty
     x = InputBox("Enter a sample decoder call to test output:", , tmp)
@@ -374,6 +408,7 @@ Private Sub Command1_Click()
         If abort Then Exit Sub
         If Len(li.SubItems(2)) > 0 Then
             If li.Ghosted Then
+                'support more regex? like =xxx; or t+xxx) ? this would need to change to support it...
                 x = Replace(x, li.SubItems(1), "(" & li.SubItems(2) & ")", , , vbBinaryCompare)
             Else
                 x = Replace(x, li.SubItems(1), """" & li.SubItems(2) & """", , , vbBinaryCompare)
@@ -398,6 +433,12 @@ End Function
 
 Private Sub Form_Load()
     On Error Resume Next
+    example_script = "a=decoder('ivw_roieVsnere',3361,719)" & vbCrLf & _
+                        "b=decoder('].0][xr1Smfiupp.[0][0mdoeer.fs.#]a[0t[rlfggo].#].0fm[e1oebaaf0',9181,9221)" & vbCrLf & _
+                        "r=ue(2*51869*2267+41*998399*7*3);" & vbCrLf & _
+                        "r+=ue(2*17*2*65537*257);" & vbCrLf & _
+                        "r+=ue(257*65537);" & vbCrLf & vbCrLf
+    example_decoder = txtDecoder.Text
     fraRegex.Visible = isIde()
     Me.Icon = Form1.Icon
     If Not isIde() Then txtDecoder = Empty

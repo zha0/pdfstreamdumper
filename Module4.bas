@@ -31,11 +31,12 @@ Attribute VB_Name = "Module4"
  Private Declare Sub CopyMemory Lib "kernel32.dll" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
  Private Declare Function deflate Lib "zlib.dll" (vStream As zStream, Optional ByVal vflush As Long = Z_FINISH) As Long
  Private Declare Function deflateEnd Lib "zlib.dll" (vStream As zStream) As Long
- Private Declare Function deflateInit Lib "zlib.dll" Alias "deflateInit_" (strm As zStream, ByVal Level As Long, ByVal version As String, ByVal stream_size As Long) As Long
+ Private Declare Function deflateInit Lib "zlib.dll" Alias "deflateInit_" (strm As zStream, ByVal level As Long, ByVal version As String, ByVal stream_size As Long) As Long
  Private Declare Function inflate Lib "zlib.dll" (vStream As zStream, Optional ByVal vflush As Long = 1) As Long
  Private Declare Function inflateEnd Lib "zlib.dll" (vStream As zStream) As Long
  Private Declare Function inflateInit Lib "zlib.dll" Alias "inflateInit_" (strm As zStream, ByVal version As String, ByVal stream_size As Long) As Long
-
+ Private Declare Function GetAsyncKeyState Lib "user32" (ByVal vKey As Long) As Integer
+ 
  Private msVersion As String
  Private mnChunkSize As Long
 
@@ -118,6 +119,13 @@ End Function
  Public Function UncompressData(ByRef vxbInput() As Byte, ByRef vxbOutput() As Byte, Optional vnStart As Long = 0, Optional vnMaxSize As Long = 0, Optional ByVal vnUncompressedSize As Long = 0) As Boolean
  Dim tStream As zStream
  Dim rc As Long
+ Dim loop_counter As Long
+ Dim warn_me As Boolean
+ Dim mbr As VbMsgBoxResult
+ Dim warn_size As Long
+ Dim last_warn As Long
+ 
+ warn_me = True
  
  Dim xbCopy() As Byte
     With tStream
@@ -171,6 +179,34 @@ End Function
     
              
                 .avail_out = ZLIB_ChunkSize
+                loop_counter = loop_counter + 1
+                warn_size = Round((.total_out / 1024) / 1024, 0)
+                DoEvents
+                
+                'decompression bomb detection..
+                If (loop_counter Mod 500 = 0) Or _
+                    (last_warn <> warn_size And warn_size Mod 10 = 0) _
+                Then
+                     last_warn = warn_size
+                     Form1.Caption = "Decompressing very large data     Current Size: " & warn_size & "mb    Hold ESC to abort this decompression.."
+                     Sleep 10
+                     DoEvents
+                     
+                     If GetAsyncKeyState(vbKeyEscape) <> 0 Then
+                        Form1.Caption = "Aborting the decompression of this stream!"
+                        rc = 1
+                     End If
+                     
+'                    If warn_me Then
+'                        mbr = MsgBox("Possible decompression bomb detected." & vbCrLf & vbCrLf & _
+'                                "Current size is: " & warn_size & "mb" & vbCrLf & vbCrLf & _
+'                                "Choose ignore to disable this warning from showing again", vbAbortRetryIgnore)
+'                        If mbr = vbIgnore Then warn_me = False
+'                    End If
+'                    If mbr = vbAbort Then rc = 1
+
+                End If
+                
             Loop Until rc = 1
     
             If .total_out Or vnStart Then

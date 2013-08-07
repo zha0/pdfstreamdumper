@@ -91,6 +91,7 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -409,7 +410,6 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
-      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -690,6 +690,9 @@ Begin VB.Form Form1
       End
       Begin VB.Menu mnuHexEditor 
          Caption         =   "View PDF in Hexeditor"
+      End
+      Begin VB.Menu mnuNewHexEditorWin 
+         Caption         =   "New Hexeditor Window"
       End
       Begin VB.Menu mnuSpacer4 
          Caption         =   "-"
@@ -1321,6 +1324,8 @@ Private Sub mnuHelp_Click(Index As Integer)
     On Error Resume Next
     Dim ie
     ie = mnuHelp(Index).tag
+    If Len(ie) = 0 Then Exit Sub
+    
     If ie = "[readme]" Then
         Shell "notepad.exe """ & App.path & "\readme.txt""", vbNormalFocus
         Exit Sub
@@ -1377,6 +1382,35 @@ Private Sub mnuLoadJSFile_Click()
     On Error Resume Next
     Form2.Show
     Form2.mnuLoadFile_Click
+End Sub
+
+Private Sub mnuNewHexEditorWin_Click()
+    On Error Resume Next
+    Dim f As CHexEditor
+    Dim h As String
+    
+    If mnuUseInternalHexeditor.Checked Then
+        Set f = New CHexEditor
+        f.Editor.Visible = True
+        Exit Sub
+    End If
+    
+    h = GetMySetting("hexeditor")
+    If Len(h) = 0 Or Not fso.FileExists(h) Then
+        If MsgBox("You have not yet configured which hexeditor to use select it now?", vbYesNo) = vbNo Then Exit Sub
+        h = dlg.OpenDialog(exeFiles, , "Select hexeditor to use", Me.hwnd)
+        If fso.FileExists(h) Then
+            SaveMySetting "hexeditor", h
+        Else
+            Exit Sub
+        End If
+    End If
+    
+    On Error Resume Next
+    Shell h & " """ & txtPDFPath.Text & """", vbNormalFocus
+    
+    If Err.Number <> 0 Then MsgBox Err.Description
+    
 End Sub
 
 Private Sub mnuOpenLastAtStart_Click()
@@ -3271,20 +3305,22 @@ Private Sub Form_Load()
     help_vids = Array("Readme file;[readme]", _
                       "Note on help videos;[video_help]", _
                       "Introduction (40min);http://sandsprite.com/CodeStuff/PdfStreamDumper_trainer.wmv", _
-                      "Shellcode> scdbg Trainer - General Use; http://www.youtube.com/watch?v=jFkegwFasIw", _
-                      "      sclog gui; http://www.youtube.com/watch?v=XBcmC4jYiRI", _
-                      "Misc> Adobe Api Support(10min);http://sandsprite.com/CodeStuff/Adobe_Api_Support.wmv", _
-                      "      Sample Database Search Plugin (11min);http://sandsprite.com/CodeStuff/database_search_plugin.wmv", _
-                      "      plugin developers and script writers (17min);http://sandsprite.com/CodeStuff/PDFStreamDumper_automation.wmv" _
+                      "Pdf Analysis>", _
+                      "    arguments.callee encrypted script 1 (14min); http://www.youtube.com/watch?v=UWeAom4La6g", _
+                      "    getAnnots (10min);http://youtu.be/tJDiGYsN0FM", _
+                      "    getPageNthWord (10min);http://youtu.be/JLxNdi2G72U", _
+                      "    URL Decoder(8min);http://youtu.be/HgXrUPjgdSs", _
+                      "    arguments.callee encrypted script 2 (10min); http://sandsprite.com/CodeStuff/Encrypted_Script2.wmv", _
+                      "Shellcode> ", _
+                      "    scdbg Trainer 1 - General Use; http://www.youtube.com/watch?v=jFkegwFasIw", _
+                      "    scdbg Trainer 2 - Asm/Debug Shell; http://www.youtube.com/watch?v=HZE2c_If6hU", _
+                      "    sclog gui; http://www.youtube.com/watch?v=XBcmC4jYiRI", _
+                      "    shellcode_2_exe; http://www.youtube.com/watch?v=WEMK-Wmlyi0", _
+                      "Misc> ", _
+                      "    Adobe Api Support(10min);http://sandsprite.com/CodeStuff/Adobe_Api_Support.wmv", _
+                      "    Sample Database Search Plugin (11min);http://sandsprite.com/CodeStuff/database_search_plugin.wmv", _
+                      "    plugin developers and script writers (17min);http://sandsprite.com/CodeStuff/PDFStreamDumper_automation.wmv" _
                 )
-
-                     '"Pdf Analysis> getPageNthWord (10min);http://www.youtube.com/watch?v=W6dJfdH5jHM", _
-                      '"      URL Decoder(8min);http://www.youtube.com/watch?v=Ih7lRHwZKpo", _
-                      '"      getAnnots (10min);http://sandsprite.com/CodeStuff/getAnnots_demo.wmv", _
-                      '"      arguments.callee encrypted script 1 (14min); http://www.youtube.com/watch?v=lyrbPlHMS2o", _
-                      "      arguments.callee encrypted script 2 (10min); http://www.youtube.com/watch?v=mY9hIpNY1Yg", _
-                      "      scdbg trainer 2 - Asm and Debug; http://www.youtube.com/watch?v=qkDPUF3bf6E", _
-                      "      shellcode 2 exe (14min); http://youtu.be/FTDZyYt7Fqk", _
 
 
     Dim vid, i
@@ -3344,6 +3380,13 @@ Private Sub Form_Load()
                 Form2.txtJS.Text = x
                 Form2.mnuFunctionScan_Click
             End If
+        ElseIf InStr(1, command, ".swf", vbTextCompare) > 0 Then 'its a flash file..
+            Dim exe_path As String, exe As String, flashFile As String
+            If Not isAS3Sorcerer_Installed(exe_path) Then Exit Sub
+            exe = GetShortName(exe_path)
+            flashFile = GetShortName(Replace(command, """", Empty))
+            Shell exe & " " & flashFile
+            End
         ElseIf InStr(1, command, ".vbs", vbTextCompare) > 0 Then 'vbs scripts run as automation scripts
             RunAutomationScript command
         ElseIf InStr(1, command, ".sc", vbTextCompare) > 0 Then  'sc files loaded as shellcode (expects binary input)

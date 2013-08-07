@@ -1,5 +1,37 @@
 		Changelog for libemu
 
+4.5.13   - new hooks: IsDebuggerPresent,ZwQueryInformationProcess,OpenFileMappingA,time,srand,rand,inet_addr
+		 - bugfix: malloc now logs allocations to include with /d dump option.
+		 
+3.25.13  - new hooks: fprintf, exit, GetLocalTime, ExitWindowsEx 
+					  SetFileAttributesA, GetLastError
+		   bugfix: fread (cdecl)
+
+2.18.13  - add versions to known dlls (displayed in dbgshell .pl dllmap)
+         - added /raw  - Raw Patch Mode: load fpath into mem at 0xBase (not PE aware can use multiple times)   
+		 - added /poke - Write 0xValue at 0xBase (can use multiple times) 
+		 - undocumented /rop mode added (can use with /offset)
+		      - will have to load target dll opcodes with /raw and used IAT entries with /poke
+		 - added several rop signatures
+		 - new hook ZwSetInformationProcess 
+		 - added ability to process .scmd files. Drag and drop them on icon and it will run contents as cmdline.
+		 - added -dllmap command line option
+		 - added string poke (-spoke) command to write binary (0xHexChars) or ascii strings to memory
+		 
+1.18.13  - findsc mode update/bugfix + % complete output
+         - findsc mode now supports -dump which will give more context/debugging output for findsc mode.
+         - NtQueryInformationFile partial implementation (FileInfoClass), bugfix GetEnvVarA
+
+11.30.12 - new hooks: LookupPrivilegeValueA,OpenProcessToken,EnumProcesses,GetModuleBaseNameA,HttpQueryInfoA, StrToIntA,gethostbyname
+           bugfix: _stricmp should have been cdecl
+           
+11.15.12 - added logging of last 10 instructions executed (debug shell j command)
+         - added SetEndofFile, SetSystemTime hooks
+         
+9.25.12  - added /va option to force memory range to exist ex: /va 0c1010a0-4
+
+9.13.12  - hooks: strrchr, RtlMoveMemory, CopyMemory, CreateProcessW, ZwUnmapViewOfSection
+
 8.23.12  - bugfix: VirtualAlloc huge allocs could stomp on stack memory
          - added psapi.dll and GetMappedFileNameA
 
