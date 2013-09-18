@@ -122,6 +122,15 @@ Begin VB.Form frmReplace
       Width           =   1335
    End
    Begin VB.TextBox Text2 
+      BeginProperty Font 
+         Name            =   "Courier"
+         Size            =   9.75
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   375
       Left            =   960
       TabIndex        =   3
@@ -129,6 +138,15 @@ Begin VB.Form frmReplace
       Width           =   4335
    End
    Begin VB.TextBox Text1 
+      BeginProperty Font 
+         Name            =   "Courier"
+         Size            =   9.75
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   375
       Left            =   960
       TabIndex        =   1

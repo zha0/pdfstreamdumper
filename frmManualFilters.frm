@@ -1,7 +1,7 @@
 VERSION 5.00
 Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Begin VB.Form frmManualFilters 
-   Caption         =   "Form3"
+   Caption         =   "Manual Filters"
    ClientHeight    =   7290
    ClientLeft      =   60
    ClientTop       =   345
@@ -717,7 +717,7 @@ End Sub
 Private Sub lbliText_Click()
 
     MsgBox "For iText filters to be enabled you have to have: " & vbCrLf & vbCrLf & _
-            "1) .NET runtime v2.0 or greater installed" & vbCrLf & _
+            "1) .NET runtime v2.0 or v3.5 installed" & vbCrLf & _
             "2) iTextFilters dll has be correctly registered (should be done by installer" & vbCrLf & _
             "3) pdfStreamDumper has to be able to find the dll" & vbCrLf & vbCrLf & _
             "Initilization error message (if any) is: " & vbCrLf & vbCrLf & csharp.ErrorMessage, vbInformation

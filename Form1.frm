@@ -91,7 +91,6 @@ Begin VB.Form Form1
       _ExtentX        =   15478
       _ExtentY        =   6059
       _Version        =   393217
-      Enabled         =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":1142
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -410,6 +409,7 @@ Begin VB.Form Form1
       _ExtentX        =   17383
       _ExtentY        =   7223
       _Version        =   393217
+      Enabled         =   -1  'True
       HideSelection   =   0   'False
       ScrollBars      =   2
       TextRTF         =   $"Form1.frx":11C4
@@ -2731,6 +2731,8 @@ end_of_func:
     Set oBrowser = GetObject("", "obj_Browser.plugin") 'not much of a plugin is it! more of a lib at this point :P
     oBrowser.initasLib Me
     
+    If Not csharp.Initilized Then lvDebug.ListItems.Add , , "C# Filters not initilized. See Tools->Manual Filters and click on iText Filters = false link"
+    
     TabStrip1.Tabs(3).Caption = "Debug" & IIf(lvDebug.ListItems.Count > 0, " (" & lvDebug.ListItems.Count & ")", "")
     
     If Len(ExtractToFolder) > 0 Then ExtractTo ExtractToFolder
@@ -3371,6 +3373,12 @@ Private Sub Form_Load()
     '    TabStrip1.Tabs(3).Selected = True
     'End If
     
+    If Not csharp.Initilized Then
+        lvDebug.ListItems.Add , , "C# Filters not initilized. See Tools->Manual Filters and click on iText Enabled = false link"
+        TabStrip1.Tabs(3).selected = True
+    End If
+    
+
     If Len(command) > 0 Then 'handle files draged and droped on icon or on command line...
         If InStr(1, command, ".js", vbTextCompare) > 0 Then 'js files load in jseditor
             f = Replace(command, """", Empty)

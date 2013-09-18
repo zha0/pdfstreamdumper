@@ -66,10 +66,12 @@ Public Function DetectDotNet() As Boolean
     
     If Not FolderExists(installroot) Then GoTo hell
     
+    'apparently 4.5 that comes with Win8, cant run apps compiled for .NET 2.0 so users have to install 3.5 to get it wtf...
+    
     folders = GetSubFolders(installroot)
     
     For Each f In folders
-        If VBA.Left(f, 2) = "v2" Then
+        If VBA.left(f, 2) = "v2" Then
             DetectDotNet = True
             Exit Function
         End If
@@ -106,7 +108,7 @@ Function SetPredictorParams(predictor As Integer, Optional columns = 1, Optional
 hell:
 End Function
 
-Function decode(Data As String, decoder As Decoders, Optional surpressErrorMsg As Boolean = True, Optional dbugMode As Boolean = False) As Boolean
+Function decode(data As String, decoder As Decoders, Optional surpressErrorMsg As Boolean = True, Optional dbugMode As Boolean = False) As Boolean
     
     On Error GoTo hell
         
@@ -119,12 +121,12 @@ Function decode(Data As String, decoder As Decoders, Optional surpressErrorMsg A
     Dim addr As Long
     Dim bufsize As Long
     
-    If Len(Data) = 0 Then
+    If Len(data) = 0 Then
         Me.ErrorMessage = "Data length was 0, nothing to do"
         Exit Function 'nothing to do
     End If
     
-    b() = StrConv(Data, vbFromUnicode, LANG_US)
+    b() = StrConv(data, vbFromUnicode, LANG_US)
     addr = VarPtr(b(0))
     bufsize = UBound(b)
     
@@ -231,11 +233,11 @@ Private Function GetSubFolders(folder) As String()
         Exit Function
     End If
     
-   If Right(folder, 1) <> "\" Then folder = folder & "\"
+   If right(folder, 1) <> "\" Then folder = folder & "\"
 
    fd = Dir(folder, vbDirectory)
    While fd <> ""
-     If Left(fd, 1) <> "." Then
+     If left(fd, 1) <> "." Then
         If (GetAttr(folder & fd) And vbDirectory) = vbDirectory Then
            push fnames(), fd
         End If
